@@ -10,6 +10,13 @@ GLFW now supports setting both absolute and relative window size limits with
 @ref glfwSetWindowSizeLimits.
 
 
+@subsection news_32_setmonitor Window mode switching
+
+GLFW now supports switching windows between windowed and full screen mode with
+@ref glfwSetWindowMonitor.  This function also supports moving full screen
+windows between monitors.
+
+
 @section news_31 New features in 3.1
 
 These are the release highlights.  For a full list of changes see the

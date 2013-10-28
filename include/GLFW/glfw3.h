@@ -2071,9 +2071,40 @@ GLFWAPI void glfwHideWindow(GLFWwindow* window);
  *
  *  @since Added in GLFW 3.0.
  *
+ *  @sa glfwSetWindowMonitor
+ *
  *  @ingroup window
  */
 GLFWAPI GLFWmonitor* glfwGetWindowMonitor(GLFWwindow* window);
+
+/*! @brief Sets the monitor that the window uses for full screen mode.
+ *
+ *  This function sets the monitor that the specified window will be full
+ *  screen on, or if no monitor is specified, makes it windowed mode.
+ *
+ *  If a monitor is specified, the specified width, height and refresh rate
+ *  update the desired video mode.  If no monitor is specified, the specified
+ *  width and height become the new size of the client area of the window and
+ *  the refresh rate is ignored.
+ *
+ *  @param[in] window The window whose monitor, size or video mode to update.
+ *  @param[in] monitor The desired monitor, or `NULL` to make it windowed mode.
+ *  @param[in] width The desired width, in screen coordinates, of the window or
+ *  video mode.
+ *  @param[in] height The desired height, in screen coordinates, of the window or
+ *  video mode.
+ *  @param[in] refreshRate The desired refresh rate, in Hz, of the video mode.
+ *
+ *  @par Thread Safety
+ *  This function may only be called from the main thread.
+ *
+ *  @sa glfwGetWindowMonitor
+ *
+ *  @since Added in GLFW 3.2.
+ *
+ *  @ingroup window
+ */
+GLFWAPI void glfwSetWindowMonitor(GLFWwindow* window, GLFWmonitor* monitor, int width, int height, int refreshRate);
 
 /*! @brief Returns an attribute of the specified window.
  *

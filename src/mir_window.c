@@ -614,6 +614,11 @@ int _glfwPlatformWindowVisible(_GLFWwindow* window)
     return mir_surface_get_visibility(window->mir.surface) == mir_surface_visibility_exposed;
 }
 
+void _glfwPlatformSetWindowMonitor(_GLFWwindow* window, _GLFWmonitor* monitor,
+                                   int width, int height, int refreshRate)
+{
+}
+
 void _glfwPlatformPollEvents(void)
 {
     EventNode* node = NULL;

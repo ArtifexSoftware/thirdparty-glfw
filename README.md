@@ -62,6 +62,8 @@ GLFW bundles a number of dependencies in the `deps/` directory.
 ## Changelog
 
  - Added `glfwSetWindowSizeLimits` for setting absolute and relative size limits
+ - Added `glfwSetWindowMonitor` for toggling windows between windowed and full
+   screen modes and moving full screen windows between monitors
 
 
 ## Contact
