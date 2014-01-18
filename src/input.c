@@ -44,7 +44,8 @@ static void setCursorMode(_GLFWwindow* window, int newMode)
 
     if (newMode != GLFW_CURSOR_NORMAL &&
         newMode != GLFW_CURSOR_HIDDEN &&
-        newMode != GLFW_CURSOR_DISABLED)
+        newMode != GLFW_CURSOR_DISABLED &&
+        newMode != GLFW_CURSOR_CAPTURED)
     {
         _glfwInputError(GLFW_INVALID_ENUM, "Invalid cursor mode");
         return;

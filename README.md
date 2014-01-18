@@ -66,6 +66,8 @@ GLFW bundles a number of dependencies in the `deps/` directory.
 
 ## Changelog
 
+ - Added `GLFW_CURSOR_CAPTURED` cursor mode for confining the cursor to the
+   client area of a window
  - Made all client API functions dynamically loaded
  - Changed minimum required CMake version to 2.8.12
  - Replaced GLU with [linmath.h](https://github.com/datenwolf/linmath.h) in
