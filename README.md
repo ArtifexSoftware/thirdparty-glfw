@@ -61,6 +61,8 @@ GLFW bundles a number of dependencies in the `deps/` directory.
 
 ## Changelog
 
+ - Added `glfwSetWindowSizeLimits` for setting absolute and relative size limits
+
 
 ## Contact
 

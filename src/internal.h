@@ -536,6 +536,11 @@ void _glfwPlatformGetWindowSize(_GLFWwindow* window, int* width, int* height);
  */
 void _glfwPlatformSetWindowSize(_GLFWwindow* window, int width, int height);
 
+/*! @copydoc glfwSetWindowSizeLimits
+ *  @ingroup platform
+ */
+void _glfwPlatformSetWindowSizeLimits(_GLFWwindow* window, int minwidth, int minheight, int maxwidth, int maxheight, int numer, int denom);
+
 /*! @copydoc glfwGetFramebufferSize
  *  @ingroup platform
  */

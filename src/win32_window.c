@@ -553,6 +553,32 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             return 0;
         }
 
+        case WM_SIZING:
+        {
+            return TRUE;
+        }
+
+        case WM_GETMINMAXINFO:
+        {
+            MINMAXINFO* mmi = (MINMAXINFO*) lParam;
+
+            if (window->win32.minwidth != GLFW_DONT_CARE &&
+                window->win32.minheight != GLFW_DONT_CARE)
+            {
+                mmi->ptMinTrackSize.x = window->win32.minwidth;
+                mmi->ptMinTrackSize.y = window->win32.minheight;
+            }
+
+            if (window->win32.maxwidth != GLFW_DONT_CARE &&
+                window->win32.maxheight != GLFW_DONT_CARE)
+            {
+                mmi->ptMaxTrackSize.x = window->win32.maxwidth;
+                mmi->ptMaxTrackSize.y = window->win32.maxheight;
+            }
+
+            return 0;
+        }
+
         case WM_PAINT:
         {
             _glfwInputWindowDamage(window);
@@ -726,6 +752,13 @@ static int createWindow(_GLFWwindow* window,
 
     if (!_glfwCreateContext(window, ctxconfig, fbconfig))
         return GL_FALSE;
+
+    window->win32.minwidth  = GLFW_DONT_CARE;
+    window->win32.minheight = GLFW_DONT_CARE;
+    window->win32.maxwidth  = GLFW_DONT_CARE;
+    window->win32.maxheight = GLFW_DONT_CARE;
+    window->win32.numer     = GLFW_DONT_CARE;
+    window->win32.denom     = GLFW_DONT_CARE;
 
     return GL_TRUE;
 }
@@ -916,6 +949,19 @@ void _glfwPlatformSetWindowSize(_GLFWwindow* window, int width, int height)
                      0, 0, fullWidth, fullHeight,
                      SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOZORDER);
     }
+}
+
+void _glfwPlatformSetWindowSizeLimits(_GLFWwindow* window,
+                                      int minwidth, int minheight,
+                                      int maxwidth, int maxheight,
+                                      int numer, int denom)
+{
+    window->win32.minwidth  = minwidth;
+    window->win32.minheight = minheight;
+    window->win32.maxwidth  = maxwidth;
+    window->win32.maxheight = maxheight;
+    window->win32.numer     = numer;
+    window->win32.denom     = denom;
 }
 
 void _glfwPlatformGetFramebufferSize(_GLFWwindow* window, int* width, int* height)

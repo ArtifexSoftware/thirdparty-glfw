@@ -610,6 +610,11 @@ int main( void )
        exit( EXIT_FAILURE );
    }
 
+   glfwSetWindowSizeLimits(window,
+                           400, 400,
+                           GLFW_DONT_CARE, GLFW_DONT_CARE,
+                           GLFW_DONT_CARE, GLFW_DONT_CARE);
+
    glfwSetFramebufferSizeCallback(window, reshape);
    glfwSetKeyCallback(window, key_callback);
    glfwSetMouseButtonCallback(window, mouse_button_callback);

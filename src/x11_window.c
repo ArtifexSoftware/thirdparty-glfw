@@ -1592,6 +1592,39 @@ void _glfwPlatformSetWindowSize(_GLFWwindow* window, int width, int height)
     XFlush(_glfw.x11.display);
 }
 
+void _glfwPlatformSetWindowSizeLimits(_GLFWwindow* window,
+                                      int minwidth, int minheight,
+                                      int maxwidth, int maxheight,
+                                      int numer, int denom)
+{
+    XSizeHints* hints = XAllocSizeHints();
+    hints->flags = 0;
+
+    if (minwidth != GLFW_DONT_CARE && minheight != GLFW_DONT_CARE)
+    {
+        hints->flags |= PMinSize;
+        hints->min_width  = minwidth;
+        hints->min_height = minheight;
+    }
+
+    if (maxwidth != GLFW_DONT_CARE && maxheight != GLFW_DONT_CARE)
+    {
+        hints->flags |= PMaxSize;
+        hints->max_width  = maxwidth;
+        hints->max_height = maxheight;
+    }
+
+    if (numer != GLFW_DONT_CARE && denom != GLFW_DONT_CARE)
+    {
+        hints->flags |= PAspect;
+        hints->min_aspect.x = hints->max_aspect.x = numer;
+        hints->min_aspect.y = hints->max_aspect.y = denom;
+    }
+
+    XSetWMNormalHints(_glfw.x11.display, window->x11.handle, hints);
+    XFree(hints);
+}
+
 void _glfwPlatformGetFramebufferSize(_GLFWwindow* window, int* width, int* height)
 {
     _glfwPlatformGetWindowSize(window, width, height);
