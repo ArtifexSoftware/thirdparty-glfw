@@ -655,7 +655,8 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
         Atom protocols[] =
         {
             _glfw.x11.WM_DELETE_WINDOW,
-            _glfw.x11.NET_WM_PING
+            _glfw.x11.NET_WM_PING,
+            _glfw.x11.NET_WM_SYNC_REQUEST
         };
 
         XSetWMProtocols(_glfw.x11.display, window->x11.handle,
@@ -744,6 +745,20 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
                                    XNFocusWindow,
                                    window->x11.handle,
                                    NULL);
+    }
+
+    if (_glfw.x11.xsync.available)
+    {
+        XSyncValue value = {0};
+        window->x11.counter = XSyncCreateCounter(_glfw.x11.display, value);
+        XChangeProperty(_glfw.x11.display,
+                        window->x11.handle,
+                        _glfw.x11.NET_WM_SYNC_REQUEST_COUNTER,
+                        XA_CARDINAL,
+                        32,
+                        PropModeReplace,
+                        (unsigned char*) &window->x11.counter,
+                        1);
     }
 
     _glfwPlatformGetWindowPos(window, &window->x11.xpos, &window->x11.ypos);
@@ -1537,6 +1552,14 @@ static void processEvent(XEvent *event)
                                SubstructureNotifyMask | SubstructureRedirectMask,
                                &reply);
                 }
+                else if (protocol == _glfw.x11.NET_WM_SYNC_REQUEST)
+                {
+                    // The window manager is notifying us about upcoming
+                    // ConfigureNotify events
+                    window->x11.counterValue.hi = event->xclient.data.l[3];
+                    window->x11.counterValue.lo = event->xclient.data.l[2];
+                    window->x11.counterPending = GLFW_TRUE;
+                }
             }
             else if (event->xclient.message_type == _glfw.x11.XdndEnter)
             {
@@ -1758,6 +1781,15 @@ static void processEvent(XEvent *event)
         case Expose:
         {
             _glfwInputWindowDamage(window);
+
+            if (window->x11.counterPending)
+            {
+                XSyncSetCounter(_glfw.x11.display,
+                                window->x11.counter,
+                                window->x11.counterValue);
+                window->x11.counterPending = GLFW_FALSE;
+            }
+
             return;
         }
 
@@ -1978,6 +2010,12 @@ void _glfwPlatformDestroyWindow(_GLFWwindow* window)
     {
         XDestroyIC(window->x11.ic);
         window->x11.ic = NULL;
+    }
+
+    if (window->x11.counter)
+    {
+        XSyncDestroyCounter(_glfw.x11.display, window->x11.counter);
+        window->x11.counter = None;
     }
 
     if (window->context.destroy)

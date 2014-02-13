@@ -505,6 +505,33 @@ static GLFWbool initExtensions(void)
         }
     }
 
+    _glfw.x11.xext.handle = dlopen("libXext.so.6", RTLD_LAZY | RTLD_GLOBAL);
+    if (_glfw.x11.xext.handle)
+    {
+        _glfw.x11.xext.SyncQueryExtension = (PFN_XSyncQueryExtension)
+            dlsym(_glfw.x11.xext.handle, "XSyncQueryExtension");
+        _glfw.x11.xext.SyncInitialize = (PFN_XSyncInitialize)
+            dlsym(_glfw.x11.xext.handle, "XSyncInitialize");
+        _glfw.x11.xext.SyncCreateCounter = (PFN_XSyncCreateCounter)
+            dlsym(_glfw.x11.xext.handle, "XSyncCreateCounter");
+        _glfw.x11.xext.SyncDestroyCounter = (PFN_XSyncDestroyCounter)
+            dlsym(_glfw.x11.xext.handle, "XSyncDestroyCounter");
+        _glfw.x11.xext.SyncSetCounter = (PFN_XSyncSetCounter)
+            dlsym(_glfw.x11.xext.handle, "XSyncSetCounter");
+
+        _glfw.x11.xsync.available =
+            XSyncQueryExtension(_glfw.x11.display,
+                                &_glfw.x11.xsync.eventBase,
+                                &_glfw.x11.xsync.errorBase);
+
+        if (_glfw.x11.xsync.available)
+        {
+            XSyncInitialize(_glfw.x11.display,
+                            &_glfw.x11.xsync.major,
+                            &_glfw.x11.xsync.minor);
+        }
+    }
+
     _glfw.x11.randr.handle = dlopen("libXrandr.so.2", RTLD_LAZY | RTLD_GLOBAL);
     if (_glfw.x11.randr.handle)
     {
@@ -706,6 +733,10 @@ static GLFWbool initExtensions(void)
         XInternAtom(_glfw.x11.display, "_NET_WM_ICON", False);
     _glfw.x11.NET_WM_PING =
         XInternAtom(_glfw.x11.display, "_NET_WM_PING", False);
+    _glfw.x11.NET_WM_SYNC_REQUEST =
+       XInternAtom(_glfw.x11.display, "_NET_WM_SYNC_REQUEST", False);
+    _glfw.x11.NET_WM_SYNC_REQUEST_COUNTER =
+       XInternAtom(_glfw.x11.display, "_NET_WM_SYNC_REQUEST_COUNTER", False);
     _glfw.x11.NET_WM_PID =
         XInternAtom(_glfw.x11.display, "_NET_WM_PID", False);
     _glfw.x11.NET_WM_NAME =

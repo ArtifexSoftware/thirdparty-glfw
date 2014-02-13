@@ -38,6 +38,9 @@
 // The XRandR extension provides mode setting and gamma control
 #include <X11/extensions/Xrandr.h>
 
+// The XSync extension provides sync
+#include <X11/extensions/sync.h>
+
 // The Xkb extension provides improved keyboard support
 #include <X11/XKBlib.h>
 
@@ -116,6 +119,17 @@ typedef int (* PFN_XISelectEvents)(Display*,Window,XIEventMask*,int);
 #define XIQueryVersion _glfw.x11.xi.QueryVersion
 #define XISelectEvents _glfw.x11.xi.SelectEvents
 
+typedef Status (* PFN_XSyncQueryExtension)(Display*,int*,int*);
+typedef Status (* PFN_XSyncInitialize)(Display*,int*,int*);
+typedef XSyncCounter (* PFN_XSyncCreateCounter)(Display*,XSyncValue);
+typedef Status (* PFN_XSyncDestroyCounter)(Display*,XSyncCounter);
+typedef Status (* PFN_XSyncSetCounter)(Display*,XSyncCounter,XSyncValue);
+#define XSyncQueryExtension _glfw.x11.xext.SyncQueryExtension
+#define XSyncInitialize _glfw.x11.xext.SyncInitialize
+#define XSyncCreateCounter _glfw.x11.xext.SyncCreateCounter
+#define XSyncDestroyCounter _glfw.x11.xext.SyncDestroyCounter
+#define XSyncSetCounter _glfw.x11.xext.SyncSetCounter
+
 typedef VkFlags VkXlibSurfaceCreateFlagsKHR;
 typedef VkFlags VkXcbSurfaceCreateFlagsKHR;
 
@@ -191,6 +205,11 @@ typedef struct _GLFWwindowX11
     // The time of the last KeyPress event
     Time            lastKeyTime;
 
+    // XSync counter for _NET_WM_SYNC_REQUEST
+    XSyncCounter    counter;
+    XSyncValue      counterValue;
+    GLFWbool        counterPending;
+
 } _GLFWwindowX11;
 
 // X11-specific global data
@@ -235,6 +254,8 @@ typedef struct _GLFWlibraryX11
     Atom            NET_WM_ICON;
     Atom            NET_WM_PID;
     Atom            NET_WM_PING;
+    Atom            NET_WM_SYNC_REQUEST;
+    Atom            NET_WM_SYNC_REQUEST_COUNTER;
     Atom            NET_WM_WINDOW_TYPE;
     Atom            NET_WM_WINDOW_TYPE_NORMAL;
     Atom            NET_WM_STATE;
@@ -334,6 +355,23 @@ typedef struct _GLFWlibraryX11
         PFN_XcursorImageDestroy ImageDestroy;
         PFN_XcursorImageLoadCursor ImageLoadCursor;
     } xcursor;
+
+    struct {
+        void*       handle;
+        PFN_XSyncQueryExtension SyncQueryExtension;
+        PFN_XSyncInitialize SyncInitialize;
+        PFN_XSyncCreateCounter SyncCreateCounter;
+        PFN_XSyncDestroyCounter SyncDestroyCounter;
+        PFN_XSyncSetCounter SyncSetCounter;
+    } xext;
+
+    struct {
+        GLFWbool    available;
+        int         eventBase;
+        int         errorBase;
+        int         major;
+        int         minor;
+    } xsync;
 
     struct {
         GLFWbool    available;
