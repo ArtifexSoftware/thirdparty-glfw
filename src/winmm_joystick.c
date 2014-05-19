@@ -46,50 +46,49 @@ static float calcJoystickPos(DWORD pos, DWORD min, DWORD max)
     return (2.f * (fpos - fmin) / (fmax - fmin)) - 1.f;
 }
 
-static int calcJoystickName( int joy, WCHAR * dest, const WCHAR *szRegKey )
+// Returns the name of the specified joystick
+//
+static char* getJoystickName(int joy, const WCHAR* szRegKey)
 {
-	HKEY  hKey, hLoc;
-	WCHAR temp[256];
-	DWORD size;
-	char key[256];
-	int  result;
+    HKEY hKey, hLoc;
+    WCHAR path[256];
+    DWORD size;
+    char key[256];
+    int result;
 
-	size = sizeof(temp);
-	_snwprintf ( temp, size, L"%s\\%s\\%s", REGSTR_PATH_JOYCONFIG, szRegKey, REGSTR_KEY_JOYCURR );
-	hLoc = HKEY_LOCAL_MACHINE;
-	result = RegOpenKeyEx( hLoc, temp, 0, KEY_READ, &hKey);
-	if ( result != ERROR_SUCCESS ) 
-	{
-		hLoc = HKEY_CURRENT_USER;
-		result = RegOpenKeyEx( hLoc, temp, 0, KEY_READ, &hKey);
-		if( result != ERROR_SUCCESS)
-			return 0;
-	}
+    _snwprintf(path, sizeof(path), L"%s\\%s\\%s", REGSTR_PATH_JOYCONFIG, szRegKey, REGSTR_KEY_JOYCURR);
 
-	_snwprintf ( temp, size, L"Joystick%d%s", joy + 1, REGSTR_VAL_JOYOEMNAME );
+    hLoc = HKEY_LOCAL_MACHINE;
+    if (RegOpenKeyEx(hLoc, path, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
+    {
+        hLoc = HKEY_CURRENT_USER;
+        if (RegOpenKeyEx(hLoc, path, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
+            return GL_FALSE;
+    }
 
-	size = sizeof(key);
-	result = RegQueryValueEx(hKey, temp, 0, 0, (LPBYTE)key, (LPDWORD)&size);
-	RegCloseKey ( hKey );
+    _snwprintf(path, size, L"Joystick%d%s", joy + 1, REGSTR_VAL_JOYOEMNAME);
 
-	if ( result != ERROR_SUCCESS )
-		return 0;
+    size = sizeof(key);
+    result = RegQueryValueEx(hKey, path, 0, 0, (LPBYTE) key, (LPDWORD) &size);
+    RegCloseKey(hKey);
 
-	size = sizeof(temp);
-	_snwprintf ( temp, size, L"%s\\%s", REGSTR_PATH_JOYOEM, key );
-	result = RegOpenKeyEx ( hLoc, temp, 0, KEY_QUERY_VALUE, &hKey );
-	if ( result != ERROR_SUCCESS )
-		return 0;
+    if (result != ERROR_SUCCESS)
+        return GL_FALSE;
 
-	size = sizeof(temp);
-	result = RegQueryValueEx ( hKey, REGSTR_VAL_JOYOEMNAME, 0, 0, (LPBYTE)dest, (LPDWORD)&size );
-	RegCloseKey ( hKey );
+    _snwprintf(path, sizeof(path), L"%s\\%s", REGSTR_PATH_JOYOEM, key);
+    if (RegOpenKeyEx(hLoc, path, 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
+        return GL_FALSE;
 
-	if ( result != ERROR_SUCCESS ) 
-		return 0;
+    size = sizeof(path);
+    result = RegQueryValueEx(hKey, REGSTR_VAL_JOYOEMNAME, 0, 0, (LPBYTE) dest, (LPDWORD) &size);
+    RegCloseKey(hKey);
 
-	return 1;
+    if (result != ERROR_SUCCESS)
+        return GL_FALSE;
+
+    return GL_TRUE;
 }
+
 
 //////////////////////////////////////////////////////////////////////////
 //////                       GLFW internal API                      //////
@@ -209,17 +208,17 @@ const unsigned char* _glfwPlatformGetJoystickButtons(int joy, int* count)
 
 const char* _glfwPlatformGetJoystickName(int joy)
 {
-	WCHAR	name[256];
+    WCHAR name[256];
     JOYCAPS jc;
 
     if (_glfw_joyGetDevCaps(joy, &jc, sizeof(JOYCAPS)) != JOYERR_NOERROR)
         return NULL;
 
-	if(calcJoystickName(joy, name, jc.szRegKey) == 0)
+    if (!calcJoystickName(joy, jc.szRegKey))
         return NULL;
 
     free(_glfw.winmm_js[joy].name);
-	_glfw.winmm_js[joy].name = _glfwCreateUTF8FromWideString(name);
+    _glfw.winmm_js[joy].name = _glfwCreateUTF8FromWideString(name);
     return _glfw.winmm_js[joy].name;
 }
 
