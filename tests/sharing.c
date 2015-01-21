@@ -27,8 +27,14 @@
 //
 //========================================================================
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#define NANOVG_GL2_IMPLEMENTATION
+#include <nanovg.h>
+#include <nanovg_gl.h>
+
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -59,7 +65,6 @@ static GLFWwindow* open_window(const char* title, GLFWwindow* share, int posX, i
         return NULL;
 
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
     glfwSetWindowPos(window, posX, posY);
     glfwShowWindow(window);
 
@@ -68,64 +73,44 @@ static GLFWwindow* open_window(const char* title, GLFWwindow* share, int posX, i
     return window;
 }
 
-static GLuint create_texture(void)
+static int create_image(NVGcontext* nvg)
 {
-    int x, y;
-    char pixels[256 * 256];
-    GLuint texture;
+    int i;
+    unsigned char pixels[256 * 256 * 4];
 
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    for (i = 0;  i < sizeof(pixels);  i++)
+        pixels[i] = rand() % 256;
 
-    for (y = 0;  y < 256;  y++)
-    {
-        for (x = 0;  x < 256;  x++)
-            pixels[y * 256 + x] = rand() % 256;
-    }
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, 256, 256, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    return texture;
+    return nvgCreateImageRGBA(nvg, 256, 256, 0, pixels);
 }
 
-static void draw_quad(GLuint texture)
+static void draw_quad(NVGcontext* nvg, int image, NVGcolor color)
 {
     int width, height;
+
     glfwGetFramebufferSize(glfwGetCurrentContext(), &width, &height);
-
     glViewport(0, 0, width, height);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0.f, 1.f, 0.f, 1.f, 0.f, 1.f);
+    nvgBeginFrame(nvg, width, height, 1.f);
 
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    nvgBeginPath(nvg);
+    nvgRect(nvg, 0.f, 0.f, width, height);
+    nvgFillPaint(nvg, nvgImagePattern(nvg, 0.f, 0.f, width, height, 0.f, image, 1.f));
+    nvgFill(nvg);
+    nvgFillColor(nvg, nvgTransRGBA(color, 127));
+    nvgFill(nvg);
 
-    glBegin(GL_QUADS);
-
-    glTexCoord2f(0.f, 0.f);
-    glVertex2f(0.f, 0.f);
-
-    glTexCoord2f(1.f, 0.f);
-    glVertex2f(1.f, 0.f);
-
-    glTexCoord2f(1.f, 1.f);
-    glVertex2f(1.f, 1.f);
-
-    glTexCoord2f(0.f, 1.f);
-    glVertex2f(0.f, 1.f);
-
-    glEnd();
+    nvgEndFrame(nvg);
 }
 
 int main(int argc, char** argv)
 {
     int x, y, width;
-    GLuint texture;
+    NVGcontext* nvg;
+    int image;
+
+    srand((unsigned int) time(NULL));
 
     glfwSetErrorCallback(error_callback);
 
@@ -139,10 +124,22 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
-    // This is the one and only time we create a texture
+    glfwMakeContextCurrent(windows[0]);
+    glfwSwapInterval(1);
+
+    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+
+    nvg = nvgCreateGL2(0);
+    if (!nvg)
+    {
+        glfwTerminate();
+        exit(EXIT_FAILURE);
+    }
+
+    // This is the one and only time we create an image
     // It is created inside the first context, created above
     // It will then be shared with the second context, created below
-    texture = create_texture();
+    image = create_image(nvg);
 
     glfwGetWindowPos(windows[0], &x, &y);
     glfwGetWindowSize(windows[0], &width, NULL);
@@ -155,22 +152,14 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
-    // Set drawing color for both contexts
-    glfwMakeContextCurrent(windows[0]);
-    glColor3f(0.6f, 0.f, 0.6f);
-    glfwMakeContextCurrent(windows[1]);
-    glColor3f(0.6f, 0.6f, 0.f);
-
-    glfwMakeContextCurrent(windows[0]);
-
     while (!glfwWindowShouldClose(windows[0]) &&
            !glfwWindowShouldClose(windows[1]))
     {
         glfwMakeContextCurrent(windows[0]);
-        draw_quad(texture);
+        draw_quad(nvg, image, nvgRGB(200, 0, 200));
 
         glfwMakeContextCurrent(windows[1]);
-        draw_quad(texture);
+        draw_quad(nvg, image, nvgRGB(200, 200, 0));
 
         glfwSwapBuffers(windows[0]);
         glfwSwapBuffers(windows[1]);

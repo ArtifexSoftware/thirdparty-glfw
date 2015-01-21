@@ -15,37 +15,46 @@ if ("${OPENGL_INCLUDE_DIR}")
     include_directories("${OPENGL_INCLUDE_DIR}")
 endif()
 
+set(GLAD "${GLFW_SOURCE_DIR}/deps/glad/glad.h"
+         "${GLFW_SOURCE_DIR}/deps/glad.c")
 set(GETOPT "${GLFW_SOURCE_DIR}/deps/getopt.h"
            "${GLFW_SOURCE_DIR}/deps/getopt.c")
 set(TINYCTHREAD "${GLFW_SOURCE_DIR}/deps/tinycthread.h"
                 "${GLFW_SOURCE_DIR}/deps/tinycthread.c")
+set(NANOVG "${GLFW_SOURCE_DIR}/deps/nanovg.c"
+           "${GLFW_SOURCE_DIR}/deps/fontstash.h"
+           "${GLFW_SOURCE_DIR}/deps/nanovg.h"
+           "${GLFW_SOURCE_DIR}/deps/nanovg_gl.h"
+           "${GLFW_SOURCE_DIR}/deps/nanovg_gl_utils.h"
+           "${GLFW_SOURCE_DIR}/deps/stb_image.h"
+           "${GLFW_SOURCE_DIR}/deps/stb_truetype.h")
 
 add_executable(clipboard clipboard.c ${GETOPT})
 add_executable(defaults defaults.c)
 add_executable(events events.c ${GETOPT})
-add_executable(msaa msaa.c ${GETOPT})
 add_executable(gamma gamma.c ${GETOPT})
 add_executable(glfwinfo glfwinfo.c ${GETOPT})
 add_executable(iconify iconify.c ${GETOPT})
-add_executable(joysticks joysticks.c)
+add_executable(joysticks joysticks.c ${NANOVG} ${GLAD})
 add_executable(monitors monitors.c ${GETOPT})
+add_executable(msaa msaa.c ${GETOPT} ${NANOVG} ${GLAD})
 add_executable(peter peter.c)
-add_executable(reopen reopen.c)
+add_executable(reopen reopen.c ${NANOVG} ${GLAD})
 add_executable(cursor cursor.c)
 
 add_executable(cursoranim WIN32 MACOSX_BUNDLE cursoranim.c)
 set_target_properties(cursoranim PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Cursor animation")
 
-add_executable(accuracy WIN32 MACOSX_BUNDLE accuracy.c)
+add_executable(accuracy WIN32 MACOSX_BUNDLE accuracy.c ${NANOVG} ${GLAD})
 set_target_properties(accuracy PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Accuracy")
 
 add_executable(empty WIN32 MACOSX_BUNDLE empty.c ${TINYCTHREAD})
 set_target_properties(empty PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Empty Event")
 
-add_executable(sharing WIN32 MACOSX_BUNDLE sharing.c)
+add_executable(sharing WIN32 MACOSX_BUNDLE sharing.c ${NANOVG} ${GLAD})
 set_target_properties(sharing PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Sharing")
 
-add_executable(tearing WIN32 MACOSX_BUNDLE tearing.c ${GETOPT})
+add_executable(tearing WIN32 MACOSX_BUNDLE tearing.c ${GETOPT} ${NANOVG} ${GLAD})
 set_target_properties(tearing PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Tearing")
 
 add_executable(threads WIN32 MACOSX_BUNDLE threads.c ${TINYCTHREAD})

@@ -28,7 +28,12 @@
 //
 //========================================================================
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#define NANOVG_GL2_IMPLEMENTATION
+#include <nanovg.h>
+#include <nanovg_gl.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -56,12 +61,7 @@ static void error_callback(int error, const char* description)
     fprintf(stderr, "Error: %s\n", description);
 }
 
-static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
-static void draw_joystick(Joystick* j, int x, int y, int width, int height)
+static void draw_joystick(NVGcontext* nvg, Joystick* j, int width, int height)
 {
     int i;
     const int axis_height = 3 * height / 4;
@@ -75,17 +75,19 @@ static void draw_joystick(Joystick* j, int x, int y, int width, int height)
         {
             float value = j->axes[i] / 2.f + 0.5f;
 
-            glColor3f(0.3f, 0.3f, 0.3f);
-            glRecti(x + i * axis_width,
-                    y,
-                    x + (i + 1) * axis_width,
-                    y + axis_height);
+            nvgBeginPath(nvg);
+            nvgFillColor(nvg, nvgRGB(65, 65, 65));
+            nvgRect(nvg, i * axis_width, 0, axis_width, axis_height);
+            nvgFill(nvg);
 
-            glColor3f(1.f, 1.f, 1.f);
-            glRecti(x + i * axis_width,
-                    y + (int) (value * (axis_height - 5)),
-                    x + (i + 1) * axis_width,
-                    y + 5 + (int) (value * (axis_height - 5)));
+            nvgBeginPath(nvg);
+            nvgFillColor(nvg, nvgRGB(255, 255, 255));
+            nvgRect(nvg,
+                    i * axis_width,
+                    (int) (value * (axis_height - 5)),
+                    axis_width,
+                    5);
+            nvgFill(nvg);
         }
     }
 
@@ -95,29 +97,30 @@ static void draw_joystick(Joystick* j, int x, int y, int width, int height)
 
         for (i = 0;  i < j->button_count;  i++)
         {
-            if (j->buttons[i])
-                glColor3f(1.f, 1.f, 1.f);
-            else
-                glColor3f(0.3f, 0.3f, 0.3f);
+            nvgBeginPath(nvg);
 
-            glRecti(x + i * button_width,
-                    y + axis_height,
-                    x + (i + 1) * button_width,
-                    y + axis_height + button_height);
+            if (j->buttons[i])
+                nvgFillColor(nvg, nvgRGB(255, 255, 255));
+            else
+                nvgFillColor(nvg, nvgRGB(65, 65, 65));
+
+            nvgRect(nvg,
+                    i * button_width,
+                    axis_height,
+                    button_width,
+                    button_height);
+            nvgFill(nvg);
         }
     }
 }
 
-static void draw_joysticks(GLFWwindow* window)
+static void draw_joysticks(GLFWwindow* window, NVGcontext* nvg)
 {
-    int i, width, height, offset = 0;
+    int i, width, height;
 
     glfwGetFramebufferSize(window, &width, &height);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0.f, width, height, 0.f, 1.f, -1.f);
-    glMatrixMode(GL_MODELVIEW);
+    glViewport(0, 0, width, height);
+    nvgBeginFrame(nvg, width, height, 1.f);
 
     for (i = 0;  i < sizeof(joysticks) / sizeof(Joystick);  i++)
     {
@@ -125,12 +128,12 @@ static void draw_joysticks(GLFWwindow* window)
 
         if (j->present)
         {
-            draw_joystick(j,
-                          0, offset * height / joystick_count,
-                          width, height / joystick_count);
-            offset++;
+            draw_joystick(nvg, j, width, height / joystick_count);
+            nvgTranslate(nvg, 0, height / joystick_count);
         }
     }
+
+    nvgEndFrame(nvg);
 }
 
 static void refresh_joysticks(void)
@@ -198,8 +201,7 @@ static void refresh_joysticks(void)
 int main(void)
 {
     GLFWwindow* window;
-
-    memset(joysticks, 0, sizeof(joysticks));
+    NVGcontext* nvg;
 
     glfwSetErrorCallback(error_callback);
 
@@ -213,17 +215,23 @@ int main(void)
         exit(EXIT_FAILURE);
     }
 
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+
+    nvg = nvgCreateGL2(0);
+    if (!nvg)
+    {
+        glfwTerminate();
+        exit(EXIT_FAILURE);
+    }
 
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
 
         refresh_joysticks();
-        draw_joysticks(window);
+        draw_joysticks(window, nvg);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

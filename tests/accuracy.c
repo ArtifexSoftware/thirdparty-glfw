@@ -29,7 +29,12 @@
 //
 //========================================================================
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#define NANOVG_GL2_IMPLEMENTATION
+#include <nanovg.h>
+#include <nanovg_gl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,11 +74,15 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 int main(void)
 {
     GLFWwindow* window;
+    NVGcontext* nvg;
 
     glfwSetErrorCallback(error_callback);
 
     if (!glfwInit())
         exit(EXIT_FAILURE);
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
     window = glfwCreateWindow(640, 480, "", NULL, NULL);
     if (!window)
@@ -86,33 +95,35 @@ int main(void)
     glfwSetKeyCallback(window, key_callback);
 
     glfwMakeContextCurrent(window);
-
     set_swap_interval(window, swap_interval);
+    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+
+    nvg = nvgCreateGL2(0);
+    if (!nvg)
+    {
+        glfwTerminate();
+        exit(EXIT_FAILURE);
+    }
 
     while (!glfwWindowShouldClose(window))
     {
-        int wnd_width, wnd_height, fb_width, fb_height;
-        float scale;
+        int width, height;
 
-        glfwGetWindowSize(window, &wnd_width, &wnd_height);
-        glfwGetFramebufferSize(window, &fb_width, &fb_height);
-
-        scale = (float) fb_width / (float) wnd_width;
-
+        glfwGetFramebufferSize(window, &width, &height);
+        glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glViewport(0, 0, fb_width, fb_height);
+        nvgBeginFrame(nvg, width, height, 1.f);
 
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(0.f, fb_width, 0.f, fb_height, 0.f, 1.f);
+        nvgBeginPath(nvg);
+        nvgMoveTo(nvg, 0.f, cursor_y);
+        nvgLineTo(nvg, width, cursor_y);
+        nvgMoveTo(nvg, cursor_x, 0.f);
+        nvgLineTo(nvg, cursor_x, height);
+        nvgStrokeColor(nvg, nvgRGB(255, 255, 255));
+        nvgStroke(nvg);
 
-        glBegin(GL_LINES);
-        glVertex2f(0.f, (GLfloat) (fb_height - cursor_y * scale));
-        glVertex2f((GLfloat) fb_width, (GLfloat) (fb_height - cursor_y * scale));
-        glVertex2f((GLfloat) cursor_x * scale, 0.f);
-        glVertex2f((GLfloat) cursor_x * scale, (GLfloat) fb_height);
-        glEnd();
+        nvgEndFrame(nvg);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

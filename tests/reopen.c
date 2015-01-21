@@ -33,7 +33,12 @@
 //
 //========================================================================
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#define NANOVG_GL2_IMPLEMENTATION
+#include <nanovg.h>
+#include <nanovg_gl.h>
 
 #include <time.h>
 #include <stdio.h>
@@ -42,11 +47,6 @@
 static void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
-}
-
-static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
 }
 
 static void window_close_callback(GLFWwindow* window)
@@ -75,6 +75,9 @@ static GLFWwindow* open_window(int width, int height, GLFWmonitor* monitor)
 
     base = glfwGetTime();
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+
     window = glfwCreateWindow(width, height, "Window Re-opener", monitor, NULL);
     if (!window)
         return NULL;
@@ -82,7 +85,6 @@ static GLFWwindow* open_window(int width, int height, GLFWmonitor* monitor)
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetWindowCloseCallback(window, window_close_callback);
     glfwSetKeyCallback(window, key_callback);
 
@@ -112,6 +114,7 @@ int main(int argc, char** argv)
 {
     int count = 0;
     GLFWwindow* window;
+    NVGcontext* nvg;
 
     srand((unsigned int) time(NULL));
 
@@ -138,20 +141,50 @@ int main(int argc, char** argv)
             exit(EXIT_FAILURE);
         }
 
-        glMatrixMode(GL_PROJECTION);
-        glOrtho(-1.f, 1.f, -1.f, 1.f, 1.f, -1.f);
-        glMatrixMode(GL_MODELVIEW);
+        gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+
+        nvg = nvgCreateGL2(0);
+        if (!nvg)
+        {
+            glfwTerminate();
+            exit(EXIT_FAILURE);
+        }
 
         glfwSetTime(0.0);
 
         while (glfwGetTime() < 5.0)
         {
+            float side;
+            int width, height;
+
+            glfwGetFramebufferSize(window, &width, &height);
+            glViewport(0, 0, width, height);
+            glClearColor(1.0, 1.0, 1.0, 1.0);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            glPushMatrix();
-            glRotatef((GLfloat) glfwGetTime() * 100.f, 0.f, 0.f, 1.f);
-            glRectf(-0.5f, -0.5f, 1.f, 1.f);
-            glPopMatrix();
+            side = fminf(width, height) * 0.65;
+
+            nvgBeginFrame(nvg, width, height, 1.f);
+
+            nvgFillColor(nvg, nvgRGBA(0, 0, 0, 255));
+            nvgBeginPath(nvg);
+            nvgRect(nvg, 0.f, 40, width, height - 80);
+            nvgFill(nvg);
+            nvgBeginPath(nvg);
+            nvgRect(nvg, 40, 0.f, width - 80, height);
+            nvgFill(nvg);
+            nvgBeginPath(nvg);
+            nvgRect(nvg, 5, 5, width - 10, height - 10);
+            nvgFill(nvg);
+
+            nvgFillColor(nvg, nvgRGBA(255, 255, 255, 255));
+            nvgBeginPath(nvg);
+            nvgTranslate(nvg, width / 2.f, height / 2.f);
+            nvgRotate(nvg, (float) glfwGetTime());
+            nvgRect(nvg, -side / 2.f, -side / 2.f, side, side);
+            nvgFill(nvg);
+
+            nvgEndFrame(nvg);
 
             glfwSwapBuffers(window);
             glfwPollEvents();

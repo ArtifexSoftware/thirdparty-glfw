@@ -98,21 +98,8 @@ static void window_iconify_callback(GLFWwindow* window, int iconified)
 
 static void window_refresh_callback(GLFWwindow* window)
 {
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-
     glfwMakeContextCurrent(window);
-
-    glEnable(GL_SCISSOR_TEST);
-
-    glScissor(0, 0, width, height);
-    glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-
-    glScissor(0, 0, 640, 480);
-    glClearColor(1, 1, 1, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     glfwSwapBuffers(window);
 }
 

@@ -29,8 +29,12 @@
 //
 //========================================================================
 
-#define GLFW_INCLUDE_GLEXT
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#define NANOVG_GL2_IMPLEMENTATION
+#include <nanovg.h>
+#include <nanovg_gl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,11 +44,6 @@
 static void error_callback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
-}
-
-static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -69,6 +68,7 @@ int main(int argc, char** argv)
 {
     int ch, samples = 4;
     GLFWwindow* window;
+    NVGcontext* nvg;
 
     while ((ch = getopt(argc, argv, "hs:")) != -1)
     {
@@ -97,7 +97,8 @@ int main(int argc, char** argv)
         printf("Requesting that MSAA not be available\n");
 
     glfwWindowHint(GLFW_SAMPLES, samples);
-    glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
     window = glfwCreateWindow(800, 400, "Aliasing Detector", NULL, NULL);
     if (!window)
@@ -107,50 +108,56 @@ int main(int argc, char** argv)
     }
 
     glfwSetKeyCallback(window, key_callback);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
-    if (!glfwExtensionSupported("GL_ARB_multisample"))
+    nvg = nvgCreateGL2(0);
+    if (!nvg)
     {
-        printf("GL_ARB_multisample extension not supported\n");
-
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
 
-    glfwShowWindow(window);
-
-    glGetIntegerv(GL_SAMPLES_ARB, &samples);
+    glGetIntegerv(GL_SAMPLES, &samples);
     if (samples)
         printf("Context reports MSAA is available with %i samples\n", samples);
     else
         printf("Context reports MSAA is unavailable\n");
 
-    glMatrixMode(GL_PROJECTION);
-    glOrtho(0.f, 1.f, 0.f, 0.5f, 0.f, 1.f);
-    glMatrixMode(GL_MODELVIEW);
-
     while (!glfwWindowShouldClose(window))
     {
-        GLfloat time = (GLfloat) glfwGetTime();
+        int width, height;
+        float side;
+        const double time = glfwGetTime();
 
+        glfwGetFramebufferSize(window, &width, &height);
+        glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glLoadIdentity();
-        glTranslatef(0.25f, 0.25f, 0.f);
-        glRotatef(time, 0.f, 0.f, 1.f);
+        side = fminf(width / 2.f, height) * 0.65;
 
-        glDisable(GL_MULTISAMPLE_ARB);
-        glRectf(-0.15f, -0.15f, 0.15f, 0.15f);
+        glDisable(GL_MULTISAMPLE);
 
-        glLoadIdentity();
-        glTranslatef(0.75f, 0.25f, 0.f);
-        glRotatef(time, 0.f, 0.f, 1.f);
+        nvgBeginFrame(nvg, width, height, 1.f);
+        nvgBeginPath(nvg);
+        nvgTranslate(nvg, width * 0.25f, height / 2.f);
+        nvgRotate(nvg, (float) (time * M_PI) / 180.f);
+        nvgRect(nvg, -side / 2.f, -side / 2.f, side, side);
+        nvgFillColor(nvg, nvgRGBA(255, 255, 255, 255));
+        nvgFill(nvg);
+        nvgEndFrame(nvg);
 
-        glEnable(GL_MULTISAMPLE_ARB);
-        glRectf(-0.15f, -0.15f, 0.15f, 0.15f);
+        glEnable(GL_MULTISAMPLE);
+
+        nvgBeginFrame(nvg, width, height, 1.f);
+        nvgBeginPath(nvg);
+        nvgTranslate(nvg, width * 0.75f, height / 2.f);
+        nvgRotate(nvg, (float) (time * M_PI) / 180.f);
+        nvgRect(nvg, -side / 2.f, -side / 2.f, side, side);
+        nvgFillColor(nvg, nvgRGBA(255, 255, 255, 255));
+        nvgFill(nvg);
+        nvgEndFrame(nvg);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
