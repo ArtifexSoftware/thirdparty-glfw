@@ -28,7 +28,12 @@
 //
 //========================================================================
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#define NANOVG_GL2_IMPLEMENTATION
+#include <nanovg.h>
+#include <nanovg_gl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -91,16 +96,12 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
 }
 
-static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
 int main(int argc, char** argv)
 {
     int width, height, ch;
     GLFWmonitor* monitor = NULL;
     GLFWwindow* window;
+    NVGcontext* nvg;
 
     glfwSetErrorCallback(error_callback);
 
@@ -139,9 +140,12 @@ int main(int argc, char** argv)
     }
     else
     {
-        width = 200;
-        height = 200;
+        width = 640;
+        height = 480;
     }
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
     window = glfwCreateWindow(width, height, "Gamma Test", monitor, NULL);
     if (!window)
@@ -154,19 +158,66 @@ int main(int argc, char** argv)
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+
+    nvg = nvgCreateGL2(0);
+    if (!nvg)
+    {
+        glfwTerminate();
+        exit(EXIT_FAILURE);
+    }
 
     glfwSetKeyCallback(window, key_callback);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-    glClearColor(0.5f, 0.5f, 0.5f, 0);
 
     while (!glfwWindowShouldClose(window))
     {
+        int i, width, height;
+        NVGpaint paint;
+        const int slices = 6;
+        const float border = 40.f;
+
+        glfwGetFramebufferSize(window, &width, &height);
+        glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        nvgBeginFrame(nvg, width, height, 1.f);
+
+        for (i = 0;  i < slices;  i++)
+        {
+            const float step = (width - border * 2.f) / slices;
+            const float x = border + i * step;
+            paint = nvgLinearGradient(nvg,
+                                      x, 0.f, x + step, 0.f,
+                                      nvgHSL(i / (float) slices, 1.f, 0.5f),
+                                      nvgHSL((i + 1) / (float) slices, 1.f, 0.5f));
+
+            nvgBeginPath(nvg);
+            nvgRect(nvg, x, border, step, (height - border * 3.f) / 2.f);
+            nvgFillPaint(nvg, paint);
+            nvgFill(nvg);
+        }
+
+        paint = nvgLinearGradient(nvg,
+                                  border, 0.f, width - border, 0.f,
+                                  nvgRGB(0, 0, 0), nvgRGB(255, 255, 255));
+
+        nvgBeginPath(nvg);
+        nvgRect(nvg,
+                border,
+                height / 2.f + border / 2.f,
+                width - border * 2.f,
+                (height - border * 3.f) / 2.f);
+        nvgFillPaint(nvg, paint);
+        nvgFill(nvg);
+
+        nvgEndFrame(nvg);
 
         glfwSwapBuffers(window);
         glfwWaitEvents();
     }
+
+    nvgDeleteGL2(nvg);
+    glfwDestroyWindow(window);
 
     glfwTerminate();
     exit(EXIT_SUCCESS);
