@@ -70,23 +70,37 @@ static void draw_joystick(NVGcontext* nvg, Joystick* j, int width, int height)
     if (j->axis_count)
     {
         const int axis_width = width / j->axis_count;
+        const float border = axis_width / 8.f;
 
         for (i = 0;  i < j->axis_count;  i++)
         {
-            float value = j->axes[i] / 2.f + 0.5f;
+            const float value = j->axes[i] / 2.f + 0.5f;
+            const float well_x = i * axis_width + border;
+            const float well_y = border;
+            const float well_width = axis_width - border * 2.f;
+            const float well_height = axis_height - border * 2.f;
+            NVGpaint paint = nvgBoxGradient(nvg,
+                                            well_x, well_y,
+                                            well_width, well_height,
+                                            well_width / 2.f,
+                                            well_width / 2.f,
+                                            nvgRGB(130, 130, 130),
+                                            nvgRGB(40, 40, 40));
 
             nvgBeginPath(nvg);
-            nvgFillColor(nvg, nvgRGB(65, 65, 65));
-            nvgRect(nvg, i * axis_width, 0, axis_width, axis_height);
+            nvgFillPaint(nvg, paint);
+            nvgRoundedRect(nvg,
+                           well_x, well_y,
+                           well_width, well_height,
+                           well_width / 2.f);
             nvgFill(nvg);
 
             nvgBeginPath(nvg);
-            nvgFillColor(nvg, nvgRGB(255, 255, 255));
-            nvgRect(nvg,
-                    i * axis_width,
-                    (int) (value * (axis_height - 5)),
-                    axis_width,
-                    5);
+            nvgFillColor(nvg, nvgRGB(200, 200, 200));
+            nvgCircle(nvg,
+                      (i + 0.5f) * axis_width,
+                      well_y + well_width / 2.f + value * (well_height - well_width),
+                      0.9f * well_width / 2.f);
             nvgFill(nvg);
         }
     }

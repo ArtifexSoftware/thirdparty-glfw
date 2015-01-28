@@ -33,7 +33,6 @@ add_executable(clipboard clipboard.c ${GETOPT})
 add_executable(cursor cursor.c ${NANOVG} ${GLAD})
 add_executable(defaults defaults.c)
 add_executable(events events.c ${GETOPT})
-add_executable(gamma gamma.c ${GETOPT} ${NANOVG} ${GLAD})
 add_executable(glfwinfo glfwinfo.c ${GETOPT})
 add_executable(iconify iconify.c ${GETOPT})
 add_executable(joysticks joysticks.c ${NANOVG} ${GLAD})
@@ -43,6 +42,9 @@ add_executable(reopen reopen.c ${NANOVG} ${GLAD})
 
 add_executable(empty WIN32 MACOSX_BUNDLE empty.c ${TINYCTHREAD})
 set_target_properties(empty PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Empty Event")
+
+add_executable(gamma WIN32 MACOSX_BUNDLE gamma.c ${NANOVG} ${GLAD})
+set_target_properties(gamma PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Gamma Test")
 
 add_executable(sharing WIN32 MACOSX_BUNDLE sharing.c ${NANOVG} ${GLAD})
 set_target_properties(sharing PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Sharing")
@@ -62,8 +64,8 @@ set_target_properties(windows PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Windows")
 target_link_libraries(empty "${CMAKE_THREAD_LIBS_INIT}" "${RT_LIBRARY}")
 target_link_libraries(threads "${CMAKE_THREAD_LIBS_INIT}" "${RT_LIBRARY}")
 
-set(WINDOWS_BINARIES empty sharing tearing threads title windows)
-set(CONSOLE_BINARIES clipboard cursor defaults events gamma glfwinfo iconify
+set(WINDOWS_BINARIES empty gamma sharing tearing threads title windows)
+set(CONSOLE_BINARIES clipboard cursor defaults events glfwinfo iconify
                      joysticks monitors msaa reopen)
 
 set_target_properties(${WINDOWS_BINARIES} ${CONSOLE_BINARIES} PROPERTIES
