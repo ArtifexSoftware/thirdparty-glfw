@@ -32,6 +32,22 @@
 #include <assert.h>
 
 
+#if !defined(EGL_VERSION_1_5)
+#define EGL_CONTEXT_MAJOR_VERSION 0x3098
+#define EGL_CONTEXT_MINOR_VERSION 0x30FB
+#define EGL_CONTEXT_OPENGL_PROFILE_MASK 0x30FD
+#define EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT 0x00000002
+#define EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT 0x00000001
+#define EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE 0x31B1
+#define EGL_CONTEXT_OPENGL_DEBUG 0x31B0
+#define EGL_CONTEXT_OPENGL_ROBUST_ACCESS 0x31B2
+#define EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY 0x31BD
+#define EGL_LOSE_CONTEXT_ON_RESET 0x31BF
+#define EGL_NO_RESET_NOTIFICATION 0x31BE
+#define EGL_OPENGL_ES3_BIT 0x00000040
+#endif /*EGL_VERSION_1_5*/
+
+
 // Return a description of the specified EGL error
 //
 static const char* getErrorString(EGLint error)
@@ -132,9 +148,14 @@ static GLboolean chooseFBConfigs(const _GLFWctxconfig* ctxconfig,
                 if (!(getConfigAttrib(n, EGL_RENDERABLE_TYPE) & EGL_OPENGL_ES_BIT))
                     continue;
             }
-            else
+            else if (ctxconfig->major == 2)
             {
                 if (!(getConfigAttrib(n, EGL_RENDERABLE_TYPE) & EGL_OPENGL_ES2_BIT))
+                    continue;
+            }
+            else
+            {
+                if (!(getConfigAttrib(n, EGL_RENDERABLE_TYPE) & EGL_OPENGL_ES3_BIT))
                     continue;
             }
         }
@@ -310,7 +331,47 @@ int _glfwCreateContext(_GLFWwindow* window,
         }
     }
 
-    if (_glfw.egl.KHR_create_context)
+    if (_glfw.egl.major > 1 || _glfw.egl.minor >= 5)
+    {
+        int index = 0, mask = 0, strategy = 0;
+
+        if (ctxconfig->api == GLFW_OPENGL_API)
+        {
+            if (ctxconfig->profile == GLFW_OPENGL_CORE_PROFILE)
+                mask |= EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT;
+            else if (ctxconfig->profile == GLFW_OPENGL_COMPAT_PROFILE)
+                mask |= EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT;
+
+            if (ctxconfig->forward)
+                setEGLattrib(EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE, EGL_TRUE);
+        }
+
+        if (ctxconfig->debug)
+            setEGLattrib(EGL_CONTEXT_OPENGL_DEBUG, EGL_TRUE);
+
+        if (ctxconfig->robustness)
+        {
+            if (ctxconfig->robustness == GLFW_NO_RESET_NOTIFICATION)
+                strategy = EGL_NO_RESET_NOTIFICATION;
+            else if (ctxconfig->robustness == GLFW_LOSE_CONTEXT_ON_RESET)
+                strategy = EGL_LOSE_CONTEXT_ON_RESET;
+
+            setEGLattrib(EGL_CONTEXT_OPENGL_ROBUST_ACCESS, EGL_TRUE);
+        }
+
+        if (strategy)
+            setEGLattrib(EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY, strategy);
+
+        if (ctxconfig->major != 1 || ctxconfig->minor != 0)
+        {
+            setEGLattrib(EGL_CONTEXT_MAJOR_VERSION, ctxconfig->major);
+            setEGLattrib(EGL_CONTEXT_MINOR_VERSION, ctxconfig->minor);
+        }
+
+        if (mask)
+            setEGLattrib(EGL_CONTEXT_OPENGL_PROFILE_MASK, mask);
+    }
+    else if (_glfw.egl.KHR_create_context)
     {
         int index = 0, mask = 0, flags = 0;
 

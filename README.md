@@ -79,6 +79,7 @@ GLFW bundles a number of dependencies in the `deps/` directory.
  - [GLX] Added dependency on `libdl` on systems where it provides `dlopen`
  - [GLX] Removed `_GLFW_HAS_GLXGETPROCADDRESS*` and `_GLFW_HAS_DLOPEN`
          compile-time options
+ - [EGL] Added support for EGL 1.5
 
 
 ## Contact
