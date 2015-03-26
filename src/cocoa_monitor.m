@@ -67,10 +67,17 @@ static char* getDisplayName(CGDirectDisplayID displayID)
     size = CFStringGetMaximumSizeForEncoding(CFStringGetLength(value),
                                              kCFStringEncodingUTF8);
     name = calloc(size + 1, sizeof(char));
+    if (!name)
+    {
+        _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
+
+        CFRelease(info);
+        return strdup("Unknown");
+    }
+
     CFStringGetCString(value, name, size, kCFStringEncodingUTF8);
 
     CFRelease(info);
-
     return name;
 }
 
@@ -252,8 +259,17 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
     *count = 0;
 
     CGGetOnlineDisplayList(0, NULL, &displayCount);
+
     displays = calloc(displayCount, sizeof(CGDirectDisplayID));
     monitors = calloc(displayCount, sizeof(_GLFWmonitor*));
+    if (!displays || !monitors)
+    {
+        _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
+
+        free(displays);
+        free(monitors);
+        return NULL;
+    }
 
     CGGetOnlineDisplayList(displayCount, displays, &displayCount);
     NSArray* screens = [NSScreen screens];
@@ -323,11 +339,19 @@ GLFWvidmode* _glfwPlatformGetVideoModes(_GLFWmonitor* monitor, int* count)
 
     *count = 0;
 
-    CVDisplayLinkCreateWithCGDisplay(monitor->ns.displayID, &link);
-
     modes = CGDisplayCopyAllDisplayModes(monitor->ns.displayID, NULL);
     found = CFArrayGetCount(modes);
+
     result = calloc(found, sizeof(GLFWvidmode));
+    if (!result)
+    {
+        _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
+
+        CFRelease(modes);
+        return NULL;
+    }
+
+    CVDisplayLinkCreateWithCGDisplay(monitor->ns.displayID, &link);
 
     for (i = 0;  i < found;  i++)
     {
@@ -373,7 +397,13 @@ void _glfwPlatformGetVideoMode(_GLFWmonitor* monitor, GLFWvidmode *mode)
 void _glfwPlatformGetGammaRamp(_GLFWmonitor* monitor, GLFWgammaramp* ramp)
 {
     uint32_t i, size = CGDisplayGammaTableCapacity(monitor->ns.displayID);
+
     CGGammaValue* values = calloc(size * 3, sizeof(CGGammaValue));
+    if (!values)
+    {
+        _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
+        return;
+    }
 
     CGGetDisplayTransferByTable(monitor->ns.displayID,
                                 size,
@@ -398,6 +428,11 @@ void _glfwPlatformSetGammaRamp(_GLFWmonitor* monitor, const GLFWgammaramp* ramp)
 {
     int i;
     CGGammaValue* values = calloc(ramp->size * 3, sizeof(CGGammaValue));
+    if (!values)
+    {
+        _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
+        return;
+    }
 
     for (i = 0;  i < ramp->size;  i++)
     {

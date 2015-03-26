@@ -613,6 +613,12 @@ static int translateKey(unsigned int key)
     {
         NSEnumerator* e = [files objectEnumerator];
         char** paths = calloc(count, sizeof(char*));
+        if (!paths)
+        {
+            _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
+            return NO;
+        }
+
         int i;
 
         for (i = 0;  i < count;  i++)

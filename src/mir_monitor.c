@@ -100,6 +100,11 @@ GLFWvidmode* _glfwPlatformGetVideoModes(_GLFWmonitor* monitor, int* found)
             continue;
 
         modes = calloc(out->num_modes, sizeof(GLFWvidmode));
+        if (!modes)
+        {
+            _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
+            break;
+        }
 
         for (*found = 0;  *found < out->num_modes;  (*found)++)
         {

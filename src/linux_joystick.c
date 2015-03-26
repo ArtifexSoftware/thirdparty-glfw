@@ -99,6 +99,11 @@ static void openJoystickDevice(const char* path)
 
     _glfw.linux_js.js[joy].axes = calloc(axisCount, sizeof(float));
     _glfw.linux_js.js[joy].buttons = calloc(buttonCount, 1);
+    if (!_glfw.linux_js.js[joy].axes || !_glfw.linux_js.js[joy].buttons)
+    {
+        _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
+        return;
+    }
 
     _glfw.linux_js.js[joy].present = GL_TRUE;
 #endif // __linux__
