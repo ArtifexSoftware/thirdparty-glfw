@@ -1,0 +1,15 @@
+language: c
+compiler: clang
+before_install:
+  - sudo apt-add-repository ppa:irie/cmake -y
+  - sudo apt-get update -q
+  - sudo apt-get install cmake xorg-dev libglu1-mesa-dev
+script:
+  - cmake .
+  - make
+notifications:
+  email:
+    recipients:
+      - dreda@glfw.org
+    on_success: never
+    on_failure: always
