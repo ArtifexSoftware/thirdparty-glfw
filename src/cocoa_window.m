@@ -935,10 +935,13 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
     if (!createWindow(window, wndconfig))
         return GL_FALSE;
 
-    if (!_glfwCreateContext(window, ctxconfig, fbconfig))
-        return GL_FALSE;
+    if (ctxconfig->api != GLFW_NO_API)
+    {
+        if (!_glfwCreateContext(window, ctxconfig, fbconfig))
+            return GL_FALSE;
 
-    [window->nsgl.context setView:window->ns.view];
+        [window->nsgl.context setView:window->ns.view];
+    }
 
     if (wndconfig->monitor)
     {
@@ -957,7 +960,8 @@ void _glfwPlatformDestroyWindow(_GLFWwindow* window)
     if (window->monitor)
         leaveFullscreenMode(window);
 
-    _glfwDestroyContext(window);
+    if (window->context.api != GLFW_NO_API)
+        _glfwDestroyContext(window);
 
     [window->ns.object setDelegate:nil];
     [window->ns.delegate release];

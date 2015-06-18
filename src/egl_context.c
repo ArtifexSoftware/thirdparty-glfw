@@ -112,12 +112,6 @@ static GLboolean chooseFBConfigs(const _GLFWctxconfig* ctxconfig,
         const EGLConfig n = nativeConfigs[i];
         _GLFWfbconfig* u = usableConfigs + usableCount;
 
-#if defined(_GLFW_X11)
-        // Only consider EGLConfigs with associated visuals
-        if (!getConfigAttrib(n, EGL_NATIVE_VISUAL_ID))
-            continue;
-#endif // _GLFW_X11
-
         // Only consider RGB(A) EGLConfigs
         if (!(getConfigAttrib(n, EGL_COLOR_BUFFER_TYPE) & EGL_RGB_BUFFER))
             continue;
@@ -311,55 +305,6 @@ int _glfwCreateContext(_GLFWwindow* window,
         return GL_FALSE;
     }
 
-#if defined(_GLFW_X11)
-    // Retrieve the visual corresponding to the chosen EGL config
-    {
-        EGLint count = 0;
-        int mask;
-        EGLint redBits, greenBits, blueBits, alphaBits, visualID = 0;
-        XVisualInfo info;
-
-        _glfw_eglGetConfigAttrib(_glfw.egl.display, config,
-                                 EGL_NATIVE_VISUAL_ID, &visualID);
-
-        info.screen = _glfw.x11.screen;
-        mask = VisualScreenMask;
-
-        if (visualID)
-        {
-            // The X window visual must match the EGL config
-            info.visualid = visualID;
-            mask |= VisualIDMask;
-        }
-        else
-        {
-            // Some EGL drivers do not implement the EGL_NATIVE_VISUAL_ID
-            // attribute, so attempt to find the closest match
-
-            _glfw_eglGetConfigAttrib(_glfw.egl.display, config,
-                                     EGL_RED_SIZE, &redBits);
-            _glfw_eglGetConfigAttrib(_glfw.egl.display, config,
-                                     EGL_GREEN_SIZE, &greenBits);
-            _glfw_eglGetConfigAttrib(_glfw.egl.display, config,
-                                     EGL_BLUE_SIZE, &blueBits);
-            _glfw_eglGetConfigAttrib(_glfw.egl.display, config,
-                                     EGL_ALPHA_SIZE, &alphaBits);
-
-            info.depth = redBits + greenBits + blueBits + alphaBits;
-            mask |= VisualDepthMask;
-        }
-
-        window->egl.visual = XGetVisualInfo(_glfw.x11.display,
-                                            mask, &info, &count);
-        if (!window->egl.visual)
-        {
-            _glfwInputError(GLFW_PLATFORM_ERROR,
-                            "EGL: Failed to retrieve visual for EGLConfig");
-            return GL_FALSE;
-        }
-    }
-#endif // _GLFW_X11
-
     if (ctxconfig->api == GLFW_OPENGL_ES_API)
     {
         if (!_glfw_eglBindAPI(EGL_OPENGL_ES_API))
@@ -453,6 +398,19 @@ int _glfwCreateContext(_GLFWwindow* window,
         return GL_FALSE;
     }
 
+    window->egl.surface =
+        _glfw_eglCreateWindowSurface(_glfw.egl.display,
+                                     config,
+                                     (EGLNativeWindowType)_GLFW_EGL_NATIVE_WINDOW,
+                                     NULL);
+    if (window->egl.surface == EGL_NO_SURFACE)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR,
+                        "EGL: Failed to create window surface: %s",
+                        getErrorString(_glfw_eglGetError()));
+        return GL_FALSE;
+    }
+
     window->egl.config = config;
 
     return GL_TRUE;
@@ -464,14 +422,6 @@ int _glfwCreateContext(_GLFWwindow* window,
 //
 void _glfwDestroyContext(_GLFWwindow* window)
 {
-#if defined(_GLFW_X11)
-    if (window->egl.visual)
-    {
-       XFree(window->egl.visual);
-       window->egl.visual = NULL;
-    }
-#endif // _GLFW_X11
-
     if (window->egl.surface)
     {
         _glfw_eglDestroySurface(_glfw.egl.display, window->egl.surface);
@@ -507,21 +457,6 @@ void _glfwPlatformMakeContextCurrent(_GLFWwindow* window)
 {
     if (window)
     {
-        if (window->egl.surface == EGL_NO_SURFACE)
-        {
-            window->egl.surface =
-                _glfw_eglCreateWindowSurface(_glfw.egl.display,
-                                             window->egl.config,
-                                             (EGLNativeWindowType)_GLFW_EGL_NATIVE_WINDOW,
-                                             NULL);
-            if (window->egl.surface == EGL_NO_SURFACE)
-            {
-                _glfwInputError(GLFW_PLATFORM_ERROR,
-                                "EGL: Failed to create window surface: %s",
-                                getErrorString(_glfw_eglGetError()));
-            }
-        }
-
         _glfw_eglMakeCurrent(_glfw.egl.display,
                              window->egl.surface,
                              window->egl.surface,

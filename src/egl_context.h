@@ -93,10 +93,6 @@ typedef struct _GLFWcontextEGL
    EGLContext       context;
    EGLSurface       surface;
 
-#if defined(_GLFW_X11)
-   XVisualInfo*     visual;
-#endif
-
 } _GLFWcontextEGL;
 
 

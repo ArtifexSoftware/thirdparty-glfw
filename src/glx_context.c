@@ -79,10 +79,6 @@ static GLboolean chooseFBConfig(const _GLFWfbconfig* desired, GLXFBConfig* resul
         const GLXFBConfig n = nativeConfigs[i];
         _GLFWfbconfig* u = usableConfigs + usableCount;
 
-        // Only consider GLXFBConfigs with associated visuals
-        if (!getFBConfigAttrib(n, GLX_VISUAL_ID))
-            continue;
-
         // Only consider RGBA GLXFBConfigs
         if (!(getFBConfigAttrib(n, GLX_RENDER_TYPE) & GLX_RGBA_BIT))
             continue;
@@ -192,8 +188,6 @@ int _glfwInitContextAPI(void)
         dlsym(_glfw.glx.handle, "glXQueryExtensionsString");
     _glfw.glx.CreateNewContext =
         dlsym(_glfw.glx.handle, "glXCreateNewContext");
-    _glfw.glx.GetVisualFromFBConfig =
-        dlsym(_glfw.glx.handle, "glXGetVisualFromFBConfig");
     _glfw.glx.GetProcAddress =
         dlsym(_glfw.glx.handle, "glXGetProcAddress");
     _glfw.glx.GetProcAddressARB =
@@ -323,15 +317,6 @@ int _glfwCreateContext(_GLFWwindow* window,
     {
         _glfwInputError(GLFW_PLATFORM_ERROR,
                         "GLX: Failed to find a suitable GLXFBConfig");
-        return GL_FALSE;
-    }
-
-    window->glx.visual = _glfw_glXGetVisualFromFBConfig(_glfw.x11.display,
-                                                        native);
-    if (!window->glx.visual)
-    {
-        _glfwInputError(GLFW_PLATFORM_ERROR,
-                        "GLX: Failed to retrieve visual for GLXFBConfig");
         return GL_FALSE;
     }
 
@@ -485,12 +470,6 @@ int _glfwCreateContext(_GLFWwindow* window,
 //
 void _glfwDestroyContext(_GLFWwindow* window)
 {
-    if (window->glx.visual)
-    {
-        XFree(window->glx.visual);
-        window->glx.visual = NULL;
-    }
-
     if (window->glx.context)
     {
         _glfw_glXDestroyContext(_glfw.x11.display, window->glx.context);

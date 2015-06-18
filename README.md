@@ -61,6 +61,8 @@ GLFW bundles a number of dependencies in the `deps/` directory.
 
 ## Changelog
 
+ - Added `GLFW_NO_API`
+
 
 ## Contact
 

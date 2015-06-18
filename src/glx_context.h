@@ -56,7 +56,6 @@ typedef const char* (*PFNGLXQUERYEXTENSIONSSTRINGPROC)(Display*,int);
 #define _glfw_glXSwapBuffers _glfw.glx.SwapBuffers
 #define _glfw_glXQueryExtensionsString _glfw.glx.QueryExtensionsString
 #define _glfw_glXCreateNewContext _glfw.glx.CreateNewContext
-#define _glfw_glXGetVisualFromFBConfig _glfw.glx.GetVisualFromFBConfig
 
 #define _GLFW_PLATFORM_FBCONFIG                 GLXFBConfig     glx
 #define _GLFW_PLATFORM_CONTEXT_STATE            _GLFWcontextGLX glx
@@ -71,10 +70,7 @@ typedef int (*PFNGLXSWAPINTERVALMESAPROC)(int);
 //
 typedef struct _GLFWcontextGLX
 {
-    // Rendering context
     GLXContext      context;
-    // Visual of selected GLXFBConfig
-    XVisualInfo*    visual;
 
 } _GLFWcontextGLX;
 
@@ -101,7 +97,6 @@ typedef struct _GLFWlibraryGLX
     PFNGLXSWAPBUFFERSPROC               SwapBuffers;
     PFNGLXQUERYEXTENSIONSSTRINGPROC     QueryExtensionsString;
     PFNGLXCREATENEWCONTEXTPROC          CreateNewContext;
-    PFNGLXGETVISUALFROMFBCONFIGPROC     GetVisualFromFBConfig;
 
     // GLX 1.4 and extension functions
     PFNGLXGETPROCADDRESSPROC            GetProcAddress;

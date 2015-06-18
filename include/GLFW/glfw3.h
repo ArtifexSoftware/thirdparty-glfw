@@ -587,6 +587,7 @@ extern "C" {
  *  the user, as appropriate.
  */
 #define GLFW_FORMAT_UNAVAILABLE     0x00010009
+#define GLFW_NO_CONTEXT             0x0001000A
 /*! @} */
 
 #define GLFW_FOCUSED                0x00020001
@@ -624,6 +625,7 @@ extern "C" {
 #define GLFW_OPENGL_PROFILE         0x00022008
 #define GLFW_CONTEXT_RELEASE_BEHAVIOR 0x00022009
 
+#define GLFW_NO_API                          0
 #define GLFW_OPENGL_API             0x00030001
 #define GLFW_OPENGL_ES_API          0x00030002
 
