@@ -388,6 +388,8 @@ extern "C" {
 #define GLFW_KEY_RIGHT_ALT          346
 #define GLFW_KEY_RIGHT_SUPER        347
 #define GLFW_KEY_MENU               348
+
+#define GLFW_KEY_FIRST              GLFW_KEY_SPACE
 #define GLFW_KEY_LAST               GLFW_KEY_MENU
 
 /*! @} */
@@ -2524,6 +2526,28 @@ GLFWAPI int glfwGetInputMode(GLFWwindow* window, int mode);
  *  @ingroup input
  */
 GLFWAPI void glfwSetInputMode(GLFWwindow* window, int mode, int value);
+
+/*! @brief Returns the localized name of the specified printable key.
+ *
+ *  This function returns the localized name of the specified printable key.
+ *
+ *  If the key is `GLFW_KEY_UNKNOWN`, the scancode is used, otherwise the
+ *  scancode is ignored.
+ *
+ *  @param[in] key The key to query, or `GLFW_KEY_UNKNOWN`.
+ *  @param[in] scancode The scancode of the key to query.
+ *  @return The localized name of the key.
+ *
+ *  @par Thread Safety
+ *  This function may only be called from the main thread.
+ *
+ *  @sa @ref input_key_name
+ *
+ *  @since Added in GLFW 3.2.
+ *
+ *  @ingroup input
+ */
+GLFWAPI const char* glfwGetKeyName(int key, int scancode);
 
 /*! @brief Returns the last reported state of a keyboard key for the specified
  *  window.

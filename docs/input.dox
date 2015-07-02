@@ -192,6 +192,11 @@ void charmods_callback(GLFWwindow* window, unsigned int codepoint, int mods)
 @endcode
 
 
+@subsection input_key_name
+
+Lombardo.
+
+
 @section input_mouse Mouse input
 
 Mouse input comes in many forms, including cursor motion, button presses and

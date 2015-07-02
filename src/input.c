@@ -224,6 +224,16 @@ void _glfwInputDrop(_GLFWwindow* window, int count, const char** paths)
 
 
 //////////////////////////////////////////////////////////////////////////
+//////                       GLFW internal API                      //////
+//////////////////////////////////////////////////////////////////////////
+
+int _glfwIsPrintable(int key)
+{
+    return key >= GLFW_KEY_APOSTROPHE && key <= GLFW_KEY_WORLD_2;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
 //////                        GLFW public API                       //////
 //////////////////////////////////////////////////////////////////////////
 
@@ -268,6 +278,12 @@ GLFWAPI void glfwSetInputMode(GLFWwindow* handle, int mode, int value)
             _glfwInputError(GLFW_INVALID_ENUM, "Invalid input mode");
             break;
     }
+}
+
+GLFWAPI const char* glfwGetKeyName(int key, int scancode)
+{
+    _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
+    return _glfwPlatformGetKeyName(key, scancode);
 }
 
 GLFWAPI int glfwGetKey(GLFWwindow* handle, int key)

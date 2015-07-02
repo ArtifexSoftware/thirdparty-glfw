@@ -17,6 +17,12 @@ GLFW now supports switching windows between windowed and full screen mode with
 windows between monitors.
 
 
+@subsection news_32_keyname Localized key names
+
+GLFW now supports querying the localized name of printable keys with @ref
+glfwGetKeyName, either by key token or by scancode.
+
+
 @section news_31 New features in 3.1
 
 These are the release highlights.  For a full list of changes see the
