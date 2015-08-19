@@ -41,6 +41,51 @@
 #endif
 
 
+typedef struct
+{
+    WCHAR deviceName[32];
+    int widthMM;
+    int heightMM;
+} _GLFWmonitorsize;
+
+typedef struct
+{
+    _GLFWmonitorsize* entries;
+    int count;
+} _GLFWmonitorsizelist;
+
+
+// Recieves monitors from EnumDisplayMonitors
+//
+static BOOL CALLBACK monitorEnumProc(HMONITOR handle,
+                                     HDC dc,
+                                     RECT* rect,
+                                     LPARAM data)
+{
+    MONITORINFOEXW mi;
+    ZeroMemory(&mi, sizeof(mi));
+    mi.cbSize = sizeof(mi);
+
+    if (GetMonitorInfoW(handle, (MONITORINFO*) &mi))
+    {
+        UINT dpiX, dpiY;
+        _GLFWmonitorsizelist* sizes = (_GLFWmonitorsizelist*) data;
+
+        if (_glfw_GetDpiForMonitor(handle, MDT_RAW_DPI, &dpiX, &dpiY) == S_OK)
+        {
+            wcscpy(sizes->entries[sizes->count].deviceName, mi.szDevice);
+            sizes->entries[sizes->count].widthMM =
+                (rect->right - rect->left) * 25.4f / dpiX;
+            sizes->entries[sizes->count].heightMM =
+                (rect->bottom - rect->top) * 25.4f / dpiY;
+            sizes->count++;
+        }
+    }
+
+    return TRUE;
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 //////                       GLFW internal API                      //////
 //////////////////////////////////////////////////////////////////////////
@@ -105,12 +150,21 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
 {
     int found = 0;
     _GLFWmonitor** monitors = NULL;
+    _GLFWmonitorsizelist sizes = { NULL, 0 };
     DWORD adapterIndex, displayIndex;
 
     *count = 0;
 
+    if (_glfw_GetDpiForMonitor)
+    {
+        const int count = GetSystemMetrics(SM_CMONITORS);
+        sizes.entries = calloc(count, sizeof(_GLFWmonitorsize));
+        EnumDisplayMonitors(NULL, NULL, monitorEnumProc, (LPARAM) &sizes);
+    }
+
     for (adapterIndex = 0;  ;  adapterIndex++)
     {
+        int i, widthMM, heightMM;
         DISPLAY_DEVICEW adapter;
 
         ZeroMemory(&adapter, sizeof(DISPLAY_DEVICEW));
@@ -122,12 +176,29 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
         if (!(adapter.StateFlags & DISPLAY_DEVICE_ACTIVE))
             continue;
 
+        for (i = 0;  i < sizes.count;  i++)
+        {
+            if (wcscmp(sizes.entries[i].deviceName, adapter.DeviceName) == 0)
+            {
+                widthMM  = sizes.entries[i].widthMM;
+                heightMM = sizes.entries[i].heightMM;
+                break;
+            }
+        }
+
+        if (i == sizes.count)
+        {
+            HDC dc = CreateDCW(L"DISPLAY", adapter.DeviceName, NULL, NULL);
+            widthMM  = GetDeviceCaps(dc, HORZSIZE);
+            heightMM = GetDeviceCaps(dc, VERTSIZE);
+            DeleteDC(dc);
+        }
+
         for (displayIndex = 0;  ;  displayIndex++)
         {
             DISPLAY_DEVICEW display;
             _GLFWmonitor* monitor;
             char* name;
-            HDC dc;
 
             ZeroMemory(&display, sizeof(DISPLAY_DEVICEW));
             display.cb = sizeof(DISPLAY_DEVICEW);
@@ -143,13 +214,8 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
                 continue;
             }
 
-            dc = CreateDCW(L"DISPLAY", adapter.DeviceName, NULL, NULL);
+            monitor = _glfwAllocMonitor(name, widthMM, heightMM);
 
-            monitor = _glfwAllocMonitor(name,
-                                        GetDeviceCaps(dc, HORZSIZE),
-                                        GetDeviceCaps(dc, VERTSIZE));
-
-            DeleteDC(dc);
             free(name);
 
             if (adapter.StateFlags & DISPLAY_DEVICE_MODESPRUNED)
@@ -181,6 +247,9 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
             }
         }
     }
+
+    if (_glfw_GetDpiForMonitor)
+        free(sizes.entries);
 
     *count = found;
     return monitors;
