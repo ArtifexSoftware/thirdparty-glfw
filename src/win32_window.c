@@ -647,9 +647,7 @@ static void getFullWindowSize(_GLFWwindow* window,
 
 // Creates the GLFW window and rendering context
 //
-static int createWindow(_GLFWwindow* window,
-                        const _GLFWwndconfig* wndconfig,
-                        const _GLFWfbconfig* fbconfig)
+static int createWindow(_GLFWwindow* window, const _GLFWwndconfig* wndconfig)
 {
     int xpos, ypos, fullWidth, fullHeight;
     WCHAR* wideTitle;
@@ -795,7 +793,7 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
 {
     int status;
 
-    if (!createWindow(window, wndconfig, fbconfig))
+    if (!createWindow(window, wndconfig))
         return GL_FALSE;
 
     if (ctxconfig->api != GLFW_NO_API)
@@ -837,7 +835,7 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
             destroyWindow(window);
 
             // ...and then create them again, this time with better APIs
-            if (!createWindow(window, wndconfig, fbconfig))
+            if (!createWindow(window, wndconfig))
                 return GL_FALSE;
             if (!_glfwCreateContext(window, ctxconfig, fbconfig))
                 return GL_FALSE;
