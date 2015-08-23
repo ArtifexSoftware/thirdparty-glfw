@@ -796,12 +796,12 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
     if (!createWindow(window, wndconfig))
         return GLFW_FALSE;
 
-    if (ctxconfig->api != GLFW_NO_API)
+    if (window->context)
     {
         if (!_glfwCreateContext(window, ctxconfig, fbconfig))
             return GLFW_FALSE;
 
-        status = _glfwAnalyzeContext(window, ctxconfig, fbconfig);
+        status = _glfwAnalyzeContext(window->context, ctxconfig, fbconfig);
 
         if (status == _GLFW_RECREATION_IMPOSSIBLE)
             return GLFW_FALSE;
@@ -857,7 +857,7 @@ void _glfwPlatformDestroyWindow(_GLFWwindow* window)
     if (window->monitor)
         leaveFullscreenMode(window);
 
-    if (window->context.api != GLFW_NO_API)
+    if (window->context)
         _glfwDestroyContext(window);
 
     destroyWindow(window);

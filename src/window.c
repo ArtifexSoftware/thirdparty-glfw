@@ -140,7 +140,15 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
     wndconfig.height  = height;
     wndconfig.title   = title;
     wndconfig.monitor = (_GLFWmonitor*) monitor;
-    ctxconfig.share   = (_GLFWwindow*) share;
+
+    if (share)
+    {
+        _GLFWwindow* sw = (_GLFWwindow*) share;
+        if (!sw->context)
+            _glfwInputError(GLFW_NO_CONTEXT, NULL);
+
+        ctxconfig.share = sw->context;
+    }
 
     if (wndconfig.monitor)
     {
@@ -156,6 +164,9 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
     window = calloc(1, sizeof(_GLFWwindow));
     window->next = _glfw.windowListHead;
     _glfw.windowListHead = window;
+
+    if (ctxconfig.api != GLFW_NO_API)
+        window->context = calloc(1, sizeof(_GLFWcontext));
 
     window->videoMode.width       = width;
     window->videoMode.height      = height;
@@ -182,7 +193,7 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
         return NULL;
     }
 
-    if (ctxconfig.api != GLFW_NO_API)
+    if (window->context)
     {
         _glfwPlatformMakeContextCurrent(window);
 
@@ -398,6 +409,7 @@ GLFWAPI void glfwDestroyWindow(GLFWwindow* handle)
         *prev = window->next;
     }
 
+    free(window->context);
     free(window);
 }
 
@@ -570,23 +582,23 @@ GLFWAPI int glfwGetWindowAttrib(GLFWwindow* handle, int attrib)
         case GLFW_FLOATING:
             return window->floating;
         case GLFW_CLIENT_API:
-            return window->context.api;
+            return window->context->api;
         case GLFW_CONTEXT_VERSION_MAJOR:
-            return window->context.major;
+            return window->context->major;
         case GLFW_CONTEXT_VERSION_MINOR:
-            return window->context.minor;
+            return window->context->minor;
         case GLFW_CONTEXT_REVISION:
-            return window->context.revision;
+            return window->context->revision;
         case GLFW_CONTEXT_ROBUSTNESS:
-            return window->context.robustness;
+            return window->context->robustness;
         case GLFW_OPENGL_FORWARD_COMPAT:
-            return window->context.forward;
+            return window->context->forward;
         case GLFW_OPENGL_DEBUG_CONTEXT:
-            return window->context.debug;
+            return window->context->debug;
         case GLFW_OPENGL_PROFILE:
-            return window->context.profile;
+            return window->context->profile;
         case GLFW_CONTEXT_RELEASE_BEHAVIOR:
-            return window->context.release;
+            return window->context->release;
     }
 
     _glfwInputError(GLFW_INVALID_ENUM, "Invalid window attribute");

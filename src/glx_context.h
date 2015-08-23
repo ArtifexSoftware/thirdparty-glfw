@@ -70,7 +70,7 @@ typedef int (*PFNGLXSWAPINTERVALMESAPROC)(int);
 //
 typedef struct _GLFWcontextGLX
 {
-    GLXContext      context;
+    GLXContext      handle;
 
 } _GLFWcontextGLX;
 

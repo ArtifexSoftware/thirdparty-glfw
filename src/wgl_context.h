@@ -55,7 +55,7 @@ typedef BOOL (WINAPI * WGLSHARELISTS_T)(HGLRC,HGLRC);
 typedef struct _GLFWcontextWGL
 {
     HDC       dc;              // Private GDI device context
-    HGLRC     context;         // Permanent rendering context
+    HGLRC     handle;          // Permanent rendering context
     int       interval;
 
     // WGL extensions (context specific)
@@ -100,7 +100,7 @@ int _glfwCreateContext(_GLFWwindow* window,
                        const _GLFWctxconfig* ctxconfig,
                        const _GLFWfbconfig* fbconfig);
 void _glfwDestroyContext(_GLFWwindow* window);
-int _glfwAnalyzeContext(const _GLFWwindow* window,
+int _glfwAnalyzeContext(const _GLFWcontext* context,
                         const _GLFWctxconfig* ctxconfig,
                         const _GLFWfbconfig* fbconfig);
 

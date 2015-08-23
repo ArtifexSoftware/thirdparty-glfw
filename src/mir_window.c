@@ -462,8 +462,11 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
                               const _GLFWctxconfig* ctxconfig,
                               const _GLFWfbconfig* fbconfig)
 {
-    if (!_glfwCreateContext(window, ctxconfig, fbconfig))
-        return GLFW_FALSE;
+    if (window->context)
+    {
+        if (!_glfwCreateContext(window, ctxconfig, fbconfig))
+            return GLFW_FALSE;
+    }
 
     if (wndconfig->monitor)
     {
@@ -502,7 +505,8 @@ void _glfwPlatformDestroyWindow(_GLFWwindow* window)
         window->mir.surface = NULL;
     }
 
-    _glfwDestroyContext(window);
+    if (window->context)
+        _glfwDestroyContext(window);
 }
 
 void _glfwPlatformSetWindowTitle(_GLFWwindow* window, const char* title)

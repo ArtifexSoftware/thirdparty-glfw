@@ -90,7 +90,7 @@ typedef GLFWglproc (EGLAPIENTRY * PFNEGLGETPROCADDRESSPROC)(const char*);
 typedef struct _GLFWcontextEGL
 {
    EGLConfig        config;
-   EGLContext       context;
+   EGLContext       handle;
    EGLSurface       surface;
 
 } _GLFWcontextEGL;
@@ -133,7 +133,7 @@ int _glfwCreateContext(_GLFWwindow* window,
                        const _GLFWctxconfig* ctxconfig,
                        const _GLFWfbconfig* fbconfig);
 void _glfwDestroyContext(_GLFWwindow* window);
-int _glfwAnalyzeContext(const _GLFWwindow* window,
+int _glfwAnalyzeContext(const _GLFWcontext* context,
                         const _GLFWctxconfig* ctxconfig,
                         const _GLFWfbconfig* fbconfig);
 

@@ -294,9 +294,10 @@ int _glfwCreateContext(_GLFWwindow* window,
     int attribs[40];
     EGLConfig config;
     EGLContext share = NULL;
+    _GLFWcontext* context = window->context;
 
     if (ctxconfig->share)
-        share = ctxconfig->share->egl.context;
+        share = ctxconfig->share->egl.handle;
 
     if (!chooseFBConfigs(ctxconfig, fbconfig, &config))
     {
@@ -387,10 +388,10 @@ int _glfwCreateContext(_GLFWwindow* window,
     // Context release behaviors (GL_KHR_context_flush_control) are not yet
     // supported on EGL but are not a hard constraint, so ignore and continue
 
-    window->egl.context = _glfw_eglCreateContext(_glfw.egl.display,
+    context->egl.handle = _glfw_eglCreateContext(_glfw.egl.display,
                                                  config, share, attribs);
 
-    if (window->egl.context == EGL_NO_CONTEXT)
+    if (context->egl.handle == EGL_NO_CONTEXT)
     {
         _glfwInputError(GLFW_VERSION_UNAVAILABLE,
                         "EGL: Failed to create context: %s",
@@ -398,12 +399,12 @@ int _glfwCreateContext(_GLFWwindow* window,
         return GLFW_FALSE;
     }
 
-    window->egl.surface =
+    context->egl.surface =
         _glfw_eglCreateWindowSurface(_glfw.egl.display,
                                      config,
                                      (EGLNativeWindowType)_GLFW_EGL_NATIVE_WINDOW,
                                      NULL);
-    if (window->egl.surface == EGL_NO_SURFACE)
+    if (context->egl.surface == EGL_NO_SURFACE)
     {
         _glfwInputError(GLFW_PLATFORM_ERROR,
                         "EGL: Failed to create window surface: %s",
@@ -411,7 +412,7 @@ int _glfwCreateContext(_GLFWwindow* window,
         return GLFW_FALSE;
     }
 
-    window->egl.config = config;
+    context->egl.config = config;
 
     return GLFW_TRUE;
 }
@@ -422,22 +423,24 @@ int _glfwCreateContext(_GLFWwindow* window,
 //
 void _glfwDestroyContext(_GLFWwindow* window)
 {
-    if (window->egl.surface)
+    _GLFWcontext* context = window->context;
+
+    if (context->egl.surface)
     {
-        _glfw_eglDestroySurface(_glfw.egl.display, window->egl.surface);
-        window->egl.surface = EGL_NO_SURFACE;
+        _glfw_eglDestroySurface(_glfw.egl.display, context->egl.surface);
+        context->egl.surface = EGL_NO_SURFACE;
     }
 
-    if (window->egl.context)
+    if (context->egl.handle)
     {
-        _glfw_eglDestroyContext(_glfw.egl.display, window->egl.context);
-        window->egl.context = EGL_NO_CONTEXT;
+        _glfw_eglDestroyContext(_glfw.egl.display, context->egl.handle);
+        context->egl.handle = EGL_NO_CONTEXT;
     }
 }
 
 // Analyzes the specified context for possible recreation
 //
-int _glfwAnalyzeContext(const _GLFWwindow* window,
+int _glfwAnalyzeContext(const _GLFWcontext* context,
                         const _GLFWctxconfig* ctxconfig,
                         const _GLFWfbconfig* fbconfig)
 {
@@ -458,9 +461,9 @@ void _glfwPlatformMakeContextCurrent(_GLFWwindow* window)
     if (window)
     {
         _glfw_eglMakeCurrent(_glfw.egl.display,
-                             window->egl.surface,
-                             window->egl.surface,
-                             window->egl.context);
+                             window->context->egl.surface,
+                             window->context->egl.surface,
+                             window->context->egl.handle);
     }
     else
     {
@@ -475,7 +478,7 @@ void _glfwPlatformMakeContextCurrent(_GLFWwindow* window)
 
 void _glfwPlatformSwapBuffers(_GLFWwindow* window)
 {
-    _glfw_eglSwapBuffers(_glfw.egl.display, window->egl.surface);
+    _glfw_eglSwapBuffers(_glfw.egl.display, window->context->egl.surface);
 }
 
 void _glfwPlatformSwapInterval(int interval)
@@ -515,14 +518,30 @@ GLFWAPI EGLDisplay glfwGetEGLDisplay(void)
 GLFWAPI EGLContext glfwGetEGLContext(GLFWwindow* handle)
 {
     _GLFWwindow* window = (_GLFWwindow*) handle;
+
     _GLFW_REQUIRE_INIT_OR_RETURN(EGL_NO_CONTEXT);
-    return window->egl.context;
+
+    if (!window->context)
+    {
+        _glfwInputError(GLFW_NO_CONTEXT, NULL);
+        return NULL;
+    }
+
+    return window->context->egl.handle;
 }
 
 GLFWAPI EGLSurface glfwGetEGLSurface(GLFWwindow* handle)
 {
     _GLFWwindow* window = (_GLFWwindow*) handle;
+
     _GLFW_REQUIRE_INIT_OR_RETURN(EGL_NO_SURFACE);
-    return window->egl.surface;
+
+    if (!window->context)
+    {
+        _glfwInputError(GLFW_NO_CONTEXT, NULL);
+        return NULL;
+    }
+
+    return window->context->egl.surface;
 }
 

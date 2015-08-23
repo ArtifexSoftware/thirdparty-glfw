@@ -52,7 +52,7 @@ static int parseVersionString(int* api, int* major, int* minor, int* rev)
 
     window = _glfwPlatformGetCurrentContext();
 
-    version = (const char*) window->GetString(GL_VERSION);
+    version = (const char*) window->context->GetString(GL_VERSION);
     if (!version)
     {
         _glfwInputError(GLFW_PLATFORM_ERROR,
@@ -355,28 +355,29 @@ const _GLFWfbconfig* _glfwChooseFBConfig(const _GLFWfbconfig* desired,
 int _glfwRefreshContextAttribs(const _GLFWctxconfig* ctxconfig)
 {
     _GLFWwindow* window = _glfwPlatformGetCurrentContext();
+    _GLFWcontext* context = window->context;
 
-    window->GetIntegerv = (PFNGLGETINTEGERVPROC) glfwGetProcAddress("glGetIntegerv");
-    window->GetString = (PFNGLGETSTRINGPROC) glfwGetProcAddress("glGetString");
-    window->Clear = (PFNGLCLEARPROC) glfwGetProcAddress("glClear");
+    context->GetIntegerv = (PFNGLGETINTEGERVPROC) glfwGetProcAddress("glGetIntegerv");
+    context->GetString = (PFNGLGETSTRINGPROC) glfwGetProcAddress("glGetString");
+    context->Clear = (PFNGLCLEARPROC) glfwGetProcAddress("glClear");
 
-    if (!parseVersionString(&window->context.api,
-                            &window->context.major,
-                            &window->context.minor,
-                            &window->context.revision))
+    if (!parseVersionString(&context->api,
+                            &context->major,
+                            &context->minor,
+                            &context->revision))
     {
         return GLFW_FALSE;
     }
 
 #if defined(_GLFW_USE_OPENGL)
-    if (window->context.major > 2)
+    if (context->major > 2)
     {
         // OpenGL 3.0+ uses a different function for extension string retrieval
         // We cache it here instead of in glfwExtensionSupported mostly to alert
         // users as early as possible that their build may be broken
 
-        window->GetStringi = (PFNGLGETSTRINGIPROC) glfwGetProcAddress("glGetStringi");
-        if (!window->GetStringi)
+        context->GetStringi = (PFNGLGETSTRINGIPROC) glfwGetProcAddress("glGetStringi");
+        if (!context->GetStringi)
         {
             _glfwInputError(GLFW_PLATFORM_ERROR,
                             "Entry point retrieval is broken");
@@ -384,47 +385,46 @@ int _glfwRefreshContextAttribs(const _GLFWctxconfig* ctxconfig)
         }
     }
 
-    if (window->context.api == GLFW_OPENGL_API)
+    if (context->api == GLFW_OPENGL_API)
     {
         // Read back context flags (OpenGL 3.0 and above)
-        if (window->context.major >= 3)
+        if (context->major >= 3)
         {
             GLint flags;
-            window->GetIntegerv(GL_CONTEXT_FLAGS, &flags);
+            context->GetIntegerv(GL_CONTEXT_FLAGS, &flags);
 
             if (flags & GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT)
-                window->context.forward = GLFW_TRUE;
+                context->forward = GLFW_TRUE;
 
             if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-                window->context.debug = GLFW_TRUE;
+                context->debug = GLFW_TRUE;
             else if (glfwExtensionSupported("GL_ARB_debug_output") &&
                      ctxconfig->debug)
             {
                 // HACK: This is a workaround for older drivers (pre KHR_debug)
                 //       not setting the debug bit in the context flags for
                 //       debug contexts
-                window->context.debug = GLFW_TRUE;
+                context->debug = GLFW_TRUE;
             }
         }
 
         // Read back OpenGL context profile (OpenGL 3.2 and above)
-        if (window->context.major > 3 ||
-            (window->context.major == 3 && window->context.minor >= 2))
+        if (context->major > 3 || (context->major == 3 && context->minor >= 2))
         {
             GLint mask;
-            window->GetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
+            context->GetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
 
             if (mask & GL_CONTEXT_COMPATIBILITY_PROFILE_BIT)
-                window->context.profile = GLFW_OPENGL_COMPAT_PROFILE;
+                context->profile = GLFW_OPENGL_COMPAT_PROFILE;
             else if (mask & GL_CONTEXT_CORE_PROFILE_BIT)
-                window->context.profile = GLFW_OPENGL_CORE_PROFILE;
+                context->profile = GLFW_OPENGL_CORE_PROFILE;
             else if (glfwExtensionSupported("GL_ARB_compatibility"))
             {
                 // HACK: This is a workaround for the compatibility profile bit
                 //       not being set in the context flags if an OpenGL 3.2+
                 //       context was created without having requested a specific
                 //       version
-                window->context.profile = GLFW_OPENGL_COMPAT_PROFILE;
+                context->profile = GLFW_OPENGL_COMPAT_PROFILE;
             }
         }
 
@@ -435,12 +435,12 @@ int _glfwRefreshContextAttribs(const _GLFWctxconfig* ctxconfig)
             //       only present from 3.0 while the extension applies from 1.1
 
             GLint strategy;
-            window->GetIntegerv(GL_RESET_NOTIFICATION_STRATEGY_ARB, &strategy);
+            context->GetIntegerv(GL_RESET_NOTIFICATION_STRATEGY_ARB, &strategy);
 
             if (strategy == GL_LOSE_CONTEXT_ON_RESET_ARB)
-                window->context.robustness = GLFW_LOSE_CONTEXT_ON_RESET;
+                context->robustness = GLFW_LOSE_CONTEXT_ON_RESET;
             else if (strategy == GL_NO_RESET_NOTIFICATION_ARB)
-                window->context.robustness = GLFW_NO_RESET_NOTIFICATION;
+                context->robustness = GLFW_NO_RESET_NOTIFICATION;
         }
     }
     else
@@ -452,30 +452,30 @@ int _glfwRefreshContextAttribs(const _GLFWctxconfig* ctxconfig)
             //       one, so we can reuse them here
 
             GLint strategy;
-            window->GetIntegerv(GL_RESET_NOTIFICATION_STRATEGY_ARB, &strategy);
+            context->GetIntegerv(GL_RESET_NOTIFICATION_STRATEGY_ARB, &strategy);
 
             if (strategy == GL_LOSE_CONTEXT_ON_RESET_ARB)
-                window->context.robustness = GLFW_LOSE_CONTEXT_ON_RESET;
+                context->robustness = GLFW_LOSE_CONTEXT_ON_RESET;
             else if (strategy == GL_NO_RESET_NOTIFICATION_ARB)
-                window->context.robustness = GLFW_NO_RESET_NOTIFICATION;
+                context->robustness = GLFW_NO_RESET_NOTIFICATION;
         }
     }
 
     if (glfwExtensionSupported("GL_KHR_context_flush_control"))
     {
         GLint behavior;
-        window->GetIntegerv(GL_CONTEXT_RELEASE_BEHAVIOR, &behavior);
+        context->GetIntegerv(GL_CONTEXT_RELEASE_BEHAVIOR, &behavior);
 
         if (behavior == GL_NONE)
-            window->context.release = GLFW_RELEASE_BEHAVIOR_NONE;
+            context->release = GLFW_RELEASE_BEHAVIOR_NONE;
         else if (behavior == GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH)
-            window->context.release = GLFW_RELEASE_BEHAVIOR_FLUSH;
+            context->release = GLFW_RELEASE_BEHAVIOR_FLUSH;
     }
 #endif // _GLFW_USE_OPENGL
 
     // Clearing the front buffer to black to avoid garbage pixels
     // left over from previous uses of our bit of VRAM
-    window->Clear(GL_COLOR_BUFFER_BIT);
+    context->Clear(GL_COLOR_BUFFER_BIT);
     _glfwPlatformSwapBuffers(window);
 
     return GLFW_TRUE;
@@ -485,9 +485,9 @@ int _glfwIsValidContext(const _GLFWctxconfig* ctxconfig)
 {
     _GLFWwindow* window = _glfwPlatformGetCurrentContext();
 
-    if (window->context.major < ctxconfig->major ||
-        (window->context.major == ctxconfig->major &&
-         window->context.minor < ctxconfig->minor))
+    if (window->context->major < ctxconfig->major ||
+        (window->context->major == ctxconfig->major &&
+         window->context->minor < ctxconfig->minor))
     {
         // The desired OpenGL version is greater than the actual version
         // This only happens if the machine lacks {GLX|WGL}_ARB_create_context
@@ -540,7 +540,7 @@ GLFWAPI void glfwMakeContextCurrent(GLFWwindow* handle)
 
     _GLFW_REQUIRE_INIT();
 
-    if (window->context.api == GLFW_NO_API)
+    if (!window->context)
     {
         _glfwInputError(GLFW_NO_CONTEXT, NULL);
         return;
@@ -561,7 +561,7 @@ GLFWAPI void glfwSwapBuffers(GLFWwindow* handle)
 
     _GLFW_REQUIRE_INIT();
 
-    if (window->context.api == GLFW_NO_API)
+    if (!window->context)
     {
         _glfwInputError(GLFW_NO_CONTEXT, NULL);
         return;
@@ -603,18 +603,19 @@ GLFWAPI int glfwExtensionSupported(const char* extension)
     }
 
 #if defined(_GLFW_USE_OPENGL)
-    if (window->context.major >= 3)
+    if (window->context->major >= 3)
     {
         int i;
         GLint count;
 
         // Check if extension is in the modern OpenGL extensions string list
 
-        window->GetIntegerv(GL_NUM_EXTENSIONS, &count);
+        window->context->GetIntegerv(GL_NUM_EXTENSIONS, &count);
 
         for (i = 0;  i < count;  i++)
         {
-            const char* en = (const char*) window->GetStringi(GL_EXTENSIONS, i);
+            const char* en = (const char*)
+                window->context->GetStringi(GL_EXTENSIONS, i);
             if (!en)
             {
                 _glfwInputError(GLFW_PLATFORM_ERROR,
@@ -631,7 +632,8 @@ GLFWAPI int glfwExtensionSupported(const char* extension)
     {
         // Check if extension is in the old style OpenGL extensions string
 
-        const char* extensions = (const char*) window->GetString(GL_EXTENSIONS);
+        const char* extensions = (const char*)
+            window->context->GetString(GL_EXTENSIONS);
         if (!extensions)
         {
             _glfwInputError(GLFW_PLATFORM_ERROR,

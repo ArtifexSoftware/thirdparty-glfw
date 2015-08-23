@@ -215,8 +215,11 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
                               const _GLFWctxconfig* ctxconfig,
                               const _GLFWfbconfig* fbconfig)
 {
-    if (!_glfwCreateContext(window, ctxconfig, fbconfig))
-        return GLFW_FALSE;
+    if (window->context)
+    {
+        if (!_glfwCreateContext(window, ctxconfig, fbconfig))
+            return GLFW_FALSE;
+    }
 
     if (!createSurface(window, wndconfig))
         return GLFW_FALSE;
@@ -252,7 +255,8 @@ void _glfwPlatformDestroyWindow(_GLFWwindow* window)
         _glfwInputWindowFocus(window, GLFW_FALSE);
     }
 
-    _glfwDestroyContext(window);
+    if (window->context)
+        _glfwDestroyContext(window);
 
     if (window->wl.native)
         wl_egl_window_destroy(window->wl.native);

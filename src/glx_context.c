@@ -309,9 +309,10 @@ int _glfwCreateContext(_GLFWwindow* window,
     int attribs[40];
     GLXFBConfig native = NULL;
     GLXContext share = NULL;
+    _GLFWcontext* context = window->context;
 
     if (ctxconfig->share)
-        share = ctxconfig->share->glx.context;
+        share = ctxconfig->share->glx.handle;
 
     if (!chooseFBConfig(fbconfig, &native))
     {
@@ -428,7 +429,7 @@ int _glfwCreateContext(_GLFWwindow* window,
 
         setGLXattrib(None, None);
 
-        window->glx.context =
+        context->glx.handle =
             _glfw.glx.CreateContextAttribsARB(_glfw.x11.display,
                                               native,
                                               share,
@@ -439,23 +440,23 @@ int _glfwCreateContext(_GLFWwindow* window,
         //       implementation of GLX_ARB_create_context_profile that fail
         //       default 1.0 context creation with a GLXBadProfileARB error in
         //       violation of the extension spec
-        if (!window->glx.context)
+        if (!context->glx.handle)
         {
             if (_glfw.x11.errorCode == _glfw.glx.errorBase + GLXBadProfileARB &&
                 ctxconfig->api == GLFW_OPENGL_API &&
                 ctxconfig->profile == GLFW_OPENGL_ANY_PROFILE &&
                 ctxconfig->forward == GLFW_FALSE)
             {
-                window->glx.context = createLegacyContext(window, native, share);
+                context->glx.handle = createLegacyContext(window, native, share);
             }
         }
     }
     else
-        window->glx.context = createLegacyContext(window, native, share);
+        context->glx.handle = createLegacyContext(window, native, share);
 
     _glfwReleaseXErrorHandler();
 
-    if (!window->glx.context)
+    if (!context->glx.handle)
     {
         _glfwInputXError(GLFW_VERSION_UNAVAILABLE, "GLX: Failed to create context");
         return GLFW_FALSE;
@@ -470,10 +471,12 @@ int _glfwCreateContext(_GLFWwindow* window,
 //
 void _glfwDestroyContext(_GLFWwindow* window)
 {
-    if (window->glx.context)
+    _GLFWcontext* context = window->context;
+
+    if (context->glx.handle)
     {
-        _glfw_glXDestroyContext(_glfw.x11.display, window->glx.context);
-        window->glx.context = NULL;
+        _glfw_glXDestroyContext(_glfw.x11.display, context->glx.handle);
+        context->glx.handle = NULL;
     }
 }
 
@@ -488,7 +491,7 @@ void _glfwPlatformMakeContextCurrent(_GLFWwindow* window)
     {
         _glfw_glXMakeCurrent(_glfw.x11.display,
                              window->x11.handle,
-                             window->glx.context);
+                             window->context->glx.handle);
     }
     else
         _glfw_glXMakeCurrent(_glfw.x11.display, None, NULL);
@@ -551,7 +554,15 @@ GLFWglproc _glfwPlatformGetProcAddress(const char* procname)
 GLFWAPI GLXContext glfwGetGLXContext(GLFWwindow* handle)
 {
     _GLFWwindow* window = (_GLFWwindow*) handle;
+
     _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
-    return window->glx.context;
+
+    if (!window->context)
+    {
+        _glfwInputError(GLFW_NO_CONTEXT, NULL);
+        return NULL;
+    }
+
+    return window->context->glx.handle;
 }
 
