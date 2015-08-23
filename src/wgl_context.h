@@ -64,16 +64,16 @@ typedef struct _GLFWcontextWGL
     PFNWGLGETEXTENSIONSSTRINGEXTPROC    GetExtensionsStringEXT;
     PFNWGLGETEXTENSIONSSTRINGARBPROC    GetExtensionsStringARB;
     PFNWGLCREATECONTEXTATTRIBSARBPROC   CreateContextAttribsARB;
-    GLboolean                           EXT_swap_control;
-    GLboolean                           ARB_multisample;
-    GLboolean                           ARB_framebuffer_sRGB;
-    GLboolean                           EXT_framebuffer_sRGB;
-    GLboolean                           ARB_pixel_format;
-    GLboolean                           ARB_create_context;
-    GLboolean                           ARB_create_context_profile;
-    GLboolean                           EXT_create_context_es2_profile;
-    GLboolean                           ARB_create_context_robustness;
-    GLboolean                           ARB_context_flush_control;
+    int                                 EXT_swap_control;
+    int                                 ARB_multisample;
+    int                                 ARB_framebuffer_sRGB;
+    int                                 EXT_framebuffer_sRGB;
+    int                                 ARB_pixel_format;
+    int                                 ARB_create_context;
+    int                                 ARB_create_context_profile;
+    int                                 EXT_create_context_es2_profile;
+    int                                 ARB_create_context_robustness;
+    int                                 ARB_context_flush_control;
 
 } _GLFWcontextWGL;
 

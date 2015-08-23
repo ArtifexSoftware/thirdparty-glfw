@@ -105,17 +105,17 @@ typedef struct _GLFWlibraryGLX
     PFNGLXSWAPINTERVALEXTPROC           SwapIntervalEXT;
     PFNGLXSWAPINTERVALMESAPROC          SwapIntervalMESA;
     PFNGLXCREATECONTEXTATTRIBSARBPROC   CreateContextAttribsARB;
-    GLboolean       SGI_swap_control;
-    GLboolean       EXT_swap_control;
-    GLboolean       MESA_swap_control;
-    GLboolean       ARB_multisample;
-    GLboolean       ARB_framebuffer_sRGB;
-    GLboolean       EXT_framebuffer_sRGB;
-    GLboolean       ARB_create_context;
-    GLboolean       ARB_create_context_profile;
-    GLboolean       ARB_create_context_robustness;
-    GLboolean       EXT_create_context_es2_profile;
-    GLboolean       ARB_context_flush_control;
+    int                                 SGI_swap_control;
+    int                                 EXT_swap_control;
+    int                                 MESA_swap_control;
+    int                                 ARB_multisample;
+    int                                 ARB_framebuffer_sRGB;
+    int                                 EXT_framebuffer_sRGB;
+    int                                 ARB_create_context;
+    int                                 ARB_create_context_profile;
+    int                                 ARB_create_context_robustness;
+    int                                 EXT_create_context_es2_profile;
+    int                                 ARB_context_flush_control;
 
 } _GLFWlibraryGLX;
 

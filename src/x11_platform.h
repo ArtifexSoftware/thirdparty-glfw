@@ -166,18 +166,18 @@ typedef struct _GLFWlibraryX11
     Atom            GLFW_SELECTION;
 
     struct {
-        GLboolean   available;
+        int         available;
         int         eventBase;
         int         errorBase;
         int         major;
         int         minor;
-        GLboolean   gammaBroken;
-        GLboolean   monitorBroken;
+        int         gammaBroken;
+        int         monitorBroken;
     } randr;
 
     struct {
-        GLboolean   available;
-        GLboolean   detectable;
+        int         available;
+        int         detectable;
         int         majorOpcode;
         int         eventBase;
         int         errorBase;
@@ -198,14 +198,14 @@ typedef struct _GLFWlibraryX11
     } xdnd;
 
     struct {
-        GLboolean   available;
+        int         available;
         int         major;
         int         minor;
     } xinerama;
 
 #if defined(_GLFW_HAS_XINPUT)
     struct {
-        GLboolean   available;
+        int         available;
         int         majorOpcode;
         int         eventBase;
         int         errorBase;
@@ -216,7 +216,7 @@ typedef struct _GLFWlibraryX11
 
 #if defined(_GLFW_HAS_XF86VM)
     struct {
-        GLboolean   available;
+        int         available;
         int         eventBase;
         int         errorBase;
     } vidmode;
@@ -249,7 +249,7 @@ typedef struct _GLFWcursorX11
 } _GLFWcursorX11;
 
 
-GLboolean _glfwSetVideoMode(_GLFWmonitor* monitor, const GLFWvidmode* desired);
+int _glfwSetVideoMode(_GLFWmonitor* monitor, const GLFWvidmode* desired);
 void _glfwRestoreVideoMode(_GLFWmonitor* monitor);
 
 Cursor _glfwCreateCursor(const GLFWimage* image, int xhot, int yhot);

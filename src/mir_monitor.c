@@ -73,7 +73,7 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
     return monitors;
 }
 
-GLboolean _glfwPlatformIsSameMonitor(_GLFWmonitor* first, _GLFWmonitor* second)
+int _glfwPlatformIsSameMonitor(_GLFWmonitor* first, _GLFWmonitor* second)
 {
     return first->mir.output_id == second->mir.output_id;
 }

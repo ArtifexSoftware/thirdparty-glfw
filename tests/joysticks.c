@@ -40,7 +40,7 @@
 
 typedef struct Joystick
 {
-    GLboolean present;
+    int present;
     char* name;
     float* axes;
     unsigned char* buttons;

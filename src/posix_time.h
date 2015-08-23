@@ -37,7 +37,7 @@
 //
 typedef struct _GLFWtimePOSIX
 {
-    GLboolean   monotonic;
+    int         monotonic;
     double      resolution;
     uint64_t    base;
 

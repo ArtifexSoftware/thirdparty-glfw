@@ -103,7 +103,7 @@ typedef struct _GLFWlibraryEGL
     EGLDisplay      display;
     EGLint          major, minor;
 
-    GLboolean       KHR_create_context;
+    int             KHR_create_context;
 
     void*           handle;
 
