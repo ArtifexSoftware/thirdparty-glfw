@@ -473,6 +473,11 @@ int _glfwRefreshContextAttribs(const _GLFWctxconfig* ctxconfig)
     }
 #endif // _GLFW_USE_OPENGL
 
+    // Clearing the front buffer to black to avoid garbage pixels
+    // left over from previous uses of our bit of VRAM
+    window->Clear(GL_COLOR_BUFFER_BIT);
+    _glfwPlatformSwapBuffers(window);
+
     return GLFW_TRUE;
 }
 
