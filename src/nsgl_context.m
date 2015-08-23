@@ -64,6 +64,7 @@ int _glfwCreateContext(_GLFWwindow* window,
                        const _GLFWfbconfig* fbconfig)
 {
     unsigned int attributeCount = 0;
+    _GLFWcontext* context = window->context;
 
     if (ctxconfig->api == GLFW_OPENGL_ES_API)
     {
@@ -314,6 +315,6 @@ GLFWAPI id glfwGetNSGLContext(GLFWwindow* handle)
         return NULL;
     }
 
-    return window->nsgl.object;
+    return window->context->nsgl.object;
 }
 

@@ -201,7 +201,7 @@ static int translateKey(unsigned int key)
 
 - (void)windowDidResize:(NSNotification *)notification
 {
-    [window->nsgl.context update];
+    [window->context->nsgl.object update];
 
     if (_glfw.cursorWindow == window &&
         window->cursorMode == GLFW_CURSOR_DISABLED)
@@ -219,7 +219,7 @@ static int translateKey(unsigned int key)
 
 - (void)windowDidMove:(NSNotification *)notification
 {
-    [window->nsgl.context update];
+    [window->context->nsgl.object update];
 
     if (_glfw.cursorWindow == window &&
         window->cursorMode == GLFW_CURSOR_DISABLED)
@@ -939,7 +939,7 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
         if (!_glfwCreateContext(window, ctxconfig, fbconfig))
             return GLFW_FALSE;
 
-        [window->nsgl.context setView:window->ns.view];
+        [window->context->nsgl.object setView:window->ns.view];
     }
 
     if (wndconfig->monitor)
