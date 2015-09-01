@@ -338,10 +338,10 @@ GLFWAPI struct wl_display* glfwGetWaylandDisplay(void);
  */
 GLFWAPI struct wl_output* glfwGetWaylandMonitor(GLFWmonitor* monitor);
 
-/*! @brief Returns the `struct wl_surface*` of the specified window.
+/*! @brief Returns the main `struct wl_surface*` of the specified window.
  *
- *  @return The `struct wl_surface*` of the specified window, or `None` if an
- *  [error](@ref error_handling) occurred.
+ *  @return The main `struct wl_surface*` of the specified window, or `None` if
+ *  an [error](@ref error_handling) occurred.
  *
  *  @par Thread Safety
  *  This function may be called from any thread.  Access is not synchronized.
