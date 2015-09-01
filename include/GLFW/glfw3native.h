@@ -325,7 +325,7 @@ GLFWAPI struct wl_display* glfwGetWaylandDisplay(void);
 
 /*! @brief Returns the `struct wl_output*` of the specified monitor.
  *
- *  @return The `struct wl_output*` of the specified monitor, or `None` if an
+ *  @return The `struct wl_output*` of the specified monitor, or `NULL` if an
  *  [error](@ref error_handling) occurred.
  *
  *  @par Thread Safety
@@ -340,7 +340,7 @@ GLFWAPI struct wl_output* glfwGetWaylandMonitor(GLFWmonitor* monitor);
 
 /*! @brief Returns the main `struct wl_surface*` of the specified window.
  *
- *  @return The main `struct wl_surface*` of the specified window, or `None` if
+ *  @return The main `struct wl_surface*` of the specified window, or `NULL` if
  *  an [error](@ref error_handling) occurred.
  *
  *  @par Thread Safety
@@ -372,7 +372,7 @@ GLFWAPI MirConnection* glfwGetMirDisplay(void);
 
 /*! @brief Returns the Mir output ID of the specified monitor.
  *
- *  @return The Mir output ID of the specified monitor, or `None` if an
+ *  @return The Mir output ID of the specified monitor, or zero if an
  *  [error](@ref error_handling) occurred.
  *
  *  @par Thread Safety
@@ -387,7 +387,7 @@ GLFWAPI int glfwGetMirMonitor(GLFWmonitor* monitor);
 
 /*! @brief Returns the `MirSurface*` of the specified window.
  *
- *  @return The `MirSurface*` of the specified window, or `None` if an
+ *  @return The `MirSurface*` of the specified window, or `NULL` if an
  *  [error](@ref error_handling) occurred.
  *
  *  @par Thread Safety
