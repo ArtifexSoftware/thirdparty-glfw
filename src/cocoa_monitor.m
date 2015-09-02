@@ -285,7 +285,8 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
         char* name = getDisplayName(displays[i]);
 
         monitor = _glfwAllocMonitor(name, size.width, size.height);
-        monitor->ns.displayID = displays[i];
+        monitor->ns.displayID  = displays[i];
+        monitor->ns.unitNumber = CGDisplayUnitNumber(displays[i]);
 
         free(name);
 
@@ -301,7 +302,7 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
 
 GLboolean _glfwPlatformIsSameMonitor(_GLFWmonitor* first, _GLFWmonitor* second)
 {
-    return first->ns.displayID == second->ns.displayID;
+    return first->ns.unitNumber == second->ns.unitNumber;
 }
 
 void _glfwPlatformGetMonitorPos(_GLFWmonitor* monitor, int* xpos, int* ypos)
