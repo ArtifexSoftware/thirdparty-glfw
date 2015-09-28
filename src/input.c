@@ -158,7 +158,7 @@ void _glfwInputKey(_GLFWwindow* window, int key, int scancode, int action, int m
 
 void _glfwInputChar(_GLFWwindow* window, unsigned int codepoint, int mods, int plain)
 {
-    if (codepoint < 32 || (codepoint > 126 && codepoint < 160))
+    if (codepoint > 126 && codepoint < 160)
         return;
 
     if (window->callbacks.charmods)

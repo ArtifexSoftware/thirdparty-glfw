@@ -401,8 +401,10 @@ static GLboolean createWindow(_GLFWwindow* window,
             // HACK: Explicitly setting PPosition to any value causes some WMs,
             //       notably Compiz and Metacity, to honor the position of
             //       unmapped windows set by XMoveWindow
-            hints->flags |= PPosition;
-            hints->x = hints->y = 0;
+            // XXX(tor): Remove hack. We want the default window manager positioning.
+            // XXX(tor): We don't want the window at the top left no matter what....
+            // XXX(tor): hints->flags |= PPosition;
+            // XXX(tor): hints->x = hints->y = 0;
         }
 
         if (!wndconfig->resizable)

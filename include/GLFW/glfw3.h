@@ -33,6 +33,7 @@
 extern "C" {
 #endif
 
+#define GLFW_MUPDF_FIXES 1
 
 /*************************************************************************
  * Doxygen documentation
