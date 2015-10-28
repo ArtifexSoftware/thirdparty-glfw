@@ -75,9 +75,9 @@ static BOOL CALLBACK monitorEnumProc(HMONITOR handle,
         {
             wcscpy(sizes->entries[sizes->count].deviceName, mi.szDevice);
             sizes->entries[sizes->count].widthMM =
-                (rect->right - rect->left) * 25.4f / dpiX;
+                (int) ((rect->right - rect->left) * 25.4f / dpiX);
             sizes->entries[sizes->count].heightMM =
-                (rect->bottom - rect->top) * 25.4f / dpiY;
+                (int) ((rect->bottom - rect->top) * 25.4f / dpiY);
             sizes->count++;
         }
     }
