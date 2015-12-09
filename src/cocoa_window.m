@@ -316,8 +316,11 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
     _glfwInputWindowFocus(window, GLFW_FALSE);
 }
 
-@end
+- (void)imeStatusChangeNotified:(NSNotification *)notification {
+    _glfwInputIMEStatus(window);
+}
 
+@end
 
 //------------------------------------------------------------------------
 // Delegate for application related notifications
@@ -714,6 +717,56 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
         [markedText initWithAttributedString:string];
     else
         [markedText initWithString:string];
+    NSString* markedTextString = markedText.string;
+
+    NSUInteger i, length = [markedTextString length];
+    int ctext = window->ctext;
+    while (ctext < length+1) {
+        ctext = (ctext == 0) ? 1 : ctext*2;
+    }
+    if (ctext != window->ctext) {
+        unsigned int* preeditText = realloc(window->preeditText, sizeof(unsigned int)*ctext);
+        if (preeditText == NULL) {
+            return;
+        }
+        window->preeditText = preeditText;
+        window->ctext = ctext;
+    }
+    window->ntext = length;
+    window->preeditText[length] = 0;
+    for (i = 0;  i < length;  i++)
+    {
+        const unichar codepoint = [markedTextString characterAtIndex:i];
+        window->preeditText[i] = codepoint;
+    }
+    int focusedBlock = 0;
+    NSInteger offset = 0;
+    window->nblocks = 0;
+    while (offset < length) {
+        NSRange effectiveRange;
+        NSDictionary *attributes = [markedText attributesAtIndex:offset effectiveRange:&effectiveRange];
+        
+        if (window->nblocks == window->cblocks) {
+            int cblocks = window->cblocks * 2;
+            int* blocks = realloc(window->preeditAttributeBlocks, sizeof(int)*cblocks);
+            if (blocks == NULL) {
+                return;
+            }
+            window->preeditAttributeBlocks = blocks;
+            window->cblocks = cblocks;
+        }
+        window->preeditAttributeBlocks[window->nblocks] = effectiveRange.length;
+        offset += effectiveRange.length;
+        if (effectiveRange.length == 0) {
+            break;
+        }
+        NSNumber* underline = (NSNumber*) [attributes objectForKey:@"NSUnderline"];
+        if ([underline intValue] != 1) {
+            focusedBlock = window->nblocks;
+        }
+        window->nblocks++;
+    }
+    _glfwInputPreedit(window, focusedBlock);
 }
 
 - (void)unmarkText
@@ -742,8 +795,7 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
 {
     int xpos, ypos;
     _glfwPlatformGetWindowPos(window, &xpos, &ypos);
-    const NSRect contentRect = [window->ns.view frame];
-    return NSMakeRect(xpos, transformY(ypos + contentRect.size.height), 0.0, 0.0);
+    return NSMakeRect(xpos + window->preeditCursorPosX, transformY(ypos + window->preeditCursorPosY), 0.0, window->preeditCursorHeight);
 }
 
 - (void)insertText:(id)string replacementRange:(NSRange)replacementRange
@@ -1049,6 +1101,11 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
     [window->ns.object setAcceptsMouseMovedEvents:YES];
     [window->ns.object setRestorable:NO];
 
+    [[NSNotificationCenter defaultCenter]
+        addObserver: window->ns.delegate
+        selector:@selector(imeStatusChangeNotified:)
+        name:NSTextInputContextKeyboardSelectionDidChangeNotification
+        object: nil];
     return GLFW_TRUE;
 }
 
@@ -1101,6 +1158,8 @@ void _glfwPlatformDestroyWindow(_GLFWwindow* window)
 {
     if (_glfw.ns.disabledCursorWindow == window)
         _glfw.ns.disabledCursorWindow = NULL;
+
+    [[NSNotificationCenter defaultCenter] removeObserver: window->ns.delegate];
 
     [window->ns.object orderOut:nil];
 
@@ -1735,6 +1794,49 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
 #endif
 }
 
+void _glfwPlatformResetPreeditText(_GLFWwindow* window)
+{
+    NSTextInputContext *context = [NSTextInputContext currentInputContext];
+    [context discardMarkedText];
+    [window->ns.view unmarkText];
+}
+
+void _glfwPlatformSetIMEStatus(_GLFWwindow* window, int active)
+{
+    // Mac OS has several input sources.
+    // this code assumes input methods not in ascii capable inputs using IME.
+    NSArray* asciiInputSources = CFBridgingRelease(TISCreateASCIICapableInputSourceList());
+    TISInputSourceRef asciiSource = (__bridge TISInputSourceRef)([asciiInputSources firstObject]);
+    if (active) {
+        NSArray* allInputSources = CFBridgingRelease(TISCreateInputSourceList(NULL, false));
+        NSString* asciiSourceID = (__bridge NSString *)(TISGetInputSourceProperty(asciiSource, kTISPropertyInputSourceID));
+        int i;
+        int count = [allInputSources count];
+        for (i = 0; i < count; i++) {
+            TISInputSourceRef source = (__bridge TISInputSourceRef)([allInputSources objectAtIndex: i]);
+            NSString* sourceID = (__bridge NSString *)(TISGetInputSourceProperty(source, kTISPropertyInputSourceID));
+            if ([asciiSourceID compare: sourceID] != NSOrderedSame) {
+                TISSelectInputSource(source);
+                break;
+            }
+        }
+    } else if (asciiSource) {
+        TISSelectInputSource(asciiSource);
+    }
+}
+
+int _glfwPlatformGetIMEStatus(_GLFWwindow* window)
+{
+    TISInputSourceRef currentSource = TISCopyCurrentKeyboardInputSource();
+    NSString* currentSourceID = (__bridge NSString *)(TISGetInputSourceProperty(currentSource, kTISPropertyInputSourceID));
+    NSArray* asciiInputSources = CFBridgingRelease(TISCreateASCIICapableInputSourceList());
+    TISInputSourceRef asciiSource = (__bridge TISInputSourceRef)([asciiInputSources firstObject]);
+    if (asciiSource) {
+        NSString* asciiSourceID = (__bridge NSString *)(TISGetInputSourceProperty(asciiSource, kTISPropertyInputSourceID));
+        return ([asciiSourceID compare: currentSourceID] == NSOrderedSame) ? GLFW_FALSE : GLFW_TRUE;
+    }
+    return GLFW_FALSE;
+}
 
 //////////////////////////////////////////////////////////////////////////
 //////                        GLFW native API                       //////

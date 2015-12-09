@@ -79,6 +79,20 @@ void _glfwInputChar(_GLFWwindow* window, unsigned int codepoint, int mods, GLFWb
     }
 }
 
+void _glfwInputPreedit(_GLFWwindow* window, int focusedBlock)
+{
+    if (window->callbacks.preedit) {
+        window->callbacks.preedit((GLFWwindow*) window, window->ntext, window->preeditText, window->nblocks, window->preeditAttributeBlocks, focusedBlock);
+    }
+}
+
+void _glfwInputIMEStatus(_GLFWwindow* window)
+{
+    if (window->callbacks.imestatus) {
+        window->callbacks.imestatus((GLFWwindow*) window);
+    }
+}
+
 void _glfwInputScroll(_GLFWwindow* window, double xoffset, double yoffset)
 {
     if (window->callbacks.scroll)
@@ -162,6 +176,8 @@ GLFWAPI int glfwGetInputMode(GLFWwindow* handle, int mode)
             return window->stickyKeys;
         case GLFW_STICKY_MOUSE_BUTTONS:
             return window->stickyMouseButtons;
+        case GLFW_IME:
+            return _glfwPlatformGetIMEStatus(window);
         default:
             _glfwInputError(GLFW_INVALID_ENUM, "Invalid input mode %i", mode);
             return 0;
@@ -245,6 +261,13 @@ GLFWAPI void glfwSetInputMode(GLFWwindow* handle, int mode, int value)
             window->stickyMouseButtons = value ? GLFW_TRUE : GLFW_FALSE;
             return;
         }
+
+        case GLFW_IME:
+            _glfwPlatformSetIMEStatus(window, value ? GLFW_TRUE : GLFW_FALSE);
+            break;    
+        default:
+            _glfwInputError(GLFW_INVALID_ENUM, "Invalid input mode %i", mode);
+            break;
     }
 
     _glfwInputError(GLFW_INVALID_ENUM, "Invalid input mode %i", mode);
@@ -469,6 +492,30 @@ GLFWAPI void glfwSetCursor(GLFWwindow* windowHandle, GLFWcursor* cursorHandle)
     _glfwPlatformSetCursor(window, cursor);
 }
 
+GLFWAPI void glfwGetPreeditCursorPos(GLFWwindow* handle, int *x, int *y, int *h)
+{
+    _GLFWwindow* window = (_GLFWwindow*) handle;
+    if (x)
+        *x = window->preeditCursorPosX;
+    if (y)
+        *y = window->preeditCursorPosY;
+    if (h)
+        *h = window->preeditCursorHeight;
+}
+
+GLFWAPI void glfwSetPreeditCursorPos(GLFWwindow* handle, int x, int y, int h)
+{
+    _GLFWwindow* window = (_GLFWwindow*) handle;
+    window->preeditCursorPosX = x;
+    window->preeditCursorPosY = y;
+    window->preeditCursorHeight = h;
+}
+
+GLFWAPI void glfwResetPreeditText(GLFWwindow* handle) {
+    _GLFWwindow* window = (_GLFWwindow*) handle;
+    _glfwPlatformResetPreeditText(window);
+}
+
 GLFWAPI GLFWkeyfun glfwSetKeyCallback(GLFWwindow* handle, GLFWkeyfun cbfun)
 {
     _GLFWwindow* window = (_GLFWwindow*) handle;
@@ -496,6 +543,22 @@ GLFWAPI GLFWcharmodsfun glfwSetCharModsCallback(GLFWwindow* handle, GLFWcharmods
 
     _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
     _GLFW_SWAP_POINTERS(window->callbacks.charmods, cbfun);
+    return cbfun;
+}
+
+GLFWAPI GLFWpreeditfun glfwSetPreeditCallback(GLFWwindow* handle, GLFWpreeditfun cbfun)
+{
+    _GLFWwindow* window = (_GLFWwindow*) handle;
+    _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
+    _GLFW_SWAP_POINTERS(window->callbacks.preedit, cbfun);
+    return cbfun;
+}
+
+GLFWAPI GLFWimestatusfun glfwSetIMEStatusCallback(GLFWwindow* handle, GLFWimestatusfun cbfun)
+{
+    _GLFWwindow* window = (_GLFWwindow*) handle;
+    _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
+    _GLFW_SWAP_POINTERS(window->callbacks.imestatus, cbfun);
     return cbfun;
 }
 

@@ -128,6 +128,16 @@ typedef struct _GLFWwindowX11
     unsigned int    lastKeyCode;
     Time            lastKeyTime;
 
+    // Preedit callbacks
+    XIMCallback preeditStartCallback;
+    XIMCallback preeditDoneCallback;
+    XIMCallback preeditDrawCallback;
+    XIMCallback preeditCaretCallback;
+    XIMCallback statusStartCallback;
+    XIMCallback statusDoneCallback;
+    XIMCallback statusDrawCallback;
+
+    int imeFocus;
 } _GLFWwindowX11;
 
 // X11-specific global data

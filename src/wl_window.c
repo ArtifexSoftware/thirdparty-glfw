@@ -1027,6 +1027,28 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
     return err;
 }
 
+void _glfwPlatformResetPreeditText(_GLFWwindow* window)
+{
+    // TODO
+    _glfwInputError(GLFW_PLATFORM_ERROR,
+                    "Wayland: IME not implemented yet");
+}
+
+void _glfwPlatformSetIMEStatus(_GLFWwindow* window, int active)
+{
+    // TODO
+    _glfwInputError(GLFW_PLATFORM_ERROR,
+                    "Wayland: IME not implemented yet");
+}
+
+int _glfwPlatformGetIMEStatus(_GLFWwindow* window)
+{
+    // TODO
+    _glfwInputError(GLFW_PLATFORM_ERROR,
+                    "Wayland: IME not implemented yet");
+    return GLFW_FALSE;
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 //////                        GLFW native API                       //////

@@ -370,8 +370,18 @@ struct _GLFWwindow
     int                 cursorMode;
     char                mouseButtons[GLFW_MOUSE_BUTTON_LAST + 1];
     char                keys[GLFW_KEY_LAST + 1];
+
     // Virtual cursor position when cursor is disabled
     double              virtualCursorPosX, virtualCursorPosY;
+
+    // Preedit texts
+    unsigned int*       preeditText;
+    int                 ntext;
+    int                 ctext;
+    int*                preeditAttributeBlocks;
+    int                 nblocks;
+    int                 cblocks;
+    int                 preeditCursorPosX, preeditCursorPosY, preeditCursorHeight;
 
     _GLFWcontext        context;
 
@@ -391,6 +401,8 @@ struct _GLFWwindow
         GLFWkeyfun              key;
         GLFWcharfun             character;
         GLFWcharmodsfun         charmods;
+        GLFWpreeditfun          preedit;
+        GLFWimestatusfun        imestatus;
         GLFWdropfun             drop;
     } callbacks;
 
@@ -818,6 +830,46 @@ int _glfwPlatformGetPhysicalDevicePresentationSupport(VkInstance instance, VkPhy
  */
 VkResult _glfwPlatformCreateWindowSurface(VkInstance instance, _GLFWwindow* window, const VkAllocationCallbacks* allocator, VkSurfaceKHR* surface);
 
+/*! @copydoc glfwResetPreeditText
+ *  @ingroup platform
+ */
+void _glfwPlatformResetPreeditText(_GLFWwindow* window);
+
+/*! @brief Set IME status.
+ *
+ *  This function set IME status.
+ *
+ *  @param[in] window The window.
+ *  @param[in] active Turns on IME if `GFLW_TRUE` is given. Otherwise (`GLFW_FALSE`) turns off.
+ *
+ *  @par Thread Safety
+ *  This function may only be called from the main thread.
+ *
+ *  @sa @ref preedit
+ *
+ *  @since Added in GLFW 3.X.
+ *
+ *  @ingroup platform
+ */
+void _glfwPlatformSetIMEStatus(_GLFWwindow* window, int active);
+
+/*! @brief Get IME status.
+ *
+ *  This function get IME status.
+ *
+ *  @param[in] window The window.
+ *  @return When IME is active, this function returns `GFLW_TRUE`. Otherwise `GLFW_FALSE`.
+ *
+ *  @par Thread Safety
+ *  This function may only be called from the main thread.
+ *
+ *  @sa @ref preedit
+ *
+ *  @since Added in GLFW 3.X.
+ *
+ *  @ingroup platform
+ */
+int  _glfwPlatformGetIMEStatus(_GLFWwindow* window);
 
 //========================================================================
 // Event API functions
@@ -903,6 +955,19 @@ void _glfwInputKey(_GLFWwindow* window, int key, int scancode, int action, int m
  *  @ingroup event
  */
 void _glfwInputChar(_GLFWwindow* window, unsigned int codepoint, int mods, GLFWbool plain);
+
+/*! @brief Notifies shared code of a IME preedit text update event.
+ *  @param[in] window The window that received the event.
+ *  @param[in] focusedBlock Focused preedit text block index.
+ *  @ingroup event
+ */
+void _glfwInputPreedit(_GLFWwindow* window, int focusedBlock);
+
+/*! @brief Notifies shared code of a IME status change.
+ *  @param[in] window The window that received the event.
+ *  @ingroup event
+ */
+void _glfwInputIMEStatus(_GLFWwindow* window);
 
 /*! @brief Notifies shared code of a scroll event.
  *  @param[in] window The window that received the event.

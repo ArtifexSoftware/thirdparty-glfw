@@ -301,3 +301,16 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
     return VK_ERROR_INITIALIZATION_FAILED;
 }
 
+void _glfwPlatformResetPreeditText(_GLFWwindow* window)
+{
+}
+
+void _glfwPlatformSetIMEStatus(_GLFWwindow* window, int active)
+{
+}
+
+int _glfwPlatformGetIMEStatus(_GLFWwindow* window)
+{
+    return GLFW_FALSE;
+}
+

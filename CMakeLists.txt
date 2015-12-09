@@ -226,6 +226,7 @@ endif()
 if (_GLFW_WIN32)
 
     list(APPEND glfw_PKG_LIBS "-lgdi32")
+    list(APPEND glfw_LIBRARIES "imm32")
 
     if (GLFW_USE_HYBRID_HPG)
         set(_GLFW_USE_HYBRID_HPG 1)
