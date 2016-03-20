@@ -927,20 +927,7 @@ static GLFWbool createWindow(_GLFWwindow* window,
         return GLFW_FALSE;
     }
 
-    NSRect contentRect;
-
-    if (window->monitor)
-    {
-        GLFWvidmode mode;
-        int xpos, ypos;
-
-        _glfwPlatformGetVideoMode(window->monitor, &mode);
-        _glfwPlatformGetMonitorPos(window->monitor, &xpos, &ypos);
-
-        contentRect = NSMakeRect(xpos, ypos, mode.width, mode.height);
-    }
-    else
-        contentRect = NSMakeRect(0, 0, wndconfig->width, wndconfig->height);
+    NSRect contentRect = NSMakeRect(0, 0, wndconfig->width, wndconfig->height);
 
     window->ns.object = [[GLFWWindow alloc]
         initWithContentRect:contentRect
@@ -954,21 +941,16 @@ static GLFWbool createWindow(_GLFWwindow* window,
         return GLFW_FALSE;
     }
 
-    if (window->monitor)
-        [window->ns.object setLevel:NSMainMenuWindowLevel + 1];
-    else
-    {
-        [window->ns.object center];
+    [window->ns.object center];
 
-        if (wndconfig->resizable)
-            [window->ns.object setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
+    if (wndconfig->resizable)
+        [window->ns.object setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 
-        if (wndconfig->floating)
-            [window->ns.object setLevel:NSFloatingWindowLevel];
+    if (wndconfig->floating)
+        [window->ns.object setLevel:NSFloatingWindowLevel];
 
-        if (wndconfig->maximized)
-            [window->ns.object zoom:nil];
-    }
+    if (wndconfig->maximized)
+        [window->ns.object zoom:nil];
 
     window->ns.view = [[GLFWContentView alloc] initWithGlfwWindow:window];
 
@@ -1005,14 +987,6 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
     if (ctxconfig->api != GLFW_NO_API)
     {
         if (!_glfwCreateContextNSGL(window, ctxconfig, fbconfig))
-            return GLFW_FALSE;
-    }
-
-    if (window->monitor)
-    {
-        _glfwPlatformShowWindow(window);
-        _glfwPlatformFocusWindow(window);
-        if (!acquireMonitor(window))
             return GLFW_FALSE;
     }
 

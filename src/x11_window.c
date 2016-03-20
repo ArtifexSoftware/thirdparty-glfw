@@ -472,7 +472,7 @@ static GLFWbool createWindow(_GLFWwindow* window,
         }
     }
 
-    if (wndconfig->maximized && !window->monitor)
+    if (wndconfig->maximized)
     {
         if (_glfw.x11.NET_WM_STATE &&
             _glfw.x11.NET_WM_STATE_MAXIMIZED_VERT &&
@@ -1514,14 +1514,6 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
         if (!_glfwCreateContextEGL(window, ctxconfig, fbconfig))
             return GLFW_FALSE;
 #endif
-    }
-
-    if (window->monitor)
-    {
-        _glfwPlatformShowWindow(window);
-        updateWindowMode(window);
-        if (!acquireMonitor(window))
-            return GLFW_FALSE;
     }
 
     return GLFW_TRUE;

@@ -173,7 +173,6 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
     window->videoMode.blueBits    = fbconfig.blueBits;
     window->videoMode.refreshRate = _glfw.hints.refreshRate;
 
-    window->monitor     = (_GLFWmonitor*) monitor;
     window->resizable   = wndconfig.resizable;
     window->decorated   = wndconfig.decorated;
     window->autoIconify = wndconfig.autoIconify;
@@ -214,14 +213,21 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
         _glfwPlatformMakeContextCurrent(previous);
     }
 
-    if (window->monitor)
+    if (monitor)
     {
         int width, height;
-        _glfwPlatformGetWindowSize(window, &width, &height);
 
+        _glfwPlatformSetWindowMonitor(window,
+                                      (_GLFWmonitor*) monitor,
+                                      0, 0,
+                                      window->videoMode.width,
+                                      window->videoMode.height,
+                                      window->videoMode.refreshRate);
+        _glfwPlatformFocusWindow(window);
+
+        _glfwPlatformGetWindowSize(window, &width, &height);
         window->cursorPosX = width / 2;
         window->cursorPosY = height / 2;
-
         _glfwPlatformSetCursorPos(window, window->cursorPosX, window->cursorPosY);
     }
     else

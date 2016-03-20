@@ -773,30 +773,15 @@ static int createWindow(_GLFWwindow* window, const _GLFWwndconfig* wndconfig)
     DWORD style = getWindowStyle(window);
     DWORD exStyle = getWindowExStyle(window);
 
-    if (window->monitor)
-    {
-        GLFWvidmode mode;
+    xpos = CW_USEDEFAULT;
+    ypos = CW_USEDEFAULT;
 
-        // NOTE: This window placement is temporary and approximate, as the
-        //       correct position and size cannot be known until the monitor
-        //       video mode has been set
-        _glfwPlatformGetMonitorPos(window->monitor, &xpos, &ypos);
-        _glfwPlatformGetVideoMode(window->monitor, &mode);
-        fullWidth  = mode.width;
-        fullHeight = mode.height;
-    }
-    else
-    {
-        xpos = CW_USEDEFAULT;
-        ypos = CW_USEDEFAULT;
+    if (wndconfig->maximized)
+        style |= WS_MAXIMIZE;
 
-        if (wndconfig->maximized)
-            style |= WS_MAXIMIZE;
-
-        getFullWindowSize(style, exStyle,
-                          wndconfig->width, wndconfig->height,
-                          &fullWidth, &fullHeight);
-    }
+    getFullWindowSize(style, exStyle,
+                        wndconfig->width, wndconfig->height,
+                        &fullWidth, &fullHeight);
 
     wideTitle = _glfwCreateWideStringFromUTF8Win32(wndconfig->title);
     if (!wideTitle)
@@ -964,14 +949,6 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
         if (!_glfwCreateContextEGL(window, ctxconfig, fbconfig))
             return GLFW_FALSE;
 #endif
-    }
-
-    if (window->monitor)
-    {
-        _glfwPlatformShowWindow(window);
-        _glfwPlatformFocusWindow(window);
-        if (!acquireMonitor(window))
-            return GLFW_FALSE;
     }
 
     return GLFW_TRUE;
