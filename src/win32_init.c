@@ -58,6 +58,10 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
     return TRUE;
 }
 
+// This symbol is required when using floating point and there is no CRT
+//
+int _fltused = 0;
+
 #endif // _GLFW_BUILD_DLL
 
 // Load necessary libraries (DLLs)
@@ -85,6 +89,16 @@ static GLFWbool loadLibraries(void)
         GetProcAddress(_glfw.win32.user32.instance, "SetProcessDPIAware");
     _glfw.win32.user32.ChangeWindowMessageFilterEx = (CHANGEWINDOWMESSAGEFILTEREX_T)
         GetProcAddress(_glfw.win32.user32.instance, "ChangeWindowMessageFilterEx");
+
+    _glfw.win32.ole32.instance = LoadLibraryA("ole32.dll");
+    if (!_glfw.win32.ole32.instance)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Failed to load ole32.dll");
+        return GLFW_FALSE;
+    }
+
+    _glfw.win32.ole32.IsEqualGUID = (ISEQUALGUID_T)
+        GetProcAddress(_glfw.win32.ole32.instance, "IsEqualGUID");
 
     _glfw.win32.dinput8.instance = LoadLibraryA("dinput8.dll");
     if (_glfw.win32.dinput8.instance)
@@ -168,8 +182,8 @@ static void createKeyTables(void)
 {
     int scancode;
 
-    memset(_glfw.win32.keycodes, -1, sizeof(_glfw.win32.keycodes));
-    memset(_glfw.win32.scancodes, -1, sizeof(_glfw.win32.scancodes));
+    _glfw_memset(_glfw.win32.keycodes, -1, sizeof(_glfw.win32.keycodes));
+    _glfw_memset(_glfw.win32.scancodes, -1, sizeof(_glfw.win32.scancodes));
 
     _glfw.win32.keycodes[0x00B] = GLFW_KEY_0;
     _glfw.win32.keycodes[0x002] = GLFW_KEY_1;
@@ -327,7 +341,7 @@ static HWND createHelperWindow(void)
     // Register for HID device notifications
     {
         DEV_BROADCAST_DEVICEINTERFACE_W dbi;
-        ZeroMemory(&dbi, sizeof(dbi));
+        _glfw_memset(&dbi, 0, sizeof(dbi));
         dbi.dbcc_size = sizeof(dbi);
         dbi.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
         dbi.dbcc_classguid = GUID_DEVINTERFACE_HID;
@@ -362,11 +376,11 @@ WCHAR* _glfwCreateWideStringFromUTF8Win32(const char* source)
     if (!length)
         return NULL;
 
-    target = calloc(length, sizeof(WCHAR));
+    target = _glfw_calloc(length, sizeof(WCHAR));
 
     if (!MultiByteToWideChar(CP_UTF8, 0, source, -1, target, length))
     {
-        free(target);
+        _glfw_free(target);
         return NULL;
     }
 
@@ -384,11 +398,11 @@ char* _glfwCreateUTF8FromWideStringWin32(const WCHAR* source)
     if (!length)
         return NULL;
 
-    target = calloc(length, 1);
+    target = _glfw_calloc(length, 1);
 
     if (!WideCharToMultiByte(CP_UTF8, 0, source, -1, target, length, NULL, NULL))
     {
-        free(target);
+        _glfw_free(target);
         return NULL;
     }
 
@@ -448,7 +462,7 @@ void _glfwPlatformTerminate(void)
                           UIntToPtr(_glfw.win32.foregroundLockTimeout),
                           SPIF_SENDCHANGE);
 
-    free(_glfw.win32.clipboardString);
+    _glfw_free(_glfw.win32.clipboardString);
 
     _glfwTerminateWGL();
     _glfwTerminateEGL();

@@ -232,8 +232,8 @@ static void createKeyTables(void)
 {
     int scancode, key;
 
-    memset(_glfw.x11.keycodes, -1, sizeof(_glfw.x11.keycodes));
-    memset(_glfw.x11.scancodes, -1, sizeof(_glfw.x11.scancodes));
+    _glfw_memset(_glfw.x11.keycodes, -1, sizeof(_glfw.x11.keycodes));
+    _glfw_memset(_glfw.x11.scancodes, -1, sizeof(_glfw.x11.scancodes));
 
     if (_glfw.x11.xkb.available)
     {
@@ -247,61 +247,61 @@ static void createKeyTables(void)
         // Find the X11 key code -> GLFW key code mapping
         for (scancode = desc->min_key_code;  scancode <= desc->max_key_code;  scancode++)
         {
-            memcpy(name, desc->names->keys[scancode].name, XkbKeyNameLength);
+            _glfw_memcpy(name, desc->names->keys[scancode].name, XkbKeyNameLength);
             name[XkbKeyNameLength] = '\0';
 
             // Map the key name to a GLFW key code. Note: We only map printable
             // keys here, and we use the US keyboard layout. The rest of the
             // keys (function keys) are mapped using traditional KeySym
             // translations.
-            if (strcmp(name, "TLDE") == 0) key = GLFW_KEY_GRAVE_ACCENT;
-            else if (strcmp(name, "AE01") == 0) key = GLFW_KEY_1;
-            else if (strcmp(name, "AE02") == 0) key = GLFW_KEY_2;
-            else if (strcmp(name, "AE03") == 0) key = GLFW_KEY_3;
-            else if (strcmp(name, "AE04") == 0) key = GLFW_KEY_4;
-            else if (strcmp(name, "AE05") == 0) key = GLFW_KEY_5;
-            else if (strcmp(name, "AE06") == 0) key = GLFW_KEY_6;
-            else if (strcmp(name, "AE07") == 0) key = GLFW_KEY_7;
-            else if (strcmp(name, "AE08") == 0) key = GLFW_KEY_8;
-            else if (strcmp(name, "AE09") == 0) key = GLFW_KEY_9;
-            else if (strcmp(name, "AE10") == 0) key = GLFW_KEY_0;
-            else if (strcmp(name, "AE11") == 0) key = GLFW_KEY_MINUS;
-            else if (strcmp(name, "AE12") == 0) key = GLFW_KEY_EQUAL;
-            else if (strcmp(name, "AD01") == 0) key = GLFW_KEY_Q;
-            else if (strcmp(name, "AD02") == 0) key = GLFW_KEY_W;
-            else if (strcmp(name, "AD03") == 0) key = GLFW_KEY_E;
-            else if (strcmp(name, "AD04") == 0) key = GLFW_KEY_R;
-            else if (strcmp(name, "AD05") == 0) key = GLFW_KEY_T;
-            else if (strcmp(name, "AD06") == 0) key = GLFW_KEY_Y;
-            else if (strcmp(name, "AD07") == 0) key = GLFW_KEY_U;
-            else if (strcmp(name, "AD08") == 0) key = GLFW_KEY_I;
-            else if (strcmp(name, "AD09") == 0) key = GLFW_KEY_O;
-            else if (strcmp(name, "AD10") == 0) key = GLFW_KEY_P;
-            else if (strcmp(name, "AD11") == 0) key = GLFW_KEY_LEFT_BRACKET;
-            else if (strcmp(name, "AD12") == 0) key = GLFW_KEY_RIGHT_BRACKET;
-            else if (strcmp(name, "AC01") == 0) key = GLFW_KEY_A;
-            else if (strcmp(name, "AC02") == 0) key = GLFW_KEY_S;
-            else if (strcmp(name, "AC03") == 0) key = GLFW_KEY_D;
-            else if (strcmp(name, "AC04") == 0) key = GLFW_KEY_F;
-            else if (strcmp(name, "AC05") == 0) key = GLFW_KEY_G;
-            else if (strcmp(name, "AC06") == 0) key = GLFW_KEY_H;
-            else if (strcmp(name, "AC07") == 0) key = GLFW_KEY_J;
-            else if (strcmp(name, "AC08") == 0) key = GLFW_KEY_K;
-            else if (strcmp(name, "AC09") == 0) key = GLFW_KEY_L;
-            else if (strcmp(name, "AC10") == 0) key = GLFW_KEY_SEMICOLON;
-            else if (strcmp(name, "AC11") == 0) key = GLFW_KEY_APOSTROPHE;
-            else if (strcmp(name, "AB01") == 0) key = GLFW_KEY_Z;
-            else if (strcmp(name, "AB02") == 0) key = GLFW_KEY_X;
-            else if (strcmp(name, "AB03") == 0) key = GLFW_KEY_C;
-            else if (strcmp(name, "AB04") == 0) key = GLFW_KEY_V;
-            else if (strcmp(name, "AB05") == 0) key = GLFW_KEY_B;
-            else if (strcmp(name, "AB06") == 0) key = GLFW_KEY_N;
-            else if (strcmp(name, "AB07") == 0) key = GLFW_KEY_M;
-            else if (strcmp(name, "AB08") == 0) key = GLFW_KEY_COMMA;
-            else if (strcmp(name, "AB09") == 0) key = GLFW_KEY_PERIOD;
-            else if (strcmp(name, "AB10") == 0) key = GLFW_KEY_SLASH;
-            else if (strcmp(name, "BKSL") == 0) key = GLFW_KEY_BACKSLASH;
-            else if (strcmp(name, "LSGT") == 0) key = GLFW_KEY_WORLD_1;
+            if (_glfw_strcmp(name, "TLDE") == 0) key = GLFW_KEY_GRAVE_ACCENT;
+            else if (_glfw_strcmp(name, "AE01") == 0) key = GLFW_KEY_1;
+            else if (_glfw_strcmp(name, "AE02") == 0) key = GLFW_KEY_2;
+            else if (_glfw_strcmp(name, "AE03") == 0) key = GLFW_KEY_3;
+            else if (_glfw_strcmp(name, "AE04") == 0) key = GLFW_KEY_4;
+            else if (_glfw_strcmp(name, "AE05") == 0) key = GLFW_KEY_5;
+            else if (_glfw_strcmp(name, "AE06") == 0) key = GLFW_KEY_6;
+            else if (_glfw_strcmp(name, "AE07") == 0) key = GLFW_KEY_7;
+            else if (_glfw_strcmp(name, "AE08") == 0) key = GLFW_KEY_8;
+            else if (_glfw_strcmp(name, "AE09") == 0) key = GLFW_KEY_9;
+            else if (_glfw_strcmp(name, "AE10") == 0) key = GLFW_KEY_0;
+            else if (_glfw_strcmp(name, "AE11") == 0) key = GLFW_KEY_MINUS;
+            else if (_glfw_strcmp(name, "AE12") == 0) key = GLFW_KEY_EQUAL;
+            else if (_glfw_strcmp(name, "AD01") == 0) key = GLFW_KEY_Q;
+            else if (_glfw_strcmp(name, "AD02") == 0) key = GLFW_KEY_W;
+            else if (_glfw_strcmp(name, "AD03") == 0) key = GLFW_KEY_E;
+            else if (_glfw_strcmp(name, "AD04") == 0) key = GLFW_KEY_R;
+            else if (_glfw_strcmp(name, "AD05") == 0) key = GLFW_KEY_T;
+            else if (_glfw_strcmp(name, "AD06") == 0) key = GLFW_KEY_Y;
+            else if (_glfw_strcmp(name, "AD07") == 0) key = GLFW_KEY_U;
+            else if (_glfw_strcmp(name, "AD08") == 0) key = GLFW_KEY_I;
+            else if (_glfw_strcmp(name, "AD09") == 0) key = GLFW_KEY_O;
+            else if (_glfw_strcmp(name, "AD10") == 0) key = GLFW_KEY_P;
+            else if (_glfw_strcmp(name, "AD11") == 0) key = GLFW_KEY_LEFT_BRACKET;
+            else if (_glfw_strcmp(name, "AD12") == 0) key = GLFW_KEY_RIGHT_BRACKET;
+            else if (_glfw_strcmp(name, "AC01") == 0) key = GLFW_KEY_A;
+            else if (_glfw_strcmp(name, "AC02") == 0) key = GLFW_KEY_S;
+            else if (_glfw_strcmp(name, "AC03") == 0) key = GLFW_KEY_D;
+            else if (_glfw_strcmp(name, "AC04") == 0) key = GLFW_KEY_F;
+            else if (_glfw_strcmp(name, "AC05") == 0) key = GLFW_KEY_G;
+            else if (_glfw_strcmp(name, "AC06") == 0) key = GLFW_KEY_H;
+            else if (_glfw_strcmp(name, "AC07") == 0) key = GLFW_KEY_J;
+            else if (_glfw_strcmp(name, "AC08") == 0) key = GLFW_KEY_K;
+            else if (_glfw_strcmp(name, "AC09") == 0) key = GLFW_KEY_L;
+            else if (_glfw_strcmp(name, "AC10") == 0) key = GLFW_KEY_SEMICOLON;
+            else if (_glfw_strcmp(name, "AC11") == 0) key = GLFW_KEY_APOSTROPHE;
+            else if (_glfw_strcmp(name, "AB01") == 0) key = GLFW_KEY_Z;
+            else if (_glfw_strcmp(name, "AB02") == 0) key = GLFW_KEY_X;
+            else if (_glfw_strcmp(name, "AB03") == 0) key = GLFW_KEY_C;
+            else if (_glfw_strcmp(name, "AB04") == 0) key = GLFW_KEY_V;
+            else if (_glfw_strcmp(name, "AB05") == 0) key = GLFW_KEY_B;
+            else if (_glfw_strcmp(name, "AB06") == 0) key = GLFW_KEY_N;
+            else if (_glfw_strcmp(name, "AB07") == 0) key = GLFW_KEY_M;
+            else if (_glfw_strcmp(name, "AB08") == 0) key = GLFW_KEY_COMMA;
+            else if (_glfw_strcmp(name, "AB09") == 0) key = GLFW_KEY_PERIOD;
+            else if (_glfw_strcmp(name, "AB10") == 0) key = GLFW_KEY_SLASH;
+            else if (_glfw_strcmp(name, "BKSL") == 0) key = GLFW_KEY_BACKSLASH;
+            else if (_glfw_strcmp(name, "LSGT") == 0) key = GLFW_KEY_WORLD_1;
             else key = GLFW_KEY_UNKNOWN;
 
             if ((scancode >= 0) && (scancode < 256))
@@ -625,7 +625,7 @@ static Cursor createHiddenCursor(void)
     unsigned char pixels[16 * 16 * 4];
     GLFWimage image = { 16, 16, pixels };
 
-    memset(pixels, 0, sizeof(pixels));
+    _glfw_memset(pixels, 0, sizeof(pixels));
 
     return _glfwCreateCursorX11(&image, 0, 0);
 }
@@ -728,7 +728,7 @@ int _glfwPlatformInit(void)
 #if !defined(X_HAVE_UTF8_STRING)
     // HACK: If the current locale is C, apply the environment's locale
     //       This is done because the C locale breaks wide character input
-    if (strcmp(setlocale(LC_CTYPE, NULL), "C") == 0)
+    if (_glfw_strcmp(setlocale(LC_CTYPE, NULL), "C") == 0)
         setlocale(LC_CTYPE, "");
 #endif
 
@@ -813,7 +813,7 @@ void _glfwPlatformTerminate(void)
         _glfw.x11.hiddenCursorHandle = (Cursor) 0;
     }
 
-    free(_glfw.x11.clipboardString);
+    _glfw_free(_glfw.x11.clipboardString);
 
     if (_glfw.x11.im)
     {

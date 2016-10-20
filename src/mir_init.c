@@ -37,8 +37,8 @@ static void createKeyTables(void)
 {
     int scancode;
 
-    memset(_glfw.mir.keycodes, -1, sizeof(_glfw.mir.keycodes));
-    memset(_glfw.mir.scancodes, -1, sizeof(_glfw.mir.scancodes));
+    _glfw_memset(_glfw.mir.keycodes, -1, sizeof(_glfw.mir.keycodes));
+    _glfw_memset(_glfw.mir.scancodes, -1, sizeof(_glfw.mir.scancodes));
 
     _glfw.mir.keycodes[KEY_GRAVE]      = GLFW_KEY_GRAVE_ACCENT;
     _glfw.mir.keycodes[KEY_1]          = GLFW_KEY_1;
@@ -201,7 +201,7 @@ int _glfwPlatformInit(void)
     _glfw.mir.defaultConf  = mir_cursor_configuration_from_name(mir_default_cursor_name);
     _glfw.mir.disabledConf = mir_cursor_configuration_from_name(mir_disabled_cursor_name);
 
-    _glfw.mir.eventQueue = calloc(1, sizeof(EventQueue));
+    _glfw.mir.eventQueue = _glfw_calloc(1, sizeof(EventQueue));
     _glfwInitEventQueueMir(_glfw.mir.eventQueue);
 
     error = pthread_mutex_init(&_glfw.mir.eventMutex, NULL);

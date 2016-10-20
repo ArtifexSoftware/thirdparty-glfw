@@ -84,8 +84,8 @@ static const GLFWimage* chooseImage(int count, const GLFWimage* images,
 
     for (i = 0;  i < count;  i++)
     {
-        const int currDiff = abs(images[i].width * images[i].height -
-                                 width * height);
+        const int currDiff = _glfw_abs(images[i].width * images[i].height -
+                                       width * height);
         if (currDiff < leastDiff)
         {
             closest = images + i;
@@ -110,7 +110,7 @@ static HICON createIcon(const GLFWimage* image,
     unsigned char* target = NULL;
     unsigned char* source = image->pixels;
 
-    ZeroMemory(&bi, sizeof(bi));
+    _glfw_memset(&bi, 0, sizeof(bi));
     bi.bV5Size        = sizeof(BITMAPV5HEADER);
     bi.bV5Width       = image->width;
     bi.bV5Height      = -image->height;
@@ -157,7 +157,7 @@ static HICON createIcon(const GLFWimage* image,
         source += 4;
     }
 
-    ZeroMemory(&ii, sizeof(ii));
+    _glfw_memset(&ii, 0, sizeof(ii));
     ii.fIcon    = icon;
     ii.xHotspot = xhot;
     ii.yHotspot = yhot;
@@ -639,7 +639,7 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             if (!window->win32.cursorTracked)
             {
                 TRACKMOUSEEVENT tme;
-                ZeroMemory(&tme, sizeof(tme));
+                _glfw_memset(&tme, 0, sizeof(tme));
                 tme.cbSize = sizeof(tme);
                 tme.dwFlags = TME_LEAVE;
                 tme.hwndTrack = window->win32.handle;
@@ -818,7 +818,7 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             int i;
 
             const int count = DragQueryFileW(drop, 0xffffffff, NULL, 0);
-            char** paths = calloc(count, sizeof(char*));
+            char** paths = _glfw_calloc(count, sizeof(char*));
 
             // Move the mouse to the position of the drop
             DragQueryPoint(drop, &pt);
@@ -827,19 +827,19 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             for (i = 0;  i < count;  i++)
             {
                 const UINT length = DragQueryFileW(drop, i, NULL, 0);
-                WCHAR* buffer = calloc(length + 1, sizeof(WCHAR));
+                WCHAR* buffer = _glfw_calloc(length + 1, sizeof(WCHAR));
 
                 DragQueryFileW(drop, i, buffer, length + 1);
                 paths[i] = _glfwCreateUTF8FromWideStringWin32(buffer);
 
-                free(buffer);
+                _glfw_free(buffer);
             }
 
             _glfwInputDrop(window, count, (const char**) paths);
 
             for (i = 0;  i < count;  i++)
-                free(paths[i]);
-            free(paths);
+                _glfw_free(paths[i]);
+            _glfw_free(paths);
 
             DragFinish(drop);
             return 0;
@@ -903,7 +903,7 @@ static int createNativeWindow(_GLFWwindow* window,
                                            GetModuleHandleW(NULL),
                                            NULL);
 
-    free(wideTitle);
+    _glfw_free(wideTitle);
 
     if (!window->win32.handle)
     {
@@ -939,7 +939,7 @@ GLFWbool _glfwRegisterWindowClassWin32(void)
 {
     WNDCLASSEXW wc;
 
-    ZeroMemory(&wc, sizeof(wc));
+    _glfw_memset(&wc, 0, sizeof(wc));
     wc.cbSize        = sizeof(wc);
     wc.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     wc.lpfnWndProc   = (WNDPROC) windowProc;
@@ -1056,7 +1056,7 @@ void _glfwPlatformSetWindowTitle(_GLFWwindow* window, const char* title)
     }
 
     SetWindowTextW(window->win32.handle, wideTitle);
-    free(wideTitle);
+    _glfw_free(wideTitle);
 }
 
 void _glfwPlatformSetWindowIcon(_GLFWwindow* window,
@@ -1628,7 +1628,7 @@ const char* _glfwPlatformGetClipboardString(_GLFWwindow* window)
         return NULL;
     }
 
-    free(_glfw.win32.clipboardString);
+    _glfw_free(_glfw.win32.clipboardString);
     _glfw.win32.clipboardString =
         _glfwCreateUTF8FromWideStringWin32(buffer);
 
@@ -1689,7 +1689,7 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
 
-    memset(&sci, 0, sizeof(sci));
+    _glfw_memset(&sci, 0, sizeof(sci));
     sci.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
     sci.hinstance = GetModuleHandle(NULL);
     sci.hwnd = window->win32.handle;

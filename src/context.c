@@ -27,7 +27,6 @@
 
 #include "internal.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
@@ -364,9 +363,9 @@ GLFWbool _glfwRefreshContextAttribs(const _GLFWctxconfig* ctxconfig)
 
     for (i = 0;  prefixes[i];  i++)
     {
-        const size_t length = strlen(prefixes[i]);
+        const size_t length = _glfw_strlen(prefixes[i]);
 
-        if (strncmp(version, prefixes[i], length) == 0)
+        if (_glfw_strncmp(version, prefixes[i], length) == 0)
         {
             version += length;
             window->context.client = GLFW_OPENGL_ES_API;
@@ -374,23 +373,29 @@ GLFWbool _glfwRefreshContextAttribs(const _GLFWctxconfig* ctxconfig)
         }
     }
 
-    if (!sscanf(version, "%d.%d.%d",
-                &window->context.major,
-                &window->context.minor,
-                &window->context.revision))
+    while (*version >= '0' && *version <= '9')
     {
-        if (window->context.client == GLFW_OPENGL_API)
-        {
-            _glfwInputError(GLFW_PLATFORM_ERROR,
-                            "No version found in OpenGL version string");
-        }
-        else
-        {
-            _glfwInputError(GLFW_PLATFORM_ERROR,
-                            "No version found in OpenGL ES version string");
-        }
+        window->context.major += *version - '0';
+        version++;
+    }
 
-        return GLFW_FALSE;
+    version++;
+
+    while (*version >= '0' && *version <= '9')
+    {
+        window->context.minor += *version - '0';
+        version++;
+    }
+
+    if (*version == '.')
+    {
+        version++;
+
+        while (*version >= '0' && *version <= '9')
+        {
+            window->context.revision += *version - '0';
+            version++;
+        }
     }
 
     if (window->context.major < ctxconfig->major ||
@@ -552,11 +557,11 @@ GLFWbool _glfwStringInExtensionString(const char* string, const char* extensions
         const char* where;
         const char* terminator;
 
-        where = strstr(start, string);
+        where = _glfw_strstr(start, string);
         if (!where)
             return GLFW_FALSE;
 
-        terminator = where + strlen(string);
+        terminator = where + _glfw_strlen(string);
         if (where == start || *(where - 1) == ' ')
         {
             if (*terminator == ' ' || *terminator == '\0')
@@ -676,7 +681,7 @@ GLFWAPI int glfwExtensionSupported(const char* extension)
                 return GLFW_FALSE;
             }
 
-            if (strcmp(en, extension) == 0)
+            if (_glfw_strcmp(en, extension) == 0)
                 return GLFW_TRUE;
         }
     }

@@ -29,7 +29,6 @@
 
 #include <stdlib.h>
 #include <malloc.h>
-#include <assert.h>
 
 
 // Returns the specified attribute of the specified pixel format
@@ -75,7 +74,7 @@ static int choosePixelFormat(_GLFWwindow* window, const _GLFWfbconfig* desired)
                                           NULL);
     }
 
-    usableConfigs = calloc(nativeCount, sizeof(_GLFWfbconfig));
+    usableConfigs = _glfw_calloc(nativeCount, sizeof(_GLFWfbconfig));
     usableCount = 0;
 
     for (i = 0;  i < nativeCount;  i++)
@@ -194,7 +193,7 @@ static int choosePixelFormat(_GLFWwindow* window, const _GLFWfbconfig* desired)
         _glfwInputError(GLFW_API_UNAVAILABLE,
                         "WGL: The driver does not appear to support OpenGL");
 
-        free(usableConfigs);
+        _glfw_free(usableConfigs);
         return 0;
     }
 
@@ -204,12 +203,12 @@ static int choosePixelFormat(_GLFWwindow* window, const _GLFWfbconfig* desired)
         _glfwInputError(GLFW_FORMAT_UNAVAILABLE,
                         "WGL: Failed to find a suitable pixel format");
 
-        free(usableConfigs);
+        _glfw_free(usableConfigs);
         return 0;
     }
 
     pixelFormat = (int) closest->handle;
-    free(usableConfigs);
+    _glfw_free(usableConfigs);
 
     return pixelFormat;
 }
@@ -259,7 +258,7 @@ static void swapBuffersWGL(_GLFWwindow* window)
     // HACK: Use DwmFlush when desktop composition is enabled
     if (isCompositionEnabled() && !window->monitor)
     {
-        int count = abs(window->context.wgl.interval);
+        int count = _glfw_abs(window->context.wgl.interval);
         while (count--)
             _glfw_DwmFlush();
     }
@@ -344,7 +343,7 @@ static void loadWGLExtensions(void)
     // NOTE: This code will accept the Microsoft GDI ICD; accelerated context
     //       creation failure occurs during manual pixel format enumeration
 
-    ZeroMemory(&pfd, sizeof(pfd));
+    _glfw_memset(&pfd, 0, sizeof(pfd));
     pfd.nSize = sizeof(pfd);
     pfd.nVersion = 1;
     pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;

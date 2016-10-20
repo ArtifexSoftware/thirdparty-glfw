@@ -59,7 +59,7 @@ static GLFWbool chooseGLXFBConfig(const _GLFWfbconfig* desired, GLXFBConfig* res
     // HACK: This is a (hopefully temporary) workaround for Chromium
     //       (VirtualBox GL) not setting the window bit on any GLXFBConfigs
     vendor = glXGetClientString(_glfw.x11.display, GLX_VENDOR);
-    if (strcmp(vendor, "Chromium") == 0)
+    if (_glfw_strcmp(vendor, "Chromium") == 0)
         trustWindowBit = GLFW_FALSE;
 
     nativeConfigs =
@@ -70,7 +70,7 @@ static GLFWbool chooseGLXFBConfig(const _GLFWfbconfig* desired, GLXFBConfig* res
         return GLFW_FALSE;
     }
 
-    usableConfigs = calloc(nativeCount, sizeof(_GLFWfbconfig));
+    usableConfigs = _glfw_calloc(nativeCount, sizeof(_GLFWfbconfig));
     usableCount = 0;
 
     for (i = 0;  i < nativeCount;  i++)
@@ -124,7 +124,7 @@ static GLFWbool chooseGLXFBConfig(const _GLFWfbconfig* desired, GLXFBConfig* res
         *result = (GLXFBConfig) closest->handle;
 
     XFree(nativeConfigs);
-    free(usableConfigs);
+    _glfw_free(usableConfigs);
 
     return closest != NULL;
 }

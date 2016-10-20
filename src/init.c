@@ -88,7 +88,7 @@ void _glfwInputError(int error, const char* format, ...)
 {
     if (_glfwErrorCallback)
     {
-        char buffer[8192];
+        char buffer[1024];
         const char* description;
 
         if (format)
@@ -97,7 +97,7 @@ void _glfwInputError(int error, const char* format, ...)
             va_list vl;
 
             va_start(vl, format);
-            count = vsnprintf(buffer, sizeof(buffer), format, vl);
+            count = _glfw_vsnprintf(buffer, sizeof(buffer), format, vl);
             va_end(vl);
 
             if (count < 0)
@@ -122,7 +122,7 @@ GLFWAPI int glfwInit(void)
     if (_glfwInitialized)
         return GLFW_TRUE;
 
-    memset(&_glfw, 0, sizeof(_glfw));
+    _glfw_memset(&_glfw, 0, sizeof(_glfw));
 
     if (!_glfwPlatformInit())
     {
@@ -148,7 +148,7 @@ GLFWAPI void glfwTerminate(void)
     if (!_glfwInitialized)
         return;
 
-    memset(&_glfw.callbacks, 0, sizeof(_glfw.callbacks));
+    _glfw_memset(&_glfw.callbacks, 0, sizeof(_glfw.callbacks));
 
     while (_glfw.windowListHead)
         glfwDestroyWindow((GLFWwindow*) _glfw.windowListHead);
@@ -171,7 +171,7 @@ GLFWAPI void glfwTerminate(void)
 
     _glfwPlatformTerminate();
 
-    memset(&_glfw, 0, sizeof(_glfw));
+    _glfw_memset(&_glfw, 0, sizeof(_glfw));
     _glfwInitialized = GLFW_FALSE;
 }
 

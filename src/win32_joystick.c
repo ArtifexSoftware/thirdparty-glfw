@@ -183,11 +183,11 @@ static GLFWbool supportsXInput(const GUID* guid)
     if (GetRawInputDeviceList(NULL, &count, sizeof(RAWINPUTDEVICELIST)) != 0)
         return GLFW_FALSE;
 
-    ridl = calloc(count, sizeof(RAWINPUTDEVICELIST));
+    ridl = _glfw_calloc(count, sizeof(RAWINPUTDEVICELIST));
 
     if (GetRawInputDeviceList(ridl, &count, sizeof(RAWINPUTDEVICELIST)) == (UINT) -1)
     {
-        free(ridl);
+        _glfw_free(ridl);
         return GLFW_FALSE;
     }
 
@@ -200,7 +200,7 @@ static GLFWbool supportsXInput(const GUID* guid)
         if (ridl[i].dwType != RIM_TYPEHID)
             continue;
 
-        ZeroMemory(&rdi, sizeof(rdi));
+        _glfw_memset(&rdi, 0, sizeof(rdi));
         rdi.cbSize = sizeof(rdi);
         size = sizeof(rdi);
 
@@ -214,7 +214,7 @@ static GLFWbool supportsXInput(const GUID* guid)
         if (MAKELONG(rdi.hid.dwVendorId, rdi.hid.dwProductId) != (LONG) guid->Data1)
             continue;
 
-        memset(name, 0, sizeof(name));
+        _glfw_memset(name, 0, sizeof(name));
         size = sizeof(name);
 
         if ((INT) GetRawInputDeviceInfoA(ridl[i].hDevice,
@@ -225,14 +225,14 @@ static GLFWbool supportsXInput(const GUID* guid)
         }
 
         name[sizeof(name) - 1] = '\0';
-        if (strstr(name, "IG_"))
+        if (_glfw_strstr(name, "IG_"))
         {
             result = GLFW_TRUE;
             break;
         }
     }
 
-    free(ridl);
+    _glfw_free(ridl);
     return result;
 }
 
@@ -246,11 +246,11 @@ static void closeJoystick(_GLFWjoystickWin32* js)
         IDirectInputDevice8_Release(js->device);
     }
 
-    free(js->name);
-    free(js->axes);
-    free(js->buttons);
-    free(js->objects);
-    memset(js, 0, sizeof(_GLFWjoystickWin32));
+    _glfw_free(js->name);
+    _glfw_free(js->axes);
+    _glfw_free(js->buttons);
+    _glfw_free(js->objects);
+    _glfw_memset(js, 0, sizeof(_GLFWjoystickWin32));
 
     _glfwInputJoystickChange((int) (js - _glfw.win32_js), GLFW_DISCONNECTED);
 }
@@ -268,24 +268,24 @@ static BOOL CALLBACK deviceObjectCallback(const DIDEVICEOBJECTINSTANCEW* doi,
     {
         DIPROPRANGE dipr;
 
-        if (memcmp(&doi->guidType, &GUID_Slider, sizeof(GUID)) == 0)
+        if (_glfw_IsEqualGUID(&doi->guidType, &GUID_Slider))
             object->offset = DIJOFS_SLIDER(data->sliderCount);
-        else if (memcmp(&doi->guidType, &GUID_XAxis, sizeof(GUID)) == 0)
+        else if (_glfw_IsEqualGUID(&doi->guidType, &GUID_XAxis))
             object->offset = DIJOFS_X;
-        else if (memcmp(&doi->guidType, &GUID_YAxis, sizeof(GUID)) == 0)
+        else if (_glfw_IsEqualGUID(&doi->guidType, &GUID_YAxis))
             object->offset = DIJOFS_Y;
-        else if (memcmp(&doi->guidType, &GUID_ZAxis, sizeof(GUID)) == 0)
+        else if (_glfw_IsEqualGUID(&doi->guidType, &GUID_ZAxis))
             object->offset = DIJOFS_Z;
-        else if (memcmp(&doi->guidType, &GUID_RxAxis, sizeof(GUID)) == 0)
+        else if (_glfw_IsEqualGUID(&doi->guidType, &GUID_RxAxis))
             object->offset = DIJOFS_RX;
-        else if (memcmp(&doi->guidType, &GUID_RyAxis, sizeof(GUID)) == 0)
+        else if (_glfw_IsEqualGUID(&doi->guidType, &GUID_RyAxis))
             object->offset = DIJOFS_RY;
-        else if (memcmp(&doi->guidType, &GUID_RzAxis, sizeof(GUID)) == 0)
+        else if (_glfw_IsEqualGUID(&doi->guidType, &GUID_RzAxis))
             object->offset = DIJOFS_RZ;
         else
             return DIENUM_CONTINUE;
 
-        ZeroMemory(&dipr, sizeof(dipr));
+        _glfw_memset(&dipr, 0, sizeof(dipr));
         dipr.diph.dwSize = sizeof(dipr);
         dipr.diph.dwHeaderSize = sizeof(dipr.diph);
         dipr.diph.dwObj = doi->dwType;
@@ -300,7 +300,7 @@ static BOOL CALLBACK deviceObjectCallback(const DIDEVICEOBJECTINSTANCEW* doi,
             return DIENUM_CONTINUE;
         }
 
-        if (memcmp(&doi->guidType, &GUID_Slider, sizeof(GUID)) == 0)
+        if (_glfw_IsEqualGUID(&doi->guidType, &GUID_Slider))
         {
             object->type = _GLFW_TYPE_SLIDER;
             data->sliderCount++;
@@ -341,7 +341,7 @@ static BOOL CALLBACK deviceCallback(const DIDEVICEINSTANCE* di, void* user)
 
     for (jid = GLFW_JOYSTICK_1;  jid <= GLFW_JOYSTICK_LAST;  jid++)
     {
-        if (memcmp(&_glfw.win32_js[jid].guid, &di->guidInstance, sizeof(GUID)) == 0)
+        if (_glfw_IsEqualGUID(&_glfw.win32_js[jid].guid, &di->guidInstance))
             return DIENUM_CONTINUE;
     }
 
@@ -375,7 +375,7 @@ static BOOL CALLBACK deviceCallback(const DIDEVICEINSTANCE* di, void* user)
         return DIENUM_CONTINUE;
     }
 
-    ZeroMemory(&dc, sizeof(dc));
+    _glfw_memset(&dc, 0, sizeof(dc));
     dc.dwSize = sizeof(dc);
 
     if (FAILED(IDirectInputDevice8_GetCapabilities(device, &dc)))
@@ -387,7 +387,7 @@ static BOOL CALLBACK deviceCallback(const DIDEVICEINSTANCE* di, void* user)
         return DIENUM_CONTINUE;
     }
 
-    ZeroMemory(&dipd, sizeof(dipd));
+    _glfw_memset(&dipd, 0, sizeof(dipd));
     dipd.diph.dwSize = sizeof(dipd);
     dipd.diph.dwHeaderSize = sizeof(dipd.diph);
     dipd.diph.dwHow = DIPH_DEVICE;
@@ -404,10 +404,10 @@ static BOOL CALLBACK deviceCallback(const DIDEVICEINSTANCE* di, void* user)
         return DIENUM_CONTINUE;
     }
 
-    memset(&data, 0, sizeof(data));
+    _glfw_memset(&data, 0, sizeof(data));
     data.device = device;
-    data.objects = calloc(dc.dwAxes + dc.dwButtons + dc.dwPOVs,
-                          sizeof(_GLFWjoyobjectWin32));
+    data.objects = _glfw_calloc(dc.dwAxes + dc.dwButtons + dc.dwPOVs,
+                                sizeof(_GLFWjoyobjectWin32));
 
     if (FAILED(IDirectInputDevice8_EnumObjects(device,
                                                deviceObjectCallback,
@@ -418,21 +418,21 @@ static BOOL CALLBACK deviceCallback(const DIDEVICEINSTANCE* di, void* user)
                         "Win32: Failed to enumerate device objects");
 
         IDirectInputDevice8_Release(device);
-        free(data.objects);
+        _glfw_free(data.objects);
         return DIENUM_CONTINUE;
     }
 
-    qsort(data.objects, data.objectCount,
-          sizeof(_GLFWjoyobjectWin32),
-          compareJoystickObjects);
+    _glfw_qsort(data.objects, data.objectCount,
+                sizeof(_GLFWjoyobjectWin32),
+                compareJoystickObjects);
 
     js = _glfw.win32_js + jid;
     js->device = device;
     js->guid = di->guidInstance;
     js->axisCount = data.axisCount + data.sliderCount;
-    js->axes = calloc(js->axisCount, sizeof(float));
+    js->axes = _glfw_calloc(js->axisCount, sizeof(float));
     js->buttonCount += data.buttonCount + data.povCount * 4;
-    js->buttons = calloc(js->buttonCount, 1);
+    js->buttons = _glfw_calloc(js->buttonCount, 1);
     js->objects = data.objects;
     js->objectCount = data.objectCount;
     js->name = _glfwCreateUTF8FromWideStringWin32(di->tszInstanceName);
@@ -475,11 +475,11 @@ static GLFWbool openXinputDevice(DWORD index)
 
     js = _glfw.win32_js + jid;
     js->axisCount = 6;
-    js->axes = calloc(js->axisCount, sizeof(float));
+    js->axes = _glfw_calloc(js->axisCount, sizeof(float));
     js->buttonCount = 14;
-    js->buttons = calloc(js->buttonCount, 1);
+    js->buttons = _glfw_calloc(js->buttonCount, 1);
     js->present = GLFW_TRUE;
-    js->name = strdup(getDeviceDescription(&xic));
+    js->name = _glfw_strdup(getDeviceDescription(&xic));
     js->index = index;
 
     _glfwInputJoystickChange(jid, GLFW_CONNECTED);
@@ -603,9 +603,10 @@ static GLFWbool pollJoystickState(_GLFWjoystickWin32* js, int mode)
         if (mode == _GLFW_PRESENCE_ONLY)
             return GLFW_TRUE;
 
-        if (sqrt((double) (xis.Gamepad.sThumbLX * xis.Gamepad.sThumbLX +
-                           xis.Gamepad.sThumbLY * xis.Gamepad.sThumbLY)) >
-            (double) XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+        if ((xis.Gamepad.sThumbLX * xis.Gamepad.sThumbLX +
+             xis.Gamepad.sThumbLY * xis.Gamepad.sThumbLY) >
+            XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE *
+            XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
         {
             js->axes[0] = (xis.Gamepad.sThumbLX + 0.5f) / 32767.f;
             js->axes[1] = (xis.Gamepad.sThumbLY + 0.5f) / 32767.f;
@@ -616,9 +617,10 @@ static GLFWbool pollJoystickState(_GLFWjoystickWin32* js, int mode)
             js->axes[1] = 0.f;
         }
 
-        if (sqrt((double) (xis.Gamepad.sThumbRX * xis.Gamepad.sThumbRX +
-                           xis.Gamepad.sThumbRY * xis.Gamepad.sThumbRY)) >
-            (double) XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+        if ((xis.Gamepad.sThumbRX * xis.Gamepad.sThumbRX +
+             xis.Gamepad.sThumbRY * xis.Gamepad.sThumbRY) >
+            XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE *
+            XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
         {
             js->axes[2] = (xis.Gamepad.sThumbRX + 0.5f) / 32767.f;
             js->axes[3] = (xis.Gamepad.sThumbRY + 0.5f) / 32767.f;

@@ -441,28 +441,28 @@ static void registryHandleGlobal(void* data,
                                  const char* interface,
                                  uint32_t version)
 {
-    if (strcmp(interface, "wl_compositor") == 0)
+    if (_glfw_strcmp(interface, "wl_compositor") == 0)
     {
         _glfw.wl.compositorVersion = min(3, version);
         _glfw.wl.compositor =
             wl_registry_bind(registry, name, &wl_compositor_interface,
                              _glfw.wl.compositorVersion);
     }
-    else if (strcmp(interface, "wl_shm") == 0)
+    else if (_glfw_strcmp(interface, "wl_shm") == 0)
     {
         _glfw.wl.shm =
             wl_registry_bind(registry, name, &wl_shm_interface, 1);
     }
-    else if (strcmp(interface, "wl_shell") == 0)
+    else if (_glfw_strcmp(interface, "wl_shell") == 0)
     {
         _glfw.wl.shell =
             wl_registry_bind(registry, name, &wl_shell_interface, 1);
     }
-    else if (strcmp(interface, "wl_output") == 0)
+    else if (_glfw_strcmp(interface, "wl_output") == 0)
     {
         _glfwAddOutputWayland(name, version);
     }
-    else if (strcmp(interface, "wl_seat") == 0)
+    else if (_glfw_strcmp(interface, "wl_seat") == 0)
     {
         if (!_glfw.wl.seat)
         {
@@ -471,14 +471,14 @@ static void registryHandleGlobal(void* data,
             wl_seat_add_listener(_glfw.wl.seat, &seatListener, NULL);
         }
     }
-    else if (strcmp(interface, "zwp_relative_pointer_manager_v1") == 0)
+    else if (_glfw_strcmp(interface, "zwp_relative_pointer_manager_v1") == 0)
     {
         _glfw.wl.relativePointerManager =
             wl_registry_bind(registry, name,
                              &zwp_relative_pointer_manager_v1_interface,
                              1);
     }
-    else if (strcmp(interface, "zwp_pointer_constraints_v1") == 0)
+    else if (_glfw_strcmp(interface, "zwp_pointer_constraints_v1") == 0)
     {
         _glfw.wl.pointerConstraints =
             wl_registry_bind(registry, name,
@@ -505,8 +505,8 @@ static void createKeyTables(void)
 {
     int scancode;
 
-    memset(_glfw.wl.keycodes, -1, sizeof(_glfw.wl.keycodes));
-    memset(_glfw.wl.scancodes, -1, sizeof(_glfw.wl.scancodes));
+    _glfw_memset(_glfw.wl.keycodes, -1, sizeof(_glfw.wl.keycodes));
+    _glfw_memset(_glfw.wl.scancodes, -1, sizeof(_glfw.wl.scancodes));
 
     _glfw.wl.keycodes[KEY_GRAVE]      = GLFW_KEY_GRAVE_ACCENT;
     _glfw.wl.keycodes[KEY_1]          = GLFW_KEY_1;
@@ -650,7 +650,7 @@ int _glfwPlatformInit(void)
     _glfw.wl.registry = wl_display_get_registry(_glfw.wl.display);
     wl_registry_add_listener(_glfw.wl.registry, &registryListener, NULL);
 
-    _glfw.wl.monitors = calloc(4, sizeof(_GLFWmonitor*));
+    _glfw.wl.monitors = _glfw_calloc(4, sizeof(_GLFWmonitor*));
     _glfw.wl.monitorsSize = 4;
 
     createKeyTables();

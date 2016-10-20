@@ -180,6 +180,11 @@ typedef BOOL (WINAPI * CHANGEWINDOWMESSAGEFILTEREX_T)(HWND,UINT,DWORD,PCHANGEFIL
 #define _glfw_SetProcessDPIAware _glfw.win32.user32.SetProcessDPIAware
 #define _glfw_ChangeWindowMessageFilterEx _glfw.win32.user32.ChangeWindowMessageFilterEx
 
+// ole32.dll function pointer typedefs
+#undef IsEqualGUID
+#define _glfw_IsEqualGUID _glfw.win32.ole32.IsEqualGUID
+typedef BOOL (WINAPI * ISEQUALGUID_T)(REFGUID,REFGUID);
+
 // dwmapi.dll function pointer typedefs
 typedef HRESULT (WINAPI * DWMISCOMPOSITIONENABLED_T)(BOOL*);
 typedef HRESULT (WINAPI * DWMFLUSH_T)(VOID);
@@ -279,6 +284,11 @@ typedef struct _GLFWlibraryWin32
         SETPROCESSDPIAWARE_T          SetProcessDPIAware;
         CHANGEWINDOWMESSAGEFILTEREX_T ChangeWindowMessageFilterEx;
     } user32;
+
+    struct {
+        HINSTANCE       instance;
+        ISEQUALGUID_T   IsEqualGUID;
+    } ole32;
 
     struct {
         HINSTANCE       instance;

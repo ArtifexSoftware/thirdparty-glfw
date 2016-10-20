@@ -58,7 +58,7 @@ static GLFWbool openJoystickDevice(const char* path)
         if (!_glfw.linux_js.js[jid].present)
             continue;
 
-        if (strcmp(_glfw.linux_js.js[jid].path, path) == 0)
+        if (_glfw_strcmp(_glfw.linux_js.js[jid].path, path) == 0)
             return GLFW_FALSE;
     }
 
@@ -89,17 +89,17 @@ static GLFWbool openJoystickDevice(const char* path)
 
     js = _glfw.linux_js.js + jid;
     js->present = GLFW_TRUE;
-    js->name = strdup(name);
-    js->path = strdup(path);
+    js->name = _glfw_strdup(name);
+    js->path = _glfw_strdup(path);
     js->fd = fd;
 
     ioctl(fd, JSIOCGAXES, &axisCount);
     js->axisCount = (int) axisCount;
-    js->axes = calloc(axisCount, sizeof(float));
+    js->axes = _glfw_calloc(axisCount, sizeof(float));
 
     ioctl(fd, JSIOCGBUTTONS, &buttonCount);
     js->buttonCount = (int) buttonCount;
-    js->buttons = calloc(buttonCount, 1);
+    js->buttons = _glfw_calloc(buttonCount, 1);
 
     _glfwInputJoystickChange(jid, GLFW_CONNECTED);
     return GLFW_TRUE;
@@ -127,12 +127,12 @@ static GLFWbool pollJoystickEvents(_GLFWjoystickLinux* js)
             // Reset the joystick slot if the device was disconnected
             if (errno == ENODEV)
             {
-                free(js->axes);
-                free(js->buttons);
-                free(js->name);
-                free(js->path);
+                _glfw_free(js->axes);
+                _glfw_free(js->buttons);
+                _glfw_free(js->name);
+                _glfw_free(js->path);
 
-                memset(js, 0, sizeof(_GLFWjoystickLinux));
+                _glfw_memset(js, 0, sizeof(_GLFWjoystickLinux));
 
                 _glfwInputJoystickChange(js - _glfw.linux_js.js,
                                          GLFW_DISCONNECTED);
@@ -160,7 +160,7 @@ static int compareJoysticks(const void* fp, const void* sp)
 {
     const _GLFWjoystickLinux* fj = fp;
     const _GLFWjoystickLinux* sj = sp;
-    return strcmp(fj->path, sj->path);
+    return _glfw_strcmp(fj->path, sj->path);
 }
 #endif // __linux__
 
@@ -237,7 +237,9 @@ GLFWbool _glfwInitJoysticksLinux(void)
         // Continue with no joysticks detected
     }
 
-    qsort(_glfw.linux_js.js, count, sizeof(_GLFWjoystickLinux), compareJoysticks);
+    _glfw_qsort(_glfw.linux_js.js, count,
+                sizeof(_GLFWjoystickLinux),
+                compareJoysticks);
 #endif // __linux__
 
     return GLFW_TRUE;
@@ -255,10 +257,10 @@ void _glfwTerminateJoysticksLinux(void)
         if (_glfw.linux_js.js[i].present)
         {
             close(_glfw.linux_js.js[i].fd);
-            free(_glfw.linux_js.js[i].axes);
-            free(_glfw.linux_js.js[i].buttons);
-            free(_glfw.linux_js.js[i].name);
-            free(_glfw.linux_js.js[i].path);
+            _glfw_free(_glfw.linux_js.js[i].axes);
+            _glfw_free(_glfw.linux_js.js[i].buttons);
+            _glfw_free(_glfw.linux_js.js[i].name);
+            _glfw_free(_glfw.linux_js.js[i].path);
         }
     }
 

@@ -667,17 +667,17 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
     if (count)
     {
         NSEnumerator* e = [files objectEnumerator];
-        char** paths = calloc(count, sizeof(char*));
+        char** paths = _glfw_calloc(count, sizeof(char*));
         int i;
 
         for (i = 0;  i < count;  i++)
-            paths[i] = strdup([[e nextObject] UTF8String]);
+            paths[i] = _glfw_strdup([[e nextObject] UTF8String]);
 
         _glfwInputDrop(window, count, (const char**) paths);
 
         for (i = 0;  i < count;  i++)
-            free(paths[i]);
-        free(paths);
+            _glfw_free(paths[i]);
+        _glfw_free(paths);
     }
 
     return YES;
@@ -1580,7 +1580,7 @@ int _glfwPlatformCreateCursor(_GLFWcursor* cursor,
     if (rep == nil)
         return GLFW_FALSE;
 
-    memcpy([rep bitmapData], image->pixels, image->width * image->height * 4);
+    _glfw_memcpy([rep bitmapData], image->pixels, image->width * image->height * 4);
 
     native = [[NSImage alloc] initWithSize:NSMakeSize(image->width, image->height)];
     [native addRepresentation:rep];
@@ -1655,8 +1655,8 @@ const char* _glfwPlatformGetClipboardString(_GLFWwindow* window)
         return NULL;
     }
 
-    free(_glfw.ns.clipboardString);
-    _glfw.ns.clipboardString = strdup([object UTF8String]);
+    _glfw_free(_glfw.ns.clipboardString);
+    _glfw.ns.clipboardString = _glfw_strdup([object UTF8String]);
 
     return _glfw.ns.clipboardString;
 }
@@ -1717,7 +1717,7 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
 
     [window->ns.view setWantsLayer:YES];
 
-    memset(&sci, 0, sizeof(sci));
+    _glfw_memset(&sci, 0, sizeof(sci));
     sci.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
     sci.pView = window->ns.view;
 

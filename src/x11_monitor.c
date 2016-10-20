@@ -214,7 +214,7 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
         RROutput primary = XRRGetOutputPrimary(_glfw.x11.display,
                                                _glfw.x11.root);
 
-        monitors = calloc(sr->noutput, sizeof(_GLFWmonitor*));
+        monitors = _glfw_calloc(sr->noutput, sizeof(_GLFWmonitor*));
 
         if (_glfw.x11.xinerama.available)
             screens = XineramaQueryScreens(_glfw.x11.display, &screenCount);
@@ -286,14 +286,14 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
                             "X11: RandR monitor support seems broken");
 
             _glfw.x11.randr.monitorBroken = GLFW_TRUE;
-            free(monitors);
+            _glfw_free(monitors);
             monitors = NULL;
         }
     }
 
     if (!monitors)
     {
-        monitors = calloc(1, sizeof(_GLFWmonitor*));
+        monitors = _glfw_calloc(1, sizeof(_GLFWmonitor*));
         monitors[0] = _glfwAllocMonitor("Display",
                                         DisplayWidthMM(_glfw.x11.display,
                                                        _glfw.x11.screen),
@@ -348,7 +348,7 @@ GLFWvidmode* _glfwPlatformGetVideoModes(_GLFWmonitor* monitor, int* count)
         ci = XRRGetCrtcInfo(_glfw.x11.display, sr, monitor->x11.crtc);
         oi = XRRGetOutputInfo(_glfw.x11.display, sr, monitor->x11.output);
 
-        result = calloc(oi->nmode, sizeof(GLFWvidmode));
+        result = _glfw_calloc(oi->nmode, sizeof(GLFWvidmode));
 
         for (i = 0;  i < oi->nmode;  i++)
         {
@@ -379,7 +379,7 @@ GLFWvidmode* _glfwPlatformGetVideoModes(_GLFWmonitor* monitor, int* count)
     else
     {
         *count = 1;
-        result = calloc(1, sizeof(GLFWvidmode));
+        result = _glfw_calloc(1, sizeof(GLFWvidmode));
         _glfwPlatformGetVideoMode(monitor, result);
     }
 
@@ -423,9 +423,9 @@ void _glfwPlatformGetGammaRamp(_GLFWmonitor* monitor, GLFWgammaramp* ramp)
 
         _glfwAllocGammaArrays(ramp, size);
 
-        memcpy(ramp->red, gamma->red, size * sizeof(unsigned short));
-        memcpy(ramp->green, gamma->green, size * sizeof(unsigned short));
-        memcpy(ramp->blue, gamma->blue, size * sizeof(unsigned short));
+        _glfw_memcpy(ramp->red, gamma->red, size * sizeof(short));
+        _glfw_memcpy(ramp->green, gamma->green, size * sizeof(short));
+        _glfw_memcpy(ramp->blue, gamma->blue, size * sizeof(short));
 
         XRRFreeGamma(gamma);
     }
@@ -450,9 +450,9 @@ void _glfwPlatformSetGammaRamp(_GLFWmonitor* monitor, const GLFWgammaramp* ramp)
     {
         XRRCrtcGamma* gamma = XRRAllocGamma(ramp->size);
 
-        memcpy(gamma->red, ramp->red, ramp->size * sizeof(unsigned short));
-        memcpy(gamma->green, ramp->green, ramp->size * sizeof(unsigned short));
-        memcpy(gamma->blue, ramp->blue, ramp->size * sizeof(unsigned short));
+        _glfw_memcpy(gamma->red, ramp->red, ramp->size * sizeof(short));
+        _glfw_memcpy(gamma->green, ramp->green, ramp->size * sizeof(short));
+        _glfw_memcpy(gamma->blue, ramp->blue, ramp->size * sizeof(short));
 
         XRRSetCrtcGamma(_glfw.x11.display, monitor->x11.crtc, gamma);
         XRRFreeGamma(gamma);

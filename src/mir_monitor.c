@@ -52,7 +52,7 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
             out->current_mode < out->num_modes)
         {
             found++;
-            monitors        = realloc(monitors, sizeof(_GLFWmonitor*) * found);
+            monitors        = _glfw_realloc(monitors, sizeof(_GLFWmonitor*) * found);
             monitors[i]     = _glfwAllocMonitor("Unknown",
                                                 out->physical_width_mm,
                                                 out->physical_height_mm);
@@ -132,7 +132,7 @@ GLFWvidmode* _glfwPlatformGetVideoModes(_GLFWmonitor* monitor, int* found)
         if (out->output_id != monitor->mir.outputId)
             continue;
 
-        modes = calloc(out->num_modes, sizeof(GLFWvidmode));
+        modes = _glfw_calloc(out->num_modes, sizeof(GLFWvidmode));
 
         for (*found = 0;  *found < out->num_modes;  (*found)++)
         {

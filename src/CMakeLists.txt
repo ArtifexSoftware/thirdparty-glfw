@@ -15,8 +15,8 @@ elseif (_GLFW_WIN32)
     set(glfw_HEADERS ${common_HEADERS} win32_platform.h win32_joystick.h
                      wgl_context.h egl_context.h)
     set(glfw_SOURCES ${common_SOURCES} win32_init.c win32_joystick.c
-                     win32_monitor.c win32_time.c win32_tls.c win32_window.c
-                     wgl_context.c egl_context.c)
+                     win32_monitor.c win32_stdlib.c win32_time.c win32_tls.c
+                     win32_window.c wgl_context.c egl_context.c)
 elseif (_GLFW_X11)
     set(glfw_HEADERS ${common_HEADERS} x11_platform.h xkb_unicode.h
                      linux_joystick.h posix_time.h posix_tls.h glx_context.h

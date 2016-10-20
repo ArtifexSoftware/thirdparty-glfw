@@ -76,8 +76,8 @@ static void mode(void* data,
     {
         int size = monitor->wl.modesSize * 2;
         _GLFWvidmodeWayland* modes =
-            realloc(monitor->wl.modes,
-                    size * sizeof(_GLFWvidmodeWayland));
+            _glfw_realloc(monitor->wl.modes,
+                          size * sizeof(_GLFWvidmodeWayland));
         monitor->wl.modes = modes;
         monitor->wl.modesSize = size;
     }
@@ -120,7 +120,7 @@ void _glfwAddOutputWayland(uint32_t name, uint32_t version)
     struct wl_output *output;
     char nameStr[80];
 
-    memset(nameStr, 0, sizeof(nameStr));
+    _glfw_memset(nameStr, 0, sizeof(nameStr));
     snprintf(nameStr, 79, "wl_output@%u", name);
 
     if (version < 2)
@@ -142,7 +142,7 @@ void _glfwAddOutputWayland(uint32_t name, uint32_t version)
         return;
     }
 
-    monitor->wl.modes = calloc(4, sizeof(_GLFWvidmodeWayland));
+    monitor->wl.modes = _glfw_calloc(4, sizeof(_GLFWvidmodeWayland));
     monitor->wl.modesSize = 4;
 
     monitor->wl.scale = 1;
@@ -155,7 +155,7 @@ void _glfwAddOutputWayland(uint32_t name, uint32_t version)
         _GLFWmonitor** monitors = _glfw.wl.monitors;
         int size = _glfw.wl.monitorsSize * 2;
 
-        monitors = realloc(monitors, size * sizeof(_GLFWmonitor*));
+        monitors = _glfw_realloc(monitors, size * sizeof(_GLFWmonitor*));
 
         _glfw.wl.monitors = monitors;
         _glfw.wl.monitorsSize = size;
@@ -178,12 +178,12 @@ _GLFWmonitor** _glfwPlatformGetMonitors(int* count)
     if (_glfw.wl.monitorsCount == 0)
         goto err;
 
-    monitors = calloc(monitorsCount, sizeof(_GLFWmonitor*));
+    monitors = _glfw_calloc(monitorsCount, sizeof(_GLFWmonitor*));
 
     for (i = 0; i < monitorsCount; i++)
     {
         _GLFWmonitor* origMonitor = _glfw.wl.monitors[i];
-        monitor = calloc(1, sizeof(_GLFWmonitor));
+        monitor = _glfw_calloc(1, sizeof(_GLFWmonitor));
 
         monitor->modes =
             _glfwPlatformGetVideoModes(origMonitor,
@@ -218,7 +218,7 @@ GLFWvidmode* _glfwPlatformGetVideoModes(_GLFWmonitor* monitor, int* found)
     GLFWvidmode *modes;
     int i, modesCount = monitor->wl.modesCount;
 
-    modes = calloc(modesCount, sizeof(GLFWvidmode));
+    modes = _glfw_calloc(modesCount, sizeof(GLFWvidmode));
 
     for (i = 0;  i < modesCount;  i++)
         modes[i] = monitor->wl.modes[i].base;

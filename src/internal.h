@@ -975,6 +975,23 @@ void _glfwInputJoystickChange(int jid, int event);
 // Utility functions
 //========================================================================
 
+void _glfw_memset(void* ptr, int c, size_t size);
+void* _glfw_memcpy(void* d, const void* s, size_t size);
+void* _glfw_calloc(size_t count, size_t size);
+void* _glfw_realloc(void* ptr, size_t size);
+void _glfw_free(void* ptr);
+char* _glfw_strdup(const char* str);
+size_t _glfw_strlen(const char* str);
+int _glfw_strcmp(const char* a, const char* b);
+int _glfw_strncmp(const char* a, const char* b, size_t l);
+char* _glfw_strstr(const char* a, const char* b);
+char* _glfw_strcpy(char* d, const char* s);
+int _glfw_vsnprintf(char* str, size_t size, const char* fmt, va_list list);
+void _glfw_qsort(void* ptr, size_t count, size_t size, int (*comp)(const void*, const void*));
+double _glfw_pow(double x, double y);
+int _glfw_abs(int x);
+#define assert(x)
+
 /*! @ingroup utility
  */
 const GLFWvidmode* _glfwChooseVideoMode(_GLFWmonitor* monitor,

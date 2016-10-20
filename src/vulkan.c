@@ -27,7 +27,6 @@
 
 #include "internal.h"
 
-#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -107,7 +106,7 @@ GLFWbool _glfwInitVulkan(int mode)
         return GLFW_FALSE;
     }
 
-    ep = calloc(count, sizeof(VkExtensionProperties));
+    ep = _glfw_calloc(count, sizeof(VkExtensionProperties));
 
     err = vkEnumerateInstanceExtensionProperties(NULL, &count, ep);
     if (err)
@@ -116,36 +115,36 @@ GLFWbool _glfwInitVulkan(int mode)
                         "Vulkan: Failed to query instance extensions: %s",
                         _glfwGetVulkanResultString(err));
 
-        free(ep);
+        _glfw_free(ep);
         _glfwTerminateVulkan();
         return GLFW_FALSE;
     }
 
     for (i = 0;  i < count;  i++)
     {
-        if (strcmp(ep[i].extensionName, "VK_KHR_surface") == 0)
+        if (_glfw_strcmp(ep[i].extensionName, "VK_KHR_surface") == 0)
             _glfw.vk.KHR_surface = GLFW_TRUE;
 #if defined(_GLFW_WIN32)
-        else if (strcmp(ep[i].extensionName, "VK_KHR_win32_surface") == 0)
+        else if (_glfw_strcmp(ep[i].extensionName, "VK_KHR_win32_surface") == 0)
             _glfw.vk.KHR_win32_surface = GLFW_TRUE;
 #elif defined(_GLFW_COCOA)
-        else if (strcmp(ep[i].extensionName, "VK_MVK_macos_surface") == 0)
+        else if (_glfw_strcmp(ep[i].extensionName, "VK_MVK_macos_surface") == 0)
             _glfw.vk.MVK_macos_surface = GLFW_TRUE;
 #elif defined(_GLFW_X11)
-        else if (strcmp(ep[i].extensionName, "VK_KHR_xlib_surface") == 0)
+        else if (_glfw_strcmp(ep[i].extensionName, "VK_KHR_xlib_surface") == 0)
             _glfw.vk.KHR_xlib_surface = GLFW_TRUE;
-        else if (strcmp(ep[i].extensionName, "VK_KHR_xcb_surface") == 0)
+        else if (_glfw_strcmp(ep[i].extensionName, "VK_KHR_xcb_surface") == 0)
             _glfw.vk.KHR_xcb_surface = GLFW_TRUE;
 #elif defined(_GLFW_WAYLAND)
-        else if (strcmp(ep[i].extensionName, "VK_KHR_wayland_surface") == 0)
+        else if (_glfw_strcmp(ep[i].extensionName, "VK_KHR_wayland_surface") == 0)
             _glfw.vk.KHR_wayland_surface = GLFW_TRUE;
 #elif defined(_GLFW_MIR)
-        else if (strcmp(ep[i].extensionName, "VK_KHR_mir_surface") == 0)
+        else if (_glfw_strcmp(ep[i].extensionName, "VK_KHR_mir_surface") == 0)
             _glfw.vk.KHR_mir_surface = GLFW_TRUE;
 #endif
     }
 
-    free(ep);
+    _glfw_free(ep);
 
     _glfw.vk.available = GLFW_TRUE;
 
@@ -255,7 +254,7 @@ GLFWAPI GLFWvkproc glfwGetInstanceProcAddress(VkInstance instance,
 #if defined(_GLFW_VULKAN_STATIC)
     if (!proc)
     {
-        if (strcmp(procname, "vkGetInstanceProcAddr") == 0)
+        if (_glfw_strcmp(procname, "vkGetInstanceProcAddr") == 0)
             return (GLFWvkproc) vkGetInstanceProcAddr;
     }
 #else

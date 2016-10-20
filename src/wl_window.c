@@ -139,8 +139,8 @@ static void handleEnter(void *data,
     {
         ++window->wl.monitorsSize;
         window->wl.monitors =
-            realloc(window->wl.monitors,
-                    window->wl.monitorsSize * sizeof(_GLFWmonitor*));
+            _glfw_realloc(window->wl.monitors,
+                          window->wl.monitorsSize * sizeof(_GLFWmonitor*));
     }
 
     window->wl.monitors[window->wl.monitorsCount++] = monitor;
@@ -337,13 +337,13 @@ createAnonymousFile(off_t size)
         return -1;
     }
 
-    name = calloc(strlen(path) + sizeof(template), 1);
-    strcpy(name, path);
-    strcat(name, template);
+    name = _glfw_calloc(_glfw_strlen(path) + sizeof(template), 1);
+    _glfw_strcpy(name, path);
+    _glfw_strcat(name, template);
 
     fd = createTmpfileCloexec(name);
 
-    free(name);
+    _glfw_free(name);
 
     if (fd < 0)
         return -1;
@@ -400,7 +400,7 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
     }
 
     if (wndconfig->title)
-        window->wl.title = strdup(wndconfig->title);
+        window->wl.title = _glfw_strdup(wndconfig->title);
 
     if (wndconfig->visible)
     {
@@ -417,7 +417,7 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
 
     window->wl.currentCursor = NULL;
 
-    window->wl.monitors = calloc(1, sizeof(_GLFWmonitor*));
+    window->wl.monitors = _glfw_calloc(1, sizeof(_GLFWmonitor*));
     window->wl.monitorsCount = 0;
     window->wl.monitorsSize = 1;
 
@@ -449,15 +449,15 @@ void _glfwPlatformDestroyWindow(_GLFWwindow* window)
     if (window->wl.surface)
         wl_surface_destroy(window->wl.surface);
 
-    free(window->wl.title);
-    free(window->wl.monitors);
+    _glfw_free(window->wl.title);
+    _glfw_free(window->wl.monitors);
 }
 
 void _glfwPlatformSetWindowTitle(_GLFWwindow* window, const char* title)
 {
     if (window->wl.title)
-        free(window->wl.title);
-    window->wl.title = strdup(title);
+        _glfw_free(window->wl.title);
+    window->wl.title = _glfw_strdup(title);
     if (window->wl.shellSurface)
         wl_shell_surface_set_title(window->wl.shellSurface, title);
 }
@@ -1011,7 +1011,7 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
 
-    memset(&sci, 0, sizeof(sci));
+    _glfw_memset(&sci, 0, sizeof(sci));
     sci.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
     sci.display = _glfw.wl.display;
     sci.surface = window->wl.surface;

@@ -27,7 +27,6 @@
 
 #include "internal.h"
 
-#include <assert.h>
 #include <float.h>
 #include <stdlib.h>
 
@@ -378,7 +377,7 @@ GLFWAPI GLFWcursor* glfwCreateCursor(const GLFWimage* image, int xhot, int yhot)
 
     _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
 
-    cursor = calloc(1, sizeof(_GLFWcursor));
+    cursor = _glfw_calloc(1, sizeof(_GLFWcursor));
     cursor->next = _glfw.cursorListHead;
     _glfw.cursorListHead = cursor;
 
@@ -408,7 +407,7 @@ GLFWAPI GLFWcursor* glfwCreateStandardCursor(int shape)
         return NULL;
     }
 
-    cursor = calloc(1, sizeof(_GLFWcursor));
+    cursor = _glfw_calloc(1, sizeof(_GLFWcursor));
     cursor->next = _glfw.cursorListHead;
     _glfw.cursorListHead = cursor;
 
@@ -453,7 +452,7 @@ GLFWAPI void glfwDestroyCursor(GLFWcursor* handle)
         *prev = cursor->next;
     }
 
-    free(cursor);
+    _glfw_free(cursor);
 }
 
 GLFWAPI void glfwSetCursor(GLFWwindow* windowHandle, GLFWcursor* cursorHandle)

@@ -27,7 +27,6 @@
 
 #include "internal.h"
 
-#include <assert.h>
 #include <math.h>
 #include <float.h>
 #include <string.h>
@@ -72,9 +71,9 @@ static GLFWbool refreshVideoModes(_GLFWmonitor* monitor)
     if (!modes)
         return GLFW_FALSE;
 
-    qsort(modes, modeCount, sizeof(GLFWvidmode), compareVideoModes);
+    _glfw_qsort(modes, modeCount, sizeof(GLFWvidmode), compareVideoModes);
 
-    free(monitor->modes);
+    _glfw_free(monitor->modes);
     monitor->modes = modes;
     monitor->modeCount = modeCount;
 
@@ -174,8 +173,8 @@ void _glfwInputMonitorWindowChange(_GLFWmonitor* monitor, _GLFWwindow* window)
 
 _GLFWmonitor* _glfwAllocMonitor(const char* name, int widthMM, int heightMM)
 {
-    _GLFWmonitor* monitor = calloc(1, sizeof(_GLFWmonitor));
-    monitor->name = strdup(name);
+    _GLFWmonitor* monitor = _glfw_calloc(1, sizeof(_GLFWmonitor));
+    monitor->name = _glfw_strdup(name);
     monitor->widthMM = widthMM;
     monitor->heightMM = heightMM;
 
@@ -190,26 +189,26 @@ void _glfwFreeMonitor(_GLFWmonitor* monitor)
     _glfwFreeGammaArrays(&monitor->originalRamp);
     _glfwFreeGammaArrays(&monitor->currentRamp);
 
-    free(monitor->modes);
-    free(monitor->name);
-    free(monitor);
+    _glfw_free(monitor->modes);
+    _glfw_free(monitor->name);
+    _glfw_free(monitor);
 }
 
 void _glfwAllocGammaArrays(GLFWgammaramp* ramp, unsigned int size)
 {
-    ramp->red = calloc(size, sizeof(unsigned short));
-    ramp->green = calloc(size, sizeof(unsigned short));
-    ramp->blue = calloc(size, sizeof(unsigned short));
+    ramp->red = _glfw_calloc(size, sizeof(unsigned short));
+    ramp->green = _glfw_calloc(size, sizeof(unsigned short));
+    ramp->blue = _glfw_calloc(size, sizeof(unsigned short));
     ramp->size = size;
 }
 
 void _glfwFreeGammaArrays(GLFWgammaramp* ramp)
 {
-    free(ramp->red);
-    free(ramp->green);
-    free(ramp->blue);
+    _glfw_free(ramp->red);
+    _glfw_free(ramp->green);
+    _glfw_free(ramp->blue);
 
-    memset(ramp, 0, sizeof(GLFWgammaramp));
+    _glfw_memset(ramp, 0, sizeof(GLFWgammaramp));
 }
 
 void _glfwFreeMonitors(_GLFWmonitor** monitors, int count)
@@ -219,7 +218,7 @@ void _glfwFreeMonitors(_GLFWmonitor** monitors, int count)
     for (i = 0;  i < count;  i++)
         _glfwFreeMonitor(monitors[i]);
 
-    free(monitors);
+    _glfw_free(monitors);
 }
 
 const GLFWvidmode* _glfwChooseVideoMode(_GLFWmonitor* monitor,
@@ -242,19 +241,19 @@ const GLFWvidmode* _glfwChooseVideoMode(_GLFWmonitor* monitor,
         colorDiff = 0;
 
         if (desired->redBits != GLFW_DONT_CARE)
-            colorDiff += abs(current->redBits - desired->redBits);
+            colorDiff += _glfw_abs(current->redBits - desired->redBits);
         if (desired->greenBits != GLFW_DONT_CARE)
-            colorDiff += abs(current->greenBits - desired->greenBits);
+            colorDiff += _glfw_abs(current->greenBits - desired->greenBits);
         if (desired->blueBits != GLFW_DONT_CARE)
-            colorDiff += abs(current->blueBits - desired->blueBits);
+            colorDiff += _glfw_abs(current->blueBits - desired->blueBits);
 
-        sizeDiff = abs((current->width - desired->width) *
-                       (current->width - desired->width) +
-                       (current->height - desired->height) *
-                       (current->height - desired->height));
+        sizeDiff = _glfw_abs((current->width - desired->width) *
+                             (current->width - desired->width) +
+                             (current->height - desired->height) *
+                             (current->height - desired->height));
 
         if (desired->refreshRate != GLFW_DONT_CARE)
-            rateDiff = abs(current->refreshRate - desired->refreshRate);
+            rateDiff = _glfw_abs(current->refreshRate - desired->refreshRate);
         else
             rateDiff = UINT_MAX - current->refreshRate;
 
@@ -420,7 +419,7 @@ GLFWAPI void glfwSetGamma(GLFWmonitor* handle, float gamma)
         // Calculate intensity
         value = i / 255.0;
         // Apply gamma curve
-        value = pow(value, 1.0 / gamma) * 65535.0 + 0.5;
+        value = _glfw_pow(value, 1.0 / gamma) * 65535.0 + 0.5;
 
         // Clamp to value range
         if (value > 65535.0)

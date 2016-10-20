@@ -28,7 +28,6 @@
 
 #include "internal.h"
 
-#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include <float.h>
@@ -168,7 +167,7 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
     if (!_glfwIsValidContextConfig(&ctxconfig))
         return NULL;
 
-    window = calloc(1, sizeof(_GLFWwindow));
+    window = _glfw_calloc(1, sizeof(_GLFWwindow));
     window->next = _glfw.windowListHead;
     _glfw.windowListHead = window;
 
@@ -239,7 +238,7 @@ void glfwDefaultWindowHints(void)
 {
     _GLFW_REQUIRE_INIT();
 
-    memset(&_glfw.hints, 0, sizeof(_glfw.hints));
+    _glfw_memset(&_glfw.hints, 0, sizeof(_glfw.hints));
 
     // The default is OpenGL with minimum version 1.0
     _glfw.hints.context.client = GLFW_OPENGL_API;
@@ -390,7 +389,7 @@ GLFWAPI void glfwDestroyWindow(GLFWwindow* handle)
         return;
 
     // Clear all callbacks to avoid exposing a half torn-down window object
-    memset(&window->callbacks, 0, sizeof(window->callbacks));
+    _glfw_memset(&window->callbacks, 0, sizeof(window->callbacks));
 
     // The window's context must not be current on another thread when the
     // window is destroyed
@@ -409,7 +408,7 @@ GLFWAPI void glfwDestroyWindow(GLFWwindow* handle)
         *prev = window->next;
     }
 
-    free(window);
+    _glfw_free(window);
 }
 
 GLFWAPI int glfwWindowShouldClose(GLFWwindow* handle)

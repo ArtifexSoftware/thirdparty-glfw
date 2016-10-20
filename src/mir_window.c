@@ -41,7 +41,7 @@ typedef struct EventNode
 static void deleteNode(EventQueue* queue, EventNode* node)
 {
     mir_event_unref(node->event);
-    free(node);
+    _glfw_free(node);
 }
 
 static GLFWbool emptyEventQueue(EventQueue* queue)
@@ -54,7 +54,7 @@ static GLFWbool emptyEventQueue(EventQueue* queue)
 //      for single threaded event handling.
 static EventNode* newEventNode(const MirEvent* event, _GLFWwindow* context)
 {
-    EventNode* newNode = calloc(1, sizeof(EventNode));
+    EventNode* newNode = _glfw_calloc(1, sizeof(EventNode));
     newNode->event     = mir_event_ref(event);
     newNode->window    = context;
 
@@ -363,7 +363,7 @@ void _glfwDeleteEventQueueMir(EventQueue* queue)
             node = node_next;
         }
 
-        free(queue);
+        _glfw_free(queue);
     }
 }
 
@@ -690,7 +690,7 @@ int _glfwPlatformCreateCursor(_GLFWcursor* cursor,
 
     for (i = 0; i < i_h; i++)
     {
-        memcpy(dest, pixels, bytes_per_row);
+        _glfw_memcpy(dest, pixels, bytes_per_row);
         dest   += r_stride;
         pixels += r_stride;
     }
@@ -874,7 +874,7 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
 
-    memset(&sci, 0, sizeof(sci));
+    _glfw_memset(&sci, 0, sizeof(sci));
     sci.sType = VK_STRUCTURE_TYPE_MIR_SURFACE_CREATE_INFO_KHR;
     sci.connection = _glfw.mir.connection;
     sci.mirSurface = window->mir.surface;

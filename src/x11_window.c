@@ -232,7 +232,7 @@ static void sendEventToWM(_GLFWwindow* window, Atom type,
                           long a, long b, long c, long d, long e)
 {
     XEvent event;
-    memset(&event, 0, sizeof(event));
+    _glfw_memset(&event, 0, sizeof(event));
 
     event.type = ClientMessage;
     event.xclient.window = window->x11.handle;
@@ -409,13 +409,13 @@ static char** parseUriList(char* text, int* count)
         if (line[0] == '#')
             continue;
 
-        if (strncmp(line, prefix, strlen(prefix)) == 0)
-            line += strlen(prefix);
+        if (_glfw_strncmp(line, prefix, _glfw_strlen(prefix)) == 0)
+            line += _glfw_strlen(prefix);
 
         (*count)++;
 
-        char* path = calloc(strlen(line) + 1, 1);
-        paths = realloc(paths, *count * sizeof(char*));
+        char* path = _glfw_calloc(_glfw_strlen(line) + 1, 1);
+        paths = _glfw_realloc(paths, *count * sizeof(char*));
         paths[*count - 1] = path;
 
         while (*line)
@@ -623,7 +623,7 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
     // Set ICCCM WM_CLASS property
     // HACK: Until a mechanism for specifying the application name is added, the
     //       initial window title is used as the window class name
-    if (strlen(wndconfig->title))
+    if (_glfw_strlen(wndconfig->title))
     {
         XClassHint* hint = XAllocClassHint();
         hint->res_name = (char*) wndconfig->title;
@@ -732,7 +732,7 @@ static Atom writeTargetToProperty(const XSelectionRequestEvent* request)
                                 8,
                                 PropModeReplace,
                                 (unsigned char*) _glfw.x11.clipboardString,
-                                strlen(_glfw.x11.clipboardString));
+                                _glfw_strlen(_glfw.x11.clipboardString));
             }
             else
                 targets[i + 1] = None;
@@ -784,7 +784,7 @@ static Atom writeTargetToProperty(const XSelectionRequestEvent* request)
                             8,
                             PropModeReplace,
                             (unsigned char*) _glfw.x11.clipboardString,
-                            strlen(_glfw.x11.clipboardString));
+                            _glfw_strlen(_glfw.x11.clipboardString));
 
             return request->property;
         }
@@ -797,7 +797,7 @@ static Atom writeTargetToProperty(const XSelectionRequestEvent* request)
 
 static void handleSelectionClear(XEvent* event)
 {
-    free(_glfw.x11.clipboardString);
+    _glfw_free(_glfw.x11.clipboardString);
     _glfw.x11.clipboardString = NULL;
 }
 
@@ -806,7 +806,7 @@ static void handleSelectionRequest(XEvent* event)
     const XSelectionRequestEvent* request = &event->xselectionrequest;
 
     XEvent reply;
-    memset(&reply, 0, sizeof(reply));
+    _glfw_memset(&reply, 0, sizeof(reply));
 
     reply.xselection.property = writeTargetToProperty(request);
     reply.xselection.type = SelectionNotify;
@@ -982,7 +982,7 @@ static void processEvent(XEvent *event)
 
                     if (status == XBufferOverflow)
                     {
-                        chars = calloc(count + 1, 1);
+                        chars = _glfw_calloc(count + 1, 1);
                         count = Xutf8LookupString(window->x11.ic,
                                                   &event->xkey,
                                                   chars, count,
@@ -1007,7 +1007,7 @@ static void processEvent(XEvent *event)
 
                     if (status == XBufferOverflow)
                     {
-                        chars = calloc(count, sizeof(wchar_t));
+                        chars = _glfw_calloc(count, sizeof(wchar_t));
                         count = XwcLookupString(window->x11.ic,
                                                 &event->xkey,
                                                 chars, count,
@@ -1023,7 +1023,7 @@ static void processEvent(XEvent *event)
 #endif /*X_HAVE_UTF8_STRING*/
 
                     if (chars != buffer)
-                        free(chars);
+                        _glfw_free(chars);
                 }
             }
             else
@@ -1299,7 +1299,7 @@ static void processEvent(XEvent *event)
 
                 // Reply that we are ready to copy the dragged data
                 XEvent reply;
-                memset(&reply, 0, sizeof(reply));
+                _glfw_memset(&reply, 0, sizeof(reply));
 
                 reply.type = ClientMessage;
                 reply.xclient.window = event->xclient.data.l[0];
@@ -1339,14 +1339,14 @@ static void processEvent(XEvent *event)
                     _glfwInputDrop(window, count, (const char**) paths);
 
                     for (i = 0;  i < count;  i++)
-                        free(paths[i]);
-                    free(paths);
+                        _glfw_free(paths[i]);
+                    _glfw_free(paths);
                 }
 
                 XFree(data);
 
                 XEvent reply;
-                memset(&reply, 0, sizeof(reply));
+                _glfw_memset(&reply, 0, sizeof(reply));
 
                 reply.type = ClientMessage;
                 reply.xclient.window = _glfw.x11.xdnd.source;
@@ -1675,12 +1675,12 @@ void _glfwPlatformSetWindowTitle(_GLFWwindow* window, const char* title)
     XChangeProperty(_glfw.x11.display,  window->x11.handle,
                     _glfw.x11.NET_WM_NAME, _glfw.x11.UTF8_STRING, 8,
                     PropModeReplace,
-                    (unsigned char*) title, strlen(title));
+                    (unsigned char*) title, _glfw_strlen(title));
 
     XChangeProperty(_glfw.x11.display,  window->x11.handle,
                     _glfw.x11.NET_WM_ICON_NAME, _glfw.x11.UTF8_STRING, 8,
                     PropModeReplace,
-                    (unsigned char*) title, strlen(title));
+                    (unsigned char*) title, _glfw_strlen(title));
 
     XFlush(_glfw.x11.display);
 }
@@ -1695,7 +1695,7 @@ void _glfwPlatformSetWindowIcon(_GLFWwindow* window,
         for (i = 0;  i < count;  i++)
             longCount += 2 + images[i].width * images[i].height;
 
-        long* icon = calloc(longCount, sizeof(long));
+        long* icon = _glfw_calloc(longCount, sizeof(long));
         long* target = icon;
 
         for (i = 0;  i < count;  i++)
@@ -1719,7 +1719,7 @@ void _glfwPlatformSetWindowIcon(_GLFWwindow* window,
                         (unsigned char*) icon,
                         longCount);
 
-        free(icon);
+        _glfw_free(icon);
     }
     else
     {
@@ -2106,7 +2106,7 @@ void _glfwPlatformPostEmptyEvent(void)
 {
     XEvent event;
 
-    memset(&event, 0, sizeof(event));
+    _glfw_memset(&event, 0, sizeof(event));
     event.type = ClientMessage;
     event.xclient.window = _glfw.x11.helperWindowHandle;
     event.xclient.format = 32; // Data is 32-bit longs
@@ -2195,7 +2195,7 @@ const char* _glfwPlatformGetKeyName(int key, int scancode)
                        _glfw.x11.keyName, sizeof(_glfw.x11.keyName),
                        &extra);
 
-    if (!strlen(_glfw.x11.keyName))
+    if (!_glfw_strlen(_glfw.x11.keyName))
         return NULL;
 
     return _glfw.x11.keyName;
@@ -2248,8 +2248,8 @@ void _glfwPlatformSetCursor(_GLFWwindow* window, _GLFWcursor* cursor)
 
 void _glfwPlatformSetClipboardString(_GLFWwindow* window, const char* string)
 {
-    free(_glfw.x11.clipboardString);
-    _glfw.x11.clipboardString = strdup(string);
+    _glfw_free(_glfw.x11.clipboardString);
+    _glfw.x11.clipboardString = _glfw_strdup(string);
 
     XSetSelectionOwner(_glfw.x11.display,
                        _glfw.x11.CLIPBOARD,
@@ -2280,7 +2280,7 @@ const char* _glfwPlatformGetClipboardString(_GLFWwindow* window)
         return _glfw.x11.clipboardString;
     }
 
-    free(_glfw.x11.clipboardString);
+    _glfw_free(_glfw.x11.clipboardString);
     _glfw.x11.clipboardString = NULL;
 
     for (i = 0;  i < formatCount;  i++)
@@ -2311,7 +2311,7 @@ const char* _glfwPlatformGetClipboardString(_GLFWwindow* window)
                                       event.xselection.target,
                                       (unsigned char**) &data))
         {
-            _glfw.x11.clipboardString = strdup(data);
+            _glfw.x11.clipboardString = _glfw_strdup(data);
         }
 
         XFree(data);
@@ -2433,7 +2433,7 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }
 
-        memset(&sci, 0, sizeof(sci));
+        _glfw_memset(&sci, 0, sizeof(sci));
         sci.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
         sci.connection = connection;
         sci.window = window->x11.handle;
@@ -2463,7 +2463,7 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }
 
-        memset(&sci, 0, sizeof(sci));
+        _glfw_memset(&sci, 0, sizeof(sci));
         sci.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
         sci.dpy = _glfw.x11.display;
         sci.window = window->x11.handle;

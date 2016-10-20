@@ -30,7 +30,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 
 
 // Return a description of the specified EGL error
@@ -101,10 +100,10 @@ static GLFWbool chooseEGLConfig(const _GLFWctxconfig* ctxconfig,
         return GLFW_FALSE;
     }
 
-    nativeConfigs = calloc(nativeCount, sizeof(EGLConfig));
+    nativeConfigs = _glfw_calloc(nativeCount, sizeof(EGLConfig));
     eglGetConfigs(_glfw.egl.display, nativeConfigs, nativeCount, &nativeCount);
 
-    usableConfigs = calloc(nativeCount, sizeof(_GLFWfbconfig));
+    usableConfigs = _glfw_calloc(nativeCount, sizeof(_GLFWfbconfig));
     usableCount = 0;
 
     for (i = 0;  i < nativeCount;  i++)
@@ -164,8 +163,8 @@ static GLFWbool chooseEGLConfig(const _GLFWctxconfig* ctxconfig,
     if (closest)
         *result = (EGLConfig) closest->handle;
 
-    free(nativeConfigs);
-    free(usableConfigs);
+    _glfw_free(nativeConfigs);
+    _glfw_free(usableConfigs);
 
     return closest != NULL;
 }
@@ -313,7 +312,7 @@ GLFWbool _glfwInitEGL(void)
         return GLFW_FALSE;
     }
 
-    _glfw.egl.prefix = (strncmp(sonames[i], "lib", 3) == 0);
+    _glfw.egl.prefix = (_glfw_strncmp(sonames[i], "lib", 3) == 0);
 
     _glfw.egl.GetConfigAttrib = (PFNEGLGETCONFIGATTRIBPROC)
         _glfw_dlsym(_glfw.egl.handle, "eglGetConfigAttrib");
@@ -638,7 +637,7 @@ GLFWbool _glfwCreateContextEGL(_GLFWwindow* window,
         {
             // HACK: Match presence of lib prefix to increase chance of finding
             //       a matching pair in the jungle that is Win32 EGL/GLES
-            if (_glfw.egl.prefix != (strncmp(sonames[i], "lib", 3) == 0))
+            if (_glfw.egl.prefix != (_glfw_strncmp(sonames[i], "lib", 3) == 0))
                 continue;
 
             window->context.egl.client = _glfw_dlopen(sonames[i]);

@@ -109,7 +109,7 @@ static void addJoystickElement(_GLFWjoystickNS* js,
 
     if (elementsArray)
     {
-        _GLFWjoyelementNS* element = calloc(1, sizeof(_GLFWjoyelementNS));
+        _GLFWjoyelementNS* element = _glfw_calloc(1, sizeof(_GLFWjoyelementNS));
 
         CFArrayAppendValue(elementsArray, element);
 
@@ -171,24 +171,24 @@ static void removeJoystick(_GLFWjoystickNS* js)
         return;
 
     for (i = 0;  i < CFArrayGetCount(js->axisElements);  i++)
-        free((void*) CFArrayGetValueAtIndex(js->axisElements, i));
+        _glfw_free((void*) CFArrayGetValueAtIndex(js->axisElements, i));
     CFArrayRemoveAllValues(js->axisElements);
     CFRelease(js->axisElements);
 
     for (i = 0;  i < CFArrayGetCount(js->buttonElements);  i++)
-        free((void*) CFArrayGetValueAtIndex(js->buttonElements, i));
+        _glfw_free((void*) CFArrayGetValueAtIndex(js->buttonElements, i));
     CFArrayRemoveAllValues(js->buttonElements);
     CFRelease(js->buttonElements);
 
     for (i = 0;  i < CFArrayGetCount(js->hatElements);  i++)
-        free((void*) CFArrayGetValueAtIndex(js->hatElements, i));
+        _glfw_free((void*) CFArrayGetValueAtIndex(js->hatElements, i));
     CFArrayRemoveAllValues(js->hatElements);
     CFRelease(js->hatElements);
 
-    free(js->axes);
-    free(js->buttons);
+    _glfw_free(js->axes);
+    _glfw_free(js->buttons);
 
-    memset(js, 0, sizeof(_GLFWjoystickNS));
+    _glfw_memset(js, 0, sizeof(_GLFWjoystickNS));
 
     _glfwInputJoystickChange(js - _glfw.ns_js, GLFW_DISCONNECTED);
 }
@@ -320,9 +320,9 @@ static void matchCallback(void* context,
 
     CFRelease(arrayRef);
 
-    js->axes = calloc(CFArrayGetCount(js->axisElements), sizeof(float));
-    js->buttons = calloc(CFArrayGetCount(js->buttonElements) +
-                         CFArrayGetCount(js->hatElements) * 4, 1);
+    js->axes = _glfw_calloc(CFArrayGetCount(js->axisElements), sizeof(float));
+    js->buttons = _glfw_calloc(CFArrayGetCount(js->buttonElements) +
+                               CFArrayGetCount(js->hatElements) * 4, 1);
 
     _glfwInputJoystickChange(jid, GLFW_CONNECTED);
 }

@@ -74,8 +74,8 @@ static void createKeyTables(void)
 {
     int scancode;
 
-    memset(_glfw.ns.keycodes, -1, sizeof(_glfw.ns.keycodes));
-    memset(_glfw.ns.scancodes, -1, sizeof(_glfw.ns.scancodes));
+    _glfw_memset(_glfw.ns.keycodes, -1, sizeof(_glfw.ns.keycodes));
+    _glfw_memset(_glfw.ns.scancodes, -1, sizeof(_glfw.ns.scancodes));
 
     _glfw.ns.keycodes[0x1D] = GLFW_KEY_0;
     _glfw.ns.keycodes[0x12] = GLFW_KEY_1;
@@ -368,7 +368,7 @@ void _glfwPlatformTerminate(void)
     [_glfw.ns.cursor release];
     _glfw.ns.cursor = nil;
 
-    free(_glfw.ns.clipboardString);
+    _glfw_free(_glfw.ns.clipboardString);
 
     _glfwTerminateNSGL();
     _glfwTerminateJoysticksNS();
