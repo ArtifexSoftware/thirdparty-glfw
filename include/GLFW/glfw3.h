@@ -3457,62 +3457,64 @@ GLFWAPI void glfwDestroyCursor(GLFWcursor* cursor);
  */
 GLFWAPI void glfwSetCursor(GLFWwindow* window, GLFWcursor* cursor);
 
-/*! @brief Retrieves the position of the text cursor relative to the client area of window.
+/*! @brief Retrieves the position of the caret.
  *
- *  This function returns position hint to decide the candidate window.
+ *  This function returns the position of the caret, in screen coordinates,
+ *  relative to the upper-left corner of the client area of the specified
+ *  window.                                          
  *
- *  @param[in] window The window to set the text cursor for.
- *  @param[out] x The text cursor x position (relative position from window coordinates).
- *  @param[out] y The text cursor y position (relative position from window coordinates).
- *  @param[out] h The text cursor height.
+ *  @param[in] window The desired window.
+ *  @param[out] xpos Where to store the caret x-coordinate, relative to the
+ *  left edge of the client area, or `NULL`.
+ *  @param[out] ypos Where to store the caret y-coordinate, relative to the to
+ *  top edge of the client area, or `NULL`.
+ *  @param[out] ypos Where to store the caret height, or `NULL`.
  *
- *  @par Thread Safety
- *  This function may only be called from the main thread.
+ *  @thread_safety This function must only be called from the main thread.
  *
  *  @sa @ref input_char
  *
- *  @since Added in GLFW 3.X.
+ *  @since Added in version 3.3.
  *
  *  @ingroup input
  */
-GLFWAPI void glfwGetPreeditCursorPos(GLFWwindow* window, int *x, int *y, int *h);
+GLFWAPI void glfwGetPreeditCaretPos(GLFWwindow* window, int* xpos, int* ypos, int* height);
 
-/*! @brief Notify the text cursor position to window system to decide the candidate window position.
+/*! @brief Sets the caret position used to place the IME candidate window.
  *
- *  This function teach position hint to decide the candidate window. The candidate window
- *  is a part of IME(Input Method Editor) and show several candidate strings.
+ *  This function teach position hint to decide the candidate window.  The
+ *  candidate window is a part of IME (Input Method Editor) and shows several
+ *  candidate strings.
  *
- *  Windows sytems decide proper pisition from text cursor geometry.
+ *  Windows sytems decide proper position from text cursor geometry.
  *  You should call this function in preedit callback.
  *
- *  @param[in] window The window to set the text cursor for.
- *  @param[in] x The text cursor x position (relative position from window coordinates).
- *  @param[in] y The text cursor y position (relative position from window coordinates).
- *  @param[in] h The text cursor height.
+ *  @param[in] window The window to set the caret position for.
+ *  @param[in] xpos The x-coordinate of the caret within the window client area.
+ *  @param[in] ypos The y-coordinate of the caret within the window client area.
+ *  @param[in] height The height of the caret.
  *
- *  @par Thread Safety
- *  This function may only be called from the main thread.
+ *  @thread_safety This function must only be called from the main thread.
  *
  *  @sa @ref input_char
  *
- *  @since Added in GLFW 3.X.
+ *  @since Added in version 3.3.
  *
  *  @ingroup input
  */
-GLFWAPI void glfwSetPreeditCursorPos(GLFWwindow* window, int x, int y, int h);
+GLFWAPI void glfwSetPreeditCaretPos(GLFWwindow* window, int xpos, int ypos, int height);
 
 /*! @brief Reset IME input status.
  *
  *  This function resets IME's preedit text.
  *
- *  @param[in] window The window.
+ *  @param[in] window The desired window.
  *
- *  @par Thread Safety
- *  This function may only be called from the main thread.
+ *  @thread_safety This function must only be called from the main thread.
  *
  *  @sa @ref preedit
  *
- *  @since Added in GLFW 3.X.
+ *  @since Added in version 3.3.
  *
  *  @ingroup input
  */
@@ -3634,11 +3636,11 @@ GLFWAPI GLFWcharmodsfun glfwSetCharModsCallback(GLFWwindow* window, GLFWcharmods
 
 /*! @brief Sets the preedit callback.
  *
- *  This function sets the  preedit callback of the specified
- *  window, which is called when an IME is processing text before commited.
+ *  This function sets the  preedit callback of the specified window, which is
+ *  called when an IME is processing text before commited.
  *
  *  Callback receives relative position of input cursor inside preedit text and
- *  attributed text blocks. This callback is used for on-the-spot text editing
+ *  attributed text blocks.  This callback is used for on-the-spot text editing
  *  with IME.
  *
  *  @param[in] window The window whose callback to set.
@@ -3647,12 +3649,11 @@ GLFWAPI GLFWcharmodsfun glfwSetCharModsCallback(GLFWwindow* window, GLFWcharmods
  *  @return The previously set callback, or `NULL` if no callback was set or an
  *  error occurred.
  *
- *  @par Thread Safety
- *  This function may only be called from the main thread.
+ *  @thread_safety This function must only be called from the main thread.
  *
  *  @sa @ref input_char
  *
- *  @since Added in GLFW 3.X
+ *  @since Added in version 3.3.
  *
  *  @ingroup input
  */
@@ -3660,12 +3661,12 @@ GLFWAPI GLFWpreeditfun glfwSetPreeditCallback(GLFWwindow* window, GLFWpreeditfun
 
 /*! @brief Sets the IME status change callback.
  *
- *  This function sets the  preedit callback of the specified
- *  window, which is called when an IME is processing text before commited.
+ *  This function sets the preedit callback of the specified window, which is
+ *  called when an IME is processing text before commited.
  *
- *  Callback receives relative position of input cursor inside preedit text and
- *  attributed text blocks. This callback is used for on-the-spot text editing
- *  with IME.
+ *  The callback receives the relative position of the input caret inside
+ *  preedit text and attributed text blocks.  This callback is used for
+ *  on-the-spot text editing with IME.
  *
  *  @param[in] window The window whose callback to set.
  *  @param[in] cbfun The new callback, or `NULL` to remove the currently set
@@ -3673,12 +3674,11 @@ GLFWAPI GLFWpreeditfun glfwSetPreeditCallback(GLFWwindow* window, GLFWpreeditfun
  *  @return The previously set callback, or `NULL` if no callback was set or an
  *  error occurred.
  *
- *  @par Thread Safety
- *  This function may only be called from the main thread.
+ *  @thread_safety This function must only be called from the main thread.
  *
  *  @sa @ref input_char
  *
- *  @since Added in GLFW 3.X
+ *  @since Added in version 3.3.
  *
  *  @ingroup input
  */

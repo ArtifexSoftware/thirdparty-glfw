@@ -231,9 +231,9 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
                 _glfwPlatformFocusWindow(window);
         }
 
-        window->preeditCursorPosX = 0;
-        window->preeditCursorPosY = height;
-        window->preeditCursorHeight = 0;
+        window->preeditCaretPosX = 0;
+        window->preeditCaretPosY = height;
+        window->preeditCaretHeight = 0;
     }
 
     return (GLFWwindow*) window;
@@ -403,6 +403,9 @@ GLFWAPI void glfwDestroyWindow(GLFWwindow* handle)
 
     _glfwPlatformDestroyWindow(window);
 
+    free(window->preeditText);
+    free(window->preeditAttributeBlocks);
+
     // Unlink window from global linked list
     {
         _GLFWwindow** prev = &_glfw.windowListHead;
@@ -412,11 +415,7 @@ GLFWAPI void glfwDestroyWindow(GLFWwindow* handle)
 
         *prev = window->next;
     }
-    // Clear memory for preedit text
-    if (window->preeditText)
-        free(window->preeditText);
-    if (window->preeditAttributeBlocks)
-        free(window->preeditAttributeBlocks);
+
     free(window);
 }
 

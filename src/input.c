@@ -81,16 +81,21 @@ void _glfwInputChar(_GLFWwindow* window, unsigned int codepoint, int mods, GLFWb
 
 void _glfwInputPreedit(_GLFWwindow* window, int focusedBlock)
 {
-    if (window->callbacks.preedit) {
-        window->callbacks.preedit((GLFWwindow*) window, window->ntext, window->preeditText, window->nblocks, window->preeditAttributeBlocks, focusedBlock);
+    if (window->callbacks.preedit)
+    {
+        window->callbacks.preedit((GLFWwindow*) window,
+                                  window->ntext,
+                                  window->preeditText,
+                                  window->nblocks,
+                                  window->preeditAttributeBlocks,
+                                  focusedBlock);
     }
 }
 
 void _glfwInputIMEStatus(_GLFWwindow* window)
 {
-    if (window->callbacks.imestatus) {
+    if (window->callbacks.imestatus)
         window->callbacks.imestatus((GLFWwindow*) window);
-    }
 }
 
 void _glfwInputScroll(_GLFWwindow* window, double xoffset, double yoffset)
@@ -264,7 +269,8 @@ GLFWAPI void glfwSetInputMode(GLFWwindow* handle, int mode, int value)
 
         case GLFW_IME:
             _glfwPlatformSetIMEStatus(window, value ? GLFW_TRUE : GLFW_FALSE);
-            break;    
+            break;
+
         default:
             _glfwInputError(GLFW_INVALID_ENUM, "Invalid input mode %i", mode);
             break;
@@ -492,27 +498,47 @@ GLFWAPI void glfwSetCursor(GLFWwindow* windowHandle, GLFWcursor* cursorHandle)
     _glfwPlatformSetCursor(window, cursor);
 }
 
-GLFWAPI void glfwGetPreeditCursorPos(GLFWwindow* handle, int *x, int *y, int *h)
+GLFWAPI void glfwGetPreeditCaretPos(GLFWwindow* handle, int* xpos, int* ypos, int* height)
 {
     _GLFWwindow* window = (_GLFWwindow*) handle;
-    if (x)
-        *x = window->preeditCursorPosX;
-    if (y)
-        *y = window->preeditCursorPosY;
-    if (h)
-        *h = window->preeditCursorHeight;
+    assert(window != NULL);
+
+    if (xpos)
+        *xpos = 0;
+    if (ypos)
+        *ypos = 0;
+    if (height)
+        *height = 0;
+
+    _GLFW_REQUIRE_INIT();
+
+    if (xpos)
+        *xpos = window->preeditCaretPosX;
+    if (ypos)
+        *ypos = window->preeditCaretPosY;
+    if (height)
+        *height = window->preeditCaretHeight;
 }
 
-GLFWAPI void glfwSetPreeditCursorPos(GLFWwindow* handle, int x, int y, int h)
+GLFWAPI void glfwSetPreeditCaretPos(GLFWwindow* handle, int xpos, int ypos, int height)
 {
     _GLFWwindow* window = (_GLFWwindow*) handle;
-    window->preeditCursorPosX = x;
-    window->preeditCursorPosY = y;
-    window->preeditCursorHeight = h;
+    assert(window != NULL);
+
+    _GLFW_REQUIRE_INIT();
+
+    window->preeditCaretPosX = xpos;
+    window->preeditCaretPosY = ypos;
+    window->preeditCaretHeight = height;
 }
 
-GLFWAPI void glfwResetPreeditText(GLFWwindow* handle) {
+GLFWAPI void glfwResetPreeditText(GLFWwindow* handle)
+{
     _GLFWwindow* window = (_GLFWwindow*) handle;
+    assert(window != NULL);
+
+    _GLFW_REQUIRE_INIT();
+
     _glfwPlatformResetPreeditText(window);
 }
 

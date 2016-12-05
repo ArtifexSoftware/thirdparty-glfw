@@ -424,12 +424,14 @@ static void releaseMonitor(_GLFWwindow* window)
 }
 
 // Set cursor position to decide candidate window
-static void _win32ChangeCursorPosition(HIMC hIMC, _GLFWwindow* window) {
-    int x = window->preeditCursorPosX;
-    int y = window->preeditCursorPosY;
-    int h = window->preeditCursorHeight;
-    CANDIDATEFORM excludeRect = {0, CFS_EXCLUDE, {x, y}, {x, y, x, y+h}};
-    ImmSetCandidateWindow(hIMC, &excludeRect);
+//
+static void changeCaretPosition(HIMC imc, _GLFWwindow* window)
+{
+    const int x = window->preeditCaretPosX;
+    const int y = window->preeditCaretPosY;
+    const int h = window->preeditCaretHeight;
+    CANDIDATEFORM excludeRect = {0, CFS_EXCLUDE, {x, y}, {x, y, x, y + h}};
+    ImmSetCandidateWindow(imc, &excludeRect);
 }
 
 // Window callback function (handles window messages)
@@ -580,93 +582,118 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
 
             break;
         }
+
         case WM_IME_COMPOSITION:
         {
-            if (lParam & GCS_RESULTSTR) {
+            HIMC imc;
+            LONG preeditTextLength, attrLength, clauseLength;
+
+            if (lParam & GCS_RESULTSTR)
+            {
                 window->nblocks = 0;
                 window->ntext = 0;
                 _glfwInputPreedit(window, 0);
                 return TRUE;
             }
-            if (lParam & GCS_COMPSTR) {
-                HIMC hIMC = ImmGetContext(hWnd);
-                // get preedit data sizes
-                LONG preeditTextLength = ImmGetCompositionStringW(hIMC, GCS_COMPSTR, NULL, 0);
-                LONG attrLength = ImmGetCompositionString(hIMC, GCS_COMPATTR, NULL, 0);
-                LONG clauseLength = ImmGetCompositionString(hIMC, GCS_COMPCLAUSE, NULL, 0);
-                if (preeditTextLength > 0) {
-                    // get preedit data
-                    int length = preeditTextLength/sizeof(WCHAR);
-                    LPWSTR buffer = (LPWSTR)malloc(sizeof(WCHAR)+preeditTextLength);
-                    LPSTR attributes = (LPSTR)malloc(attrLength);
-                    DWORD *clauses = (DWORD*)malloc(clauseLength);
-                    ImmGetCompositionStringW(hIMC, GCS_COMPSTR, buffer, preeditTextLength);
-                    ImmGetCompositionString(hIMC, GCS_COMPATTR, attributes, attrLength);
-                    ImmGetCompositionString(hIMC, GCS_COMPCLAUSE, clauses, clauseLength);
-                    // store preedit text
-                    int ctext = window->ctext;
-                    while (ctext < length+1) {
-                        ctext = (ctext == 0) ? 1 : ctext*2;
+
+            if (!(lParam & GCS_COMPSTR))
+                break;
+
+            imc = ImmGetContext(hWnd);
+            preeditTextLength = ImmGetCompositionStringW(imc, GCS_COMPSTR, NULL, 0);
+            attrLength = ImmGetCompositionString(imc, GCS_COMPATTR, NULL, 0);
+            clauseLength = ImmGetCompositionString(imc, GCS_COMPCLAUSE, NULL, 0);
+
+            if (preeditTextLength > 0)
+            {
+                // get preedit data
+                int i, ctext, cblocks, focusedBlock, length = preeditTextLength / sizeof(WCHAR);
+                LPWSTR buffer = malloc(sizeof(WCHAR) + preeditTextLength);
+                LPSTR attributes = malloc(attrLength);
+                DWORD* clauses = malloc(clauseLength);
+
+                ImmGetCompositionStringW(imc, GCS_COMPSTR, buffer, preeditTextLength);
+                ImmGetCompositionString(imc, GCS_COMPATTR, attributes, attrLength);
+                ImmGetCompositionString(imc, GCS_COMPCLAUSE, clauses, clauseLength);
+
+                // store preedit text
+                ctext = window->ctext;
+                while (ctext < length + 1)
+                    ctext = ctext ? ctext * 2 : 1;
+
+                if (ctext != window->ctext)
+                {
+                    unsigned int* preeditText = realloc(window->preeditText, sizeof(unsigned int) * ctext);
+                    if (!preeditText)
+                    {
+                        free(buffer);
+                        free(attributes);
+                        free(clauses);
+                        return FALSE;
                     }
-                    if (ctext != window->ctext) {
-                        unsigned int* preeditText = realloc(window->preeditText, sizeof(unsigned int)*ctext);
-                        if (preeditText == NULL) {
-                            return 0;
-                            free(buffer);
-                            free(attributes);
-                            free(clauses);
-                        }
-                        window->preeditText = preeditText;
-                        window->ctext = ctext;
-                    }
-                    window->ntext = length;
-                    window->preeditText[length] = 0;
-                    int i;
-                    for (i=0; i < length; i++) {
-                        window->preeditText[i] = buffer[i];
-                    }
-                    // store blocks
-                    window->nblocks = clauseLength/sizeof(DWORD)-1;
-                    // last element of clauses is a block count, but
-                    // text length is convenient.
-                    clauses[window->nblocks] = length;
-                    int cblocks = window->cblocks;
-                    while (cblocks < window->nblocks) {
-                        cblocks = (cblocks == 0) ? 1 : cblocks*2;
-                    }
-                    if (cblocks != window->cblocks) {
-                        int* blocks = realloc(window->preeditAttributeBlocks, sizeof(int)*cblocks);
-                        if (blocks == NULL) {
-                            return 0;
-                            free(buffer);
-                            free(attributes);
-                            free(clauses);
-                        }
-                        window->preeditAttributeBlocks = blocks;
-                        window->cblocks = cblocks;
-                    }
-                    int focusedBlock = 0;
-                    for (i=0; i < window->nblocks; i++) {
-                        window->preeditAttributeBlocks[i] = clauses[i+1]-clauses[i];
-                        if (attributes[clauses[i]] != ATTR_CONVERTED) {
-                            focusedBlock = i;
-                        }
-                    }
-                    free(buffer);
-                    free(attributes);
-                    free(clauses);
-                    _glfwInputPreedit(window, focusedBlock);
-                    _win32ChangeCursorPosition(hIMC, window);
+
+                    window->preeditText = preeditText;
+                    window->ctext = ctext;
                 }
-                ImmReleaseContext(hWnd, hIMC);
-                return TRUE;
+
+                window->ntext = length;
+                window->preeditText[length] = 0;
+                for (i = 0;  i < length;  i++)
+                    window->preeditText[i] = buffer[i];
+
+                // store blocks
+                window->nblocks = clauseLength / sizeof(DWORD) - 1;
+
+                // last element of clauses is a block count, but
+                // text length is convenient.
+                clauses[window->nblocks] = length;
+                cblocks = window->cblocks;
+                while (cblocks < window->nblocks)
+                    cblocks = (cblocks == 0) ? 1 : cblocks * 2;
+
+                if (cblocks != window->cblocks)
+                {
+                    int* blocks = realloc(window->preeditAttributeBlocks, sizeof(int) * cblocks);
+                    if (!blocks)
+                    {
+                        free(buffer);
+                        free(attributes);
+                        free(clauses);
+                        return FALSE;
+                    }
+
+                    window->preeditAttributeBlocks = blocks;
+                    window->cblocks = cblocks;
+                }
+
+                focusedBlock = 0;
+                for (i = 0;  i < window->nblocks;  i++)
+                {
+                    window->preeditAttributeBlocks[i] = clauses[i + 1] - clauses[i];
+                    if (attributes[clauses[i]] != ATTR_CONVERTED)
+                        focusedBlock = i;
+                }
+
+                free(buffer);
+                free(attributes);
+                free(clauses);
+
+                _glfwInputPreedit(window, focusedBlock);
+                changeCaretPosition(imc, window);
             }
-            break;
+
+            ImmReleaseContext(hWnd, imc);
+            return TRUE;
         }
+
         case WM_IME_NOTIFY:
+        {
             if (wParam == IMN_SETOPENSTATUS)
                 _glfwInputIMEStatus(window);
+
             break;
+        }
+
         case WM_LBUTTONDOWN:
         case WM_RBUTTONDOWN:
         case WM_MBUTTONDOWN:
@@ -1803,28 +1830,26 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
 
 void _glfwPlatformResetPreeditText(_GLFWwindow* window)
 {
-    HWND hWnd = window->win32.handle;
-    HIMC hIMC = ImmGetContext(hWnd);
-    ImmNotifyIME(hIMC, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
-    ImmReleaseContext(hWnd, hIMC);
+    HIMC imc = ImmGetContext(window->win32.handle);
+    ImmNotifyIME(imc, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+    ImmReleaseContext(window->win32.handle, imc);
 }
 
 void _glfwPlatformSetIMEStatus(_GLFWwindow* window, int active)
 {
-    HWND hWnd = window->win32.handle;
-    HIMC hIMC = ImmGetContext(hWnd);
-    ImmSetOpenStatus(hIMC, active ? TRUE : FALSE);
-    ImmReleaseContext(hWnd, hIMC);
+    HIMC imc = ImmGetContext(window->win32.handle);
+    ImmSetOpenStatus(imc, active);
+    ImmReleaseContext(window->win32.handle, imc);
 }
 
 int _glfwPlatformGetIMEStatus(_GLFWwindow* window)
 {
-    HWND hWnd = window->win32.handle;
-    HIMC hIMC = ImmGetContext(hWnd);
-    BOOL result = ImmGetOpenStatus(hIMC);
-    ImmReleaseContext(hWnd, hIMC);
-    return result ? GLFW_TRUE : GLFW_FALSE;
+    HIMC imc = ImmGetContext(window->win32.handle);
+    BOOL result = ImmGetOpenStatus(imc);
+    ImmReleaseContext(window->win32.handle, imc);
+    return result;
 }
+
 
 //////////////////////////////////////////////////////////////////////////
 //////                        GLFW native API                       //////

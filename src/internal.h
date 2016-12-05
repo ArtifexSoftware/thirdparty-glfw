@@ -381,7 +381,8 @@ struct _GLFWwindow
     int*                preeditAttributeBlocks;
     int                 nblocks;
     int                 cblocks;
-    int                 preeditCursorPosX, preeditCursorPosY, preeditCursorHeight;
+    int                 preeditCaretPosX, preeditCaretPosY;
+    int                 preeditCaretHeight;
 
     _GLFWcontext        context;
 
@@ -835,9 +836,9 @@ VkResult _glfwPlatformCreateWindowSurface(VkInstance instance, _GLFWwindow* wind
  */
 void _glfwPlatformResetPreeditText(_GLFWwindow* window);
 
-/*! @brief Set IME status.
+/*! @brief Sets whether the IME is enabled.
  *
- *  This function set IME status.
+ *  This function sets whether the IME is enabled.
  *
  *  @param[in] window The window.
  *  @param[in] active Turns on IME if `GFLW_TRUE` is given. Otherwise (`GLFW_FALSE`) turns off.
