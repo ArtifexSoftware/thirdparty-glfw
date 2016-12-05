@@ -374,13 +374,10 @@ struct _GLFWwindow
     // Virtual cursor position when cursor is disabled
     double              virtualCursorPosX, virtualCursorPosY;
 
-    // Preedit texts
+    // IME preedit data
     unsigned int*       preeditText;
-    int                 ntext;
-    int                 ctext;
-    int*                preeditAttributeBlocks;
-    int                 nblocks;
-    int                 cblocks;
+    int*                preeditBlocks;
+    int                 preeditBlockCount;
     int                 preeditCaretPosX, preeditCaretPosY;
     int                 preeditCaretHeight;
 

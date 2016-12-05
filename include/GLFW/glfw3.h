@@ -1106,7 +1106,6 @@ typedef void (* GLFWcharmodsfun)(GLFWwindow*,unsigned int,int);
  *  This is the function signature for preedit callback functions.
  *
  *  @param[in] window The window that received the event.
- *  @param[in] length Preedit string length.
  *  @param[in] string Preedit string.
  *  @param[in] count Attributed block count.
  *  @param[in] blocksizes List of attributed block size.
@@ -1117,7 +1116,7 @@ typedef void (* GLFWcharmodsfun)(GLFWwindow*,unsigned int,int);
  *
  *  @ingroup input
  */
-typedef void (* GLFWpreeditfun)(GLFWwindow*,int,unsigned int*,int,int*,int);
+typedef void (* GLFWpreeditfun)(GLFWwindow*,unsigned int*,int,int*,int);
 
 /*! @brief The function signature for IME status change callbacks.
  *

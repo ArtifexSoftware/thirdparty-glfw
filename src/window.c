@@ -404,7 +404,7 @@ GLFWAPI void glfwDestroyWindow(GLFWwindow* handle)
     _glfwPlatformDestroyWindow(window);
 
     free(window->preeditText);
-    free(window->preeditAttributeBlocks);
+    free(window->preeditBlocks);
 
     // Unlink window from global linked list
     {

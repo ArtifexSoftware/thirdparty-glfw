@@ -425,12 +425,12 @@ static void releaseMonitor(_GLFWwindow* window)
 
 // Set cursor position to decide candidate window
 //
-static void changeCaretPosition(HIMC imc, _GLFWwindow* window)
+static void updateCaretPosition(_GLFWwindow* window, HIMC imc)
 {
     const int x = window->preeditCaretPosX;
     const int y = window->preeditCaretPosY;
     const int h = window->preeditCaretHeight;
-    CANDIDATEFORM excludeRect = {0, CFS_EXCLUDE, {x, y}, {x, y, x, y + h}};
+    CANDIDATEFORM excludeRect = { 0, CFS_EXCLUDE, { x, y }, { x, y, x, y + h } };
     ImmSetCandidateWindow(imc, &excludeRect);
 }
 
@@ -586,12 +586,15 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
         case WM_IME_COMPOSITION:
         {
             HIMC imc;
-            LONG preeditTextLength, attrLength, clauseLength;
+            LONG textSize, attrSize, clauseSize;
+            int i, focusedBlock, length;
+            LPWSTR buffer;
+            LPSTR attributes;
+            DWORD* clauses;
 
             if (lParam & GCS_RESULTSTR)
             {
-                window->nblocks = 0;
-                window->ntext = 0;
+                window->preeditBlockCount = 0;
                 _glfwInputPreedit(window, 0);
                 return TRUE;
             }
@@ -600,87 +603,48 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
                 break;
 
             imc = ImmGetContext(hWnd);
-            preeditTextLength = ImmGetCompositionStringW(imc, GCS_COMPSTR, NULL, 0);
-            attrLength = ImmGetCompositionString(imc, GCS_COMPATTR, NULL, 0);
-            clauseLength = ImmGetCompositionString(imc, GCS_COMPCLAUSE, NULL, 0);
+            textSize = ImmGetCompositionStringW(imc, GCS_COMPSTR, NULL, 0);
+            attrSize = ImmGetCompositionStringW(imc, GCS_COMPATTR, NULL, 0);
+            clauseSize = ImmGetCompositionStringW(imc, GCS_COMPCLAUSE, NULL, 0);
 
-            if (preeditTextLength > 0)
+            if (textSize <= 0)
             {
-                // get preedit data
-                int i, ctext, cblocks, focusedBlock, length = preeditTextLength / sizeof(WCHAR);
-                LPWSTR buffer = malloc(sizeof(WCHAR) + preeditTextLength);
-                LPSTR attributes = malloc(attrLength);
-                DWORD* clauses = malloc(clauseLength);
-
-                ImmGetCompositionStringW(imc, GCS_COMPSTR, buffer, preeditTextLength);
-                ImmGetCompositionString(imc, GCS_COMPATTR, attributes, attrLength);
-                ImmGetCompositionString(imc, GCS_COMPCLAUSE, clauses, clauseLength);
-
-                // store preedit text
-                ctext = window->ctext;
-                while (ctext < length + 1)
-                    ctext = ctext ? ctext * 2 : 1;
-
-                if (ctext != window->ctext)
-                {
-                    unsigned int* preeditText = realloc(window->preeditText, sizeof(unsigned int) * ctext);
-                    if (!preeditText)
-                    {
-                        free(buffer);
-                        free(attributes);
-                        free(clauses);
-                        return FALSE;
-                    }
-
-                    window->preeditText = preeditText;
-                    window->ctext = ctext;
-                }
-
-                window->ntext = length;
-                window->preeditText[length] = 0;
-                for (i = 0;  i < length;  i++)
-                    window->preeditText[i] = buffer[i];
-
-                // store blocks
-                window->nblocks = clauseLength / sizeof(DWORD) - 1;
-
-                // last element of clauses is a block count, but
-                // text length is convenient.
-                clauses[window->nblocks] = length;
-                cblocks = window->cblocks;
-                while (cblocks < window->nblocks)
-                    cblocks = (cblocks == 0) ? 1 : cblocks * 2;
-
-                if (cblocks != window->cblocks)
-                {
-                    int* blocks = realloc(window->preeditAttributeBlocks, sizeof(int) * cblocks);
-                    if (!blocks)
-                    {
-                        free(buffer);
-                        free(attributes);
-                        free(clauses);
-                        return FALSE;
-                    }
-
-                    window->preeditAttributeBlocks = blocks;
-                    window->cblocks = cblocks;
-                }
-
-                focusedBlock = 0;
-                for (i = 0;  i < window->nblocks;  i++)
-                {
-                    window->preeditAttributeBlocks[i] = clauses[i + 1] - clauses[i];
-                    if (attributes[clauses[i]] != ATTR_CONVERTED)
-                        focusedBlock = i;
-                }
-
-                free(buffer);
-                free(attributes);
-                free(clauses);
-
-                _glfwInputPreedit(window, focusedBlock);
-                changeCaretPosition(imc, window);
+                ImmReleaseContext(hWnd, imc);
+                return TRUE;
             }
+
+            length = textSize / sizeof(WCHAR);
+            buffer = calloc(length + 1, sizeof(WCHAR));
+            attributes = calloc(attrSize, 1);
+            clauses = calloc(clauseSize, 1);
+
+            ImmGetCompositionStringW(imc, GCS_COMPSTR, buffer, textSize);
+            ImmGetCompositionStringW(imc, GCS_COMPATTR, attributes, attrSize);
+            ImmGetCompositionStringW(imc, GCS_COMPCLAUSE, clauses, clauseSize);
+
+            free(window->preeditText);
+            window->preeditText = calloc(length + 1, sizeof(unsigned int));
+            memcpy(window->preeditText, buffer, sizeof(unsigned int) * length);
+
+            focusedBlock = 0;
+
+            window->preeditBlockCount = clauseSize / sizeof(DWORD) - 1;
+            free(window->preeditBlocks);
+            window->preeditBlocks = calloc(window->preeditBlockCount, sizeof(int));
+
+            for (i = 0;  i < window->preeditBlockCount;  i++)
+            {
+                window->preeditBlocks[i] = clauses[i + 1] - clauses[i];
+                if (attributes[clauses[i]] != ATTR_CONVERTED)
+                    focusedBlock = i;
+            }
+
+            free(buffer);
+            free(attributes);
+            free(clauses);
+
+            _glfwInputPreedit(window, focusedBlock);
+            updateCaretPosition(window, imc);
 
             ImmReleaseContext(hWnd, imc);
             return TRUE;

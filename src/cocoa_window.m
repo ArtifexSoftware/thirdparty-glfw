@@ -721,33 +721,17 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
     NSString* markedTextString = markedText.string;
 
     NSUInteger i, length = [markedTextString length];
-    int ctext = window->ctext;
-    while (ctext < length + 1)
-        ctext = ctext ? ctext * 2 : 1;
 
-    if (ctext != window->ctext)
-    {
-        unsigned int* preeditText = realloc(window->preeditText, sizeof(unsigned int) * ctext);
-        if (!preeditText)
-            return;
-
-        window->preeditText = preeditText;
-        window->ctext = ctext;
-    }
-
-    window->ntext = length;
-    window->preeditText[length] = 0;
+    free(window->preeditText);
+    window->preeditText = calloc(length + 1, sizeof(unsigned int));
 
     for (i = 0;  i < length;  i++)
-    {
-        const unichar codepoint = [markedTextString characterAtIndex:i];
-        window->preeditText[i] = codepoint;
-    }
+        window->preeditText[i] = [markedTextString characterAtIndex:i];
 
     int focusedBlock = 0;
     NSInteger offset = 0;
 
-    window->nblocks = 0;
+    window->preeditBlockCount = 0;
 
     while (offset < length)
     {
@@ -755,27 +739,18 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
         NSDictionary *attributes = [markedText attributesAtIndex:offset
                                                   effectiveRange:&effectiveRange];
 
-        if (window->nblocks == window->cblocks)
-        {
-            int cblocks = window->cblocks * 2;
-            int* blocks = realloc(window->preeditAttributeBlocks, sizeof(int) * cblocks);
-            if (!blocks)
-                return;
+        window->preeditBlockCount++;
+        window->preeditBlocks = realloc(window->preeditBlocks,
+                                        window->preeditBlockCount * sizeof(int));
 
-            window->preeditAttributeBlocks = blocks;
-            window->cblocks = cblocks;
-        }
-
-        window->preeditAttributeBlocks[window->nblocks] = effectiveRange.length;
+        window->preeditBlocks[window->preeditBlockCount - 1] = effectiveRange.length;
         offset += effectiveRange.length;
         if (!effectiveRange.length)
             break;
 
         NSNumber* underline = (NSNumber*) [attributes objectForKey:@"NSUnderline"];
         if ([underline intValue] != 1)
-            focusedBlock = window->nblocks;
-
-        window->nblocks++;
+            focusedBlock = window->preeditBlockCount - 1;
     }
 
     _glfwInputPreedit(window, focusedBlock);

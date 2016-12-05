@@ -84,10 +84,9 @@ void _glfwInputPreedit(_GLFWwindow* window, int focusedBlock)
     if (window->callbacks.preedit)
     {
         window->callbacks.preedit((GLFWwindow*) window,
-                                  window->ntext,
                                   window->preeditText,
-                                  window->nblocks,
-                                  window->preeditAttributeBlocks,
+                                  window->preeditBlockCount,
+                                  window->preeditBlocks,
                                   focusedBlock);
     }
 }

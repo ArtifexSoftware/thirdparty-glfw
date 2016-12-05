@@ -421,7 +421,6 @@ static void char_mods_callback(GLFWwindow* window, unsigned int codepoint, int m
 }
 
 static void preedit_callback(GLFWwindow* window,
-                             int strLength,
                              unsigned int* string,
                              int blockLength,
                              int* blocks,
@@ -434,9 +433,9 @@ static void preedit_callback(GLFWwindow* window,
     printf("%08x to %i at %0.3f: Preedit text ",
            counter++, slot->number, glfwGetTime());
 
-    if (strLength && blockLength)
+    if (*string && blockLength)
     {
-        for (i = 0;  i < strLength;  i++)
+        for (i = 0;  string[i];  i++)
         {
             if (blockCount == 0)
             {
