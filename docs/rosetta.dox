@@ -1,0 +1,49 @@
+/*!
+
+@page rosetta Rosetta guide
+
+@tableofcontents
+
+GLUT | SDL 2 | GLFW 3
+---- | --- | ----
+`glutInit` | `SDL_Init` | @ref glfwInit
+`glutInitWindowPosition` | arguments to `SDL_CreateWindow` | [GLFW_VISIBLE](@ref GLFW_VISIBLE_hint) hint and @ref glfwSetWindowPos and @ref glfwShowWindow
+`glutInitWindowSize` | arguments to `SDL_CreateWindow` | arguments to @ref glfwCreateWindow
+`glutInitDisplayMode` | `SDL_GL_SetAttribute` | @ref glfwWindowHint
+`glutMainLoop` | application-implemented loop | application-implemented loop
+`glutCreateWindow` | `SDL_CreateWindow` | @ref glfwCreateWindow
+`glutCreateSubWindow` | sub-windows not available | sub-windows not available
+`glutGetWindow` | `SDL_GL_GetCurrentWindow` and `SDL_GL_GetCurrentContext` | @ref glfwGetCurrentContext
+`glutSetWindow` | `SDL_GL_MakeCurrent` | @ref glfwMakeContextCurrent
+`glutDestroyWindow` | `SDL_DestroyWindow` | @ref glfwDestroyWindow
+`glutPostRedisplay` | invalidation not available | invalidation not available
+`glutSwapBuffers` | `SDL_GL_SwapWindow` | @ref glfwSwapBuffers
+`glutPositionWindow` | `SDL_SetWindowPosition` | @ref glfwSetWindowPos
+`glutReshapeWindow` | `SDL_SetWindowSize` | @ref glfwSetWindowSize
+`glutFullScreen` | `SDL_SetWindowFullscreen` | @ref glfwSetWindowMonitor
+`glutPopWindow`<br />`glutPushWindow` | window stack not available | window stack not available
+`glutShowWindow` | `SDL_ShowWindow` or `SDL_RestoreWindow` | @ref glfwShowWindow or @ref glfwRestoreWindow
+`glutHideWindow` | `SDL_HideWindow` | @ref glfwHideWindow
+`glutIconifyWindow` | `SDL_MinimizeWindow` | @ref glfwIconifyWindow
+`glutSetWindowTitle`<br />`glutSetIconTitle` | `SDL_SetWindowTitle` | @ref glfwSetWindowTitle
+`glutSetCursor` | `SDL_CreateSystemCursor` and `SDL_SetCursor` | @ref glfwCreateStandardCursor and @ref glfwSetCursor
+`glutEstablishOverlay`<br />`glutUseLayer`<br />`glutRemoveOverlay`<br />`glutPostOverlayRedisplay`<br />`glutShowOverlay`<br />`glutHideOverlay`<br />`glutOverlayDisplayFunc` | overlays not available | overlays not available
+`glutDisplayFunc` | invalidation not available | invalidation not available
+`glutReshapeFunc` | `SDL_WindowEvent` struct and either `SDL_WINDOWEVENT_RESIZED` or `SDL_WINDOWEVENT_SIZE_CHANGED` | @ref glfwSetWindowSizeCallback
+`glutKeyboardFunc` (text) | `SDL_TextInputEvent` struct and `SDL_TEXTINPUT` | @ref glfwSetCharCallback
+`glutMouseFunc` | `SDL_MouseButtonEvent` struct and either `SDL_MOUSEBUTTONDOWN` or `SDL_MOUSEBUTTONUP` | @ref glfwSetMouseButtonCallback
+`glutMotionFunc`<br />`glutPassiveMotionFunc` | `SDL_MouseMotionEvent` struct and `SDL_MOUSEMOTION` | @ref glfwSetCursorPosCallback
+`glutVisibilityFunc` | `SDL_WINDOWEVENT_EXPOSED` | @ref glfwSetWindowRefreshCallback
+`glutEntryFunc` | `SDL_WindowEvent` struct and either `SDL_WINDOWEVENT_ENTER` or `SDL_WINDOWEVENT_LEAVE` | @ref glfwSetCursorEnterCallback
+`glutKeyboardFunc` (keys)<br />`glutSpecialFunc` | `SDL_KeyboardEvent` and either `SDL_KEYDOWN` or `SDL_KEYUP` | @ref glfwSetKeyCallback
+`glutSpaceballMotionFunc`<br />`glutSpaceballRotateFunc`<br />`glutSpaceballButtonFunc` | N/A | N/A 
+`glutButtonBoxFunc`<br />`glutDialsFunc` | what | what
+`glutTabletMotionFunc` | N/A | N/A
+`glutTabletButtonFunc` | N/A | N/A
+`glutMenuStatusFunc` | N/A | N/A
+`glutIdleFunc` | N/A | N/A
+`glutTimerFunc` | N/A | N/A
+`glutGetModifiers` | member of some event structs | argument to some callbacks
+`glutExtensionSupported` | `SDL_GL_ExtensionSupported` | @ref glfwExtensionSupported
+
+*/
