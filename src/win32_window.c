@@ -1611,26 +1611,27 @@ void _glfwPlatformSetCursorMode(_GLFWwindow* window, int mode)
         updateCursorImage(window);
 }
 
-const char* _glfwPlatformGetKeyName(int key, int scancode)
+const char* _glfwPlatformGetKeyName(int scancode)
 {
     WCHAR name[16];
 
-    if (key != GLFW_KEY_UNKNOWN)
-        scancode = _glfw.win32.scancodes[key];
-
-    if (!_glfwIsPrintable(_glfw.win32.keycodes[scancode]))
-        return NULL;
-
-    if (!GetKeyNameTextW(scancode << 16, name, sizeof(name) / sizeof(WCHAR)))
-        return NULL;
-
-    if (!WideCharToMultiByte(CP_UTF8, 0, name, -1,
-                             _glfw.win32.keyName,
-                             sizeof(_glfw.win32.keyName),
-                             NULL, NULL))
+    if (scancode >= sizeof(_glfw.win32.keycodes) / sizeof(short))
     {
+        _glfwInputError(GLFW_INVALID_VALUE, "Win32: Invalid scancode %i", scancode);
         return NULL;
     }
+
+    if (!GetKeyNameTextW(scancode << 16, name, sizeof(name) / sizeof(WCHAR)))
+    {
+        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
+                             "Win32: Failed to retrieve key name");
+        return NULL;
+    }
+
+    WideCharToMultiByte(CP_UTF8, 0, name, -1,
+                        _glfw.win32.keyName,
+                        sizeof(_glfw.win32.keyName),
+                        NULL, NULL);
 
     return _glfw.win32.keyName;
 }

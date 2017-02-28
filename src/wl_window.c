@@ -703,7 +703,7 @@ void _glfwPlatformSetCursorMode(_GLFWwindow* window, int mode)
     _glfwPlatformSetCursor(window, window->wl.currentCursor);
 }
 
-const char* _glfwPlatformGetKeyName(int key, int scancode)
+const char* _glfwPlatformGetKeyName(int scancode)
 {
     // TODO
     return NULL;

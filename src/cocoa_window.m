@@ -1524,13 +1524,13 @@ void _glfwPlatformSetCursorMode(_GLFWwindow* window, int mode)
         updateCursorImage(window);
 }
 
-const char* _glfwPlatformGetKeyName(int key, int scancode)
+const char* _glfwPlatformGetKeyName(int scancode)
 {
-    if (key != GLFW_KEY_UNKNOWN)
-        scancode = _glfw.ns.scancodes[key];
-
-    if (!_glfwIsPrintable(_glfw.ns.keycodes[scancode]))
+    if (scancode >= sizeof(_glfw.ns.keycodes) / sizeof(short))
+    {
+        _glfwInputError(GLFW_INVALID_VALUE, "Cocoa: Invalid scancode %i", scancode);
         return NULL;
+    }
 
     UInt32 deadKeyState = 0;
     UniChar characters[8];
@@ -1547,11 +1547,15 @@ const char* _glfwPlatformGetKeyName(int key, int scancode)
                        &characterCount,
                        characters) != noErr)
     {
+        _glfwInputError(GLFW_PLATFORM_ERROR, "Cocoa: Failed to translate key");
         return NULL;
     }
 
     if (!characterCount)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR, "Cocoa: Empty translation for key");
         return NULL;
+    }
 
     CFStringRef string = CFStringCreateWithCharactersNoCopy(kCFAllocatorDefault,
                                                             characters,

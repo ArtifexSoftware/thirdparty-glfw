@@ -2351,30 +2351,40 @@ void _glfwPlatformSetCursorMode(_GLFWwindow* window, int mode)
     XFlush(_glfw.x11.display);
 }
 
-const char* _glfwPlatformGetKeyName(int key, int scancode)
+const char* _glfwPlatformGetKeyName(int scancode)
 {
     KeySym keysym;
     int extra;
 
     if (!_glfw.x11.xkb.available)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR, "X11: Xkb extension not available");
         return NULL;
+    }
 
-    if (key != GLFW_KEY_UNKNOWN)
-        scancode = _glfw.x11.scancodes[key];
-
-    if (!_glfwIsPrintable(_glfw.x11.keycodes[scancode]))
+    if (scancode >= sizeof(_glfw.x11.keycodes) / sizeof(short))
+    {
+        _glfwInputError(GLFW_INVALID_VALUE, "X11: Invalid scancode %i", scancode);
         return NULL;
+    }
 
     keysym = XkbKeycodeToKeysym(_glfw.x11.display, scancode, 0, 0);
     if (keysym == NoSymbol)
-      return NULL;
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR,
+                        "X11: Failed to map scancode to keysym");
+        return NULL;
+    }
 
     XkbTranslateKeySym(_glfw.x11.display, &keysym, 0,
                        _glfw.x11.keyName, sizeof(_glfw.x11.keyName),
                        &extra);
 
     if (!strlen(_glfw.x11.keyName))
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR, "X11: Failed to translate keysym");
         return NULL;
+    }
 
     return _glfw.x11.keyName;
 }

@@ -565,7 +565,7 @@ int _glfwPlatformCreateStandardCursor(_GLFWcursor* cursor, int shape);
 void _glfwPlatformDestroyCursor(_GLFWcursor* cursor);
 void _glfwPlatformSetCursor(_GLFWwindow* window, _GLFWcursor* cursor);
 
-const char* _glfwPlatformGetKeyName(int key, int scancode);
+const char* _glfwPlatformGetKeyName(int scancode);
 int _glfwPlatformGetKeyScancode(int key);
 
 void _glfwPlatformGetMonitorPos(_GLFWmonitor* monitor, int* xpos, int* ypos);
@@ -904,10 +904,6 @@ _GLFWjoystick* _glfwAllocJoystick(const char* name, int axisCount, int buttonCou
  *  @ingroup utility
   */
 void _glfwFreeJoystick(_GLFWjoystick* js);
-
-/*! @ingroup utility
- */
-GLFWbool _glfwIsPrintable(int key);
 
 /*! @ingroup utility
  */
