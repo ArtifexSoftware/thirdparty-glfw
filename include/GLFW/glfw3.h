@@ -124,8 +124,8 @@ extern "C" {
 
 /* Include because it is needed by Vulkan and related functions.
  */
-#ifdef _MSC_VER
-/* stdint.h does not exist on MSVC 2005 */
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
+/* stdint.h does not exist before MSVC 2010 */
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
 typedef short int int16_t;
