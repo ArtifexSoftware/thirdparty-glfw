@@ -124,7 +124,19 @@ extern "C" {
 
 /* Include because it is needed by Vulkan and related functions.
  */
+#ifdef _MSC_VER
+/* stdint.h does not exist on MSVC 2005 */
+typedef signed char int8_t;
+typedef unsigned char uint8_t;
+typedef short int int16_t;
+typedef unsigned short int uint16_t;
+typedef int int32_t;
+typedef unsigned int uint32_t;
+typedef __int64 int64_t;
+typedef unsigned __int64 uint64_t;
+#else
 #include <stdint.h>
+#endif
 
 /* Include the chosen client API headers.
  */
