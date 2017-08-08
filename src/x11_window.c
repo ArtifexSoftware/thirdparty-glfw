@@ -952,6 +952,25 @@ static unsigned int decodeUTF8(const char** s)
 }
 #endif /*X_HAVE_UTF8_STRING*/
 
+// Convert the specified Latin-1 string to UTF-8
+//
+static char* convertLatin1toUTF8(const char* source)
+{
+    size_t size = 1;
+    const char* sp;
+
+    for (sp = source;  *sp;  sp++)
+        size += (*sp & 0x80) ? 2 : 1;
+
+    char* target = calloc(size, 1);
+    char* tp = target;
+
+    for (sp = source;  *sp;  sp++)
+        tp += encodeUTF8(tp, *sp);
+
+    return target;
+}
+
 // Process the specified X event
 //
 static void processEvent(XEvent *event)
@@ -2642,6 +2661,7 @@ const char* _glfwPlatformGetClipboardString(_GLFWwindow* window)
         if (actualType == _glfw.x11.INCR)
         {
             size_t size = 1;
+            char* string = NULL;
 
             for (;;)
             {
@@ -2670,18 +2690,32 @@ const char* _glfwPlatformGetClipboardString(_GLFWwindow* window)
                 if (itemCount)
                 {
                     size += itemCount;
-                    _glfw.x11.clipboardString =
-                        realloc(_glfw.x11.clipboardString, size);
-                    _glfw.x11.clipboardString[size - itemCount - 1] = '\0';
-                    strcat(_glfw.x11.clipboardString, data);
+                    string = realloc(string, size);
+                    string[size - itemCount - 1] = '\0';
+                    strcat(string, data);
                 }
 
                 if (!itemCount)
+                {
+                    if (targets[i] == XA_STRING)
+                    {
+                        _glfw.x11.clipboardString = convertLatin1toUTF8(string);
+                        free(string);
+                    }
+                    else
+                        _glfw.x11.clipboardString = string;
+
                     break;
+                }
             }
         }
         else if (actualType == targets[i])
-            _glfw.x11.clipboardString = strdup(data);
+        {
+            if (targets[i] == XA_STRING)
+                _glfw.x11.clipboardString = convertLatin1toUTF8(data);
+            else
+                _glfw.x11.clipboardString = strdup(data);
+        }
 
         XFree(data);
 
