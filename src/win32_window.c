@@ -306,6 +306,55 @@ static void updateWindowStyles(const _GLFWwindow* window)
                  SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOZORDER);
 }
 
+// Update default framebuffer transparency
+//
+static void updateFramebufferTransparency(const _GLFWwindow* window)
+{
+    if (!IsWindowsVistaOrGreater())
+        return;
+
+    if (_glfwIsCompositionEnabledWin32())
+    {
+        HRGN region = CreateRectRgn(0, 0, -1, -1);
+        DWM_BLURBEHIND bb = {0};
+        bb.dwFlags = DWM_BB_ENABLE | DWM_BB_BLURREGION;
+        bb.hRgnBlur = region;
+        bb.fEnable = TRUE;
+
+        if (SUCCEEDED(DwmEnableBlurBehindWindow(window->win32.handle, &bb)))
+        {
+            // Decorated windows don't repaint the transparent background
+            // leaving a trail behind animations
+            // HACK: Making the window layered with a transparency color key
+            //       seems to fix this.  Normally, when specifying
+            //       a transparency color key to be used when composing the
+            //       layered window, all pixels painted by the window in this
+            //       color will be transparent.  That doesn't seem to be the
+            //       case anymore, at least when used with blur behind window
+            //       plus negative region.
+            LONG style = GetWindowLongW(window->win32.handle, GWL_EXSTYLE);
+            style |= WS_EX_LAYERED;
+            SetWindowLongW(window->win32.handle, GWL_EXSTYLE, style);
+
+            // Using a color key not equal to black to fix the trailing
+            // issue.  When set to black, something is making the hit test
+            // not resize with the window frame.
+            SetLayeredWindowAttributes(window->win32.handle,
+                                       RGB(0, 193, 48), 255, LWA_COLORKEY);
+        }
+
+        DeleteObject(region);
+    }
+    else
+    {
+        LONG style = GetWindowLongW(window->win32.handle, GWL_EXSTYLE);
+        style &= ~WS_EX_LAYERED;
+        SetWindowLongW(window->win32.handle, GWL_EXSTYLE, style);
+        RedrawWindow(window->win32.handle, NULL, NULL,
+                     RDW_ERASE | RDW_INVALIDATE | RDW_FRAME);
+    }
+}
+
 // Translates a GLFW standard cursor to a resource ID
 //
 static LPWSTR translateCursorShape(int shape)
@@ -916,6 +965,13 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             return TRUE;
         }
 
+        case WM_DWMCOMPOSITIONCHANGED:
+        {
+            if (window->transparent)
+                updateFramebufferTransparency(window);
+            return 0;
+        }
+
         case WM_SETCURSOR:
         {
             if (LOWORD(lParam) == HTCLIENT)
@@ -1052,43 +1108,8 @@ static int createNativeWindow(_GLFWwindow* window,
 
     DragAcceptFiles(window->win32.handle, TRUE);
 
-    if (fbconfig->transparent &&
-        IsWindowsVistaOrGreater() &&
-        _glfwIsCompositionEnabledWin32())
-    {
-        HRGN region = CreateRectRgn(0, 0, -1, -1);
-        DWM_BLURBEHIND bb = {0};
-        bb.dwFlags = DWM_BB_ENABLE | DWM_BB_BLURREGION;
-        bb.hRgnBlur = region;
-        bb.fEnable = TRUE;
-
-        if (SUCCEEDED(DwmEnableBlurBehindWindow(window->win32.handle, &bb)))
-        {
-            // Decorated windows don't repaint the transparent background
-            // leaving a trail behind animations
-            // HACK: Making the window layered with a transparency color key
-            //       seems to fix this.  Normally, when specifying
-            //       a transparency color key to be used when composing the
-            //       layered window, all pixels painted by the window in this
-            //       color will be transparent.  That doesn't seem to be the
-            //       case anymore, at least when used with blur behind window
-            //       plus negative region.
-            if (wndconfig->decorated)
-            {
-                long style = GetWindowLongW(window->win32.handle, GWL_EXSTYLE);
-                style |= WS_EX_LAYERED;
-                SetWindowLongW(window->win32.handle, GWL_EXSTYLE, style);
-
-                // Using a color key not equal to black to fix the trailing
-                // issue.  When set to black, something is making the hit test
-                // not resize with the window frame.
-                SetLayeredWindowAttributes(window->win32.handle,
-                                           RGB(0, 193, 48), 255, LWA_COLORKEY);
-            }
-        }
-
-        DeleteObject(region);
-    }
+    if (fbconfig->transparent)
+        updateFramebufferTransparency(window);
 
     return GLFW_TRUE;
 }

@@ -405,6 +405,7 @@ struct _GLFWwindow
     GLFWbool            decorated;
     GLFWbool            autoIconify;
     GLFWbool            floating;
+    GLFWbool            transparent;
     GLFWbool            shouldClose;
     void*               userPointer;
     GLFWvidmode         videoMode;

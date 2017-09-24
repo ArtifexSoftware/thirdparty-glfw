@@ -364,6 +364,7 @@ static void updateWindowMode(_GLFWwindow* window)
         }
 
         // Enable compositor bypass
+        if (!window->transparent)
         {
             const unsigned long value = 1;
 
@@ -402,6 +403,7 @@ static void updateWindowMode(_GLFWwindow* window)
         }
 
         // Disable compositor bypass
+        if (!window->transparent)
         {
             XDeleteProperty(_glfw.x11.display, window->x11.handle,
                             _glfw.x11.NET_WM_BYPASS_COMPOSITOR);
