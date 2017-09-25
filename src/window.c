@@ -252,6 +252,7 @@ void glfwDefaultWindowHints(void)
     _glfw.hints.window.focused      = GLFW_TRUE;
     _glfw.hints.window.autoIconify  = GLFW_TRUE;
     _glfw.hints.window.centerCursor = GLFW_TRUE;
+    _glfw.hints.window.opacity      = 255;
 
     // The default is 24 bits of color, 24 bits of depth and 8 bits of stencil,
     // double buffered
@@ -346,6 +347,9 @@ GLFWAPI void glfwWindowHint(int hint, int value)
         case GLFW_VISIBLE:
             _glfw.hints.window.visible = value ? GLFW_TRUE : GLFW_FALSE;
             return;
+        case GLFW_OPACITY:
+            _glfw.hints.window.opacity = value;
+            break;
         case GLFW_COCOA_RETINA_FRAMEBUFFER:
             _glfw.hints.window.ns.retina = value ? GLFW_TRUE : GLFW_FALSE;
             return;
@@ -745,6 +749,8 @@ GLFWAPI int glfwGetWindowAttrib(GLFWwindow* handle, int attrib)
             return _glfwPlatformWindowMaximized(window);
         case GLFW_TRANSPARENT:
             return _glfwPlatformFramebufferTransparent(window);
+        case GLFW_OPACITY:
+            return _glfwPlatformGetWindowOpacity(window);
         case GLFW_RESIZABLE:
             return window->resizable;
         case GLFW_DECORATED:
@@ -788,12 +794,14 @@ GLFWAPI void glfwSetWindowAttrib(GLFWwindow* handle, int attrib, int value)
 
     _GLFW_REQUIRE_INIT();
 
-    value = value ? GLFW_TRUE : GLFW_FALSE;
-
     if (attrib == GLFW_AUTO_ICONIFY)
+    {
+        value = value ? GLFW_TRUE : GLFW_FALSE;
         window->autoIconify = value;
+    }
     else if (attrib == GLFW_RESIZABLE)
     {
+        value = value ? GLFW_TRUE : GLFW_FALSE;
         if (window->resizable == value)
             return;
 
@@ -803,6 +811,7 @@ GLFWAPI void glfwSetWindowAttrib(GLFWwindow* handle, int attrib, int value)
     }
     else if (attrib == GLFW_DECORATED)
     {
+        value = value ? GLFW_TRUE : GLFW_FALSE;
         if (window->decorated == value)
             return;
 
@@ -812,12 +821,24 @@ GLFWAPI void glfwSetWindowAttrib(GLFWwindow* handle, int attrib, int value)
     }
     else if (attrib == GLFW_FLOATING)
     {
+        value = value ? GLFW_TRUE : GLFW_FALSE;
         if (window->floating == value)
             return;
 
         window->floating = value;
         if (!window->monitor)
             _glfwPlatformSetWindowFloating(window, value);
+    }
+    else if (attrib == GLFW_OPACITY)
+    {
+        if (value < 0 || value > 255)
+        {
+            _glfwInputError(GLFW_INVALID_VALUE,
+                            "Invalid window opacity %i", value);
+            return;
+        }
+
+        _glfwPlatformSetWindowOpacity(window, value);
     }
     else
         _glfwInputError(GLFW_INVALID_ENUM, "Invalid window attribute 0x%08X", attrib);

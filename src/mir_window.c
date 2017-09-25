@@ -648,6 +648,15 @@ void _glfwPlatformSetWindowFloating(_GLFWwindow* window, GLFWbool enabled)
                     "Mir: Unsupported function %s", __PRETTY_FUNCTION__);
 }
 
+int _glfwPlatformGetWindowOpacity(_GLFWwindow* window)
+{
+    return 255;
+}
+
+void _glfwPlatformSetWindowOpacity(_GLFWwindow* window, int opacity)
+{
+}
+
 void _glfwPlatformPollEvents(void)
 {
     EventNode* node = NULL;

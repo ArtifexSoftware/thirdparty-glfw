@@ -793,6 +793,12 @@ extern "C" {
  *  and [window attribute](@ref GLFW_TRANSPARENT_attrib).
  */
 #define GLFW_TRANSPARENT            0x0002000A
+/*! @brief Window opacity window hint and attribute.
+ *
+ *  Window opacity [window hint](@ref GLFW_OPACITY_hint) and
+ *  [window attribute](@ref GLFW_OPACITY_attrib).
+ */
+#define GLFW_OPACITY                0x0002000B
 
 /*! @brief Framebuffer bit depth hint.
  *

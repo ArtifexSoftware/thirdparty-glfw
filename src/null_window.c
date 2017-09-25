@@ -182,6 +182,15 @@ void _glfwPlatformSetWindowFloating(_GLFWwindow* window, GLFWbool enabled)
 {
 }
 
+int _glfwPlatformGetWindowOpacity(_GLFWwindow* window)
+{
+    return 255;
+}
+
+void _glfwPlatformSetWindowOpacity(_GLFWwindow* window, int opacity)
+{
+}
+
 void _glfwPlatformShowWindow(_GLFWwindow* window)
 {
 }

@@ -1088,6 +1088,9 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
         [window->ns.object setBackgroundColor:[NSColor clearColor]];
     }
 
+    if (wndconfig->opacity < 255)
+        _glfwPlatformSetWindowOpacity(window, wndconfig->opacity);
+
     [window->ns.object setContentView:window->ns.view];
     [window->ns.object makeFirstResponder:window->ns.view];
     [window->ns.object setTitle:[NSString stringWithUTF8String:wndconfig->title]];
@@ -1491,6 +1494,17 @@ void _glfwPlatformSetWindowFloating(_GLFWwindow* window, GLFWbool enabled)
         [window->ns.object setLevel:NSFloatingWindowLevel];
     else
         [window->ns.object setLevel:NSNormalWindowLevel];
+}
+
+int _glfwPlatformGetWindowOpacity(_GLFWwindow* window)
+{
+    return (int) ([window->ns.object alphaValue] * 255.0);
+}
+
+void _glfwPlatformSetWindowOpacity(_GLFWwindow* window, int opacity)
+{
+    const double alpha = opacity / 255.0;
+    [window->ns.object setAlphaValue:alpha];
 }
 
 void _glfwPlatformPollEvents(void)

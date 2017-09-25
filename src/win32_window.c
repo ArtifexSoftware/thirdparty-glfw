@@ -1591,6 +1591,38 @@ void _glfwPlatformSetWindowFloating(_GLFWwindow* window, GLFWbool enabled)
                  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
 }
 
+int _glfwPlatformGetWindowOpacity(_GLFWwindow* window)
+{
+    BYTE alpha;
+    DWORD flags;
+
+    if ((GetWindowLongW(window->win32.handle, GWL_EXSTYLE) & WS_EX_LAYERED) &&
+        GetLayeredWindowAttributes(window->win32.handle, NULL, &alpha, &flags))
+    {
+        if (flags & LWA_ALPHA)
+            return alpha;
+    }
+
+    return 255;
+}
+
+void _glfwPlatformSetWindowOpacity(_GLFWwindow* window, int opacity)
+{
+    if (opacity < 255)
+    {
+        DWORD style = GetWindowLongW(window->win32.handle, GWL_EXSTYLE);
+        style |= WS_EX_LAYERED;
+        SetWindowLongW(window->win32.handle, GWL_EXSTYLE, style);
+        SetLayeredWindowAttributes(window->win32.handle, 0, opacity, LWA_ALPHA);
+    }
+    else
+    {
+        DWORD style = GetWindowLongW(window->win32.handle, GWL_EXSTYLE);
+        style &= ~WS_EX_LAYERED;
+        SetWindowLongW(window->win32.handle, GWL_EXSTYLE, style);
+    }
+}
+
 void _glfwPlatformPollEvents(void)
 {
     MSG msg;
