@@ -372,23 +372,6 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
                               const _GLFWctxconfig* ctxconfig,
                               const _GLFWfbconfig* fbconfig)
 {
-    if (window->monitor)
-    {
-        GLFWvidmode mode;
-        _glfwPlatformGetVideoMode(window->monitor, &mode);
-
-        mir_window_set_state(window->mir.window, mir_window_state_fullscreen);
-
-        if (wndconfig->width > mode.width || wndconfig->height > mode.height)
-        {
-            _glfwInputError(GLFW_PLATFORM_ERROR,
-                            "Mir: Requested window size too large: %ix%i",
-                            wndconfig->width, wndconfig->height);
-
-            return GLFW_FALSE;
-        }
-    }
-
     window->mir.width  = wndconfig->width;
     window->mir.height = wndconfig->height;
     window->mir.currentCursor = NULL;

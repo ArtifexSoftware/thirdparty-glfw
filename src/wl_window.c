@@ -232,22 +232,10 @@ static GLFWbool createShellSurface(_GLFWwindow* window)
     if (window->wl.title)
         wl_shell_surface_set_title(window->wl.shellSurface, window->wl.title);
 
-    if (window->monitor)
-    {
-        wl_shell_surface_set_fullscreen(
-            window->wl.shellSurface,
-            WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT,
-            0,
-            window->monitor->wl.output);
-    }
-    else if (window->wl.maximized)
-    {
+    if (window->wl.maximized)
         wl_shell_surface_set_maximized(window->wl.shellSurface, NULL);
-    }
     else
-    {
         wl_shell_surface_set_toplevel(window->wl.shellSurface);
-    }
 
     wl_surface_commit(window->wl.surface);
 

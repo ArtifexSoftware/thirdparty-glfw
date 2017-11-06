@@ -624,7 +624,7 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
     if (!wndconfig->decorated)
         _glfwPlatformSetWindowDecorated(window, GLFW_FALSE);
 
-    if (_glfw.x11.NET_WM_STATE && !window->monitor)
+    if (_glfw.x11.NET_WM_STATE)
     {
         Atom states[3];
         int count = 0;
@@ -1962,17 +1962,6 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
             if (!_glfwCreateContextOSMesa(window, ctxconfig, fbconfig))
                 return GLFW_FALSE;
         }
-    }
-
-    if (window->monitor)
-    {
-        _glfwPlatformShowWindow(window);
-        updateWindowMode(window);
-        if (!acquireMonitor(window))
-            return GLFW_FALSE;
-
-        if (wndconfig->centerCursor)
-            centerCursor(window);
     }
 
     XFlush(_glfw.x11.display);

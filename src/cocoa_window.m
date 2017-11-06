@@ -1042,20 +1042,7 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
         return GLFW_FALSE;
     }
 
-    NSRect contentRect;
-
-    if (window->monitor)
-    {
-        GLFWvidmode mode;
-        int xpos, ypos;
-
-        _glfwPlatformGetVideoMode(window->monitor, &mode);
-        _glfwPlatformGetMonitorPos(window->monitor, &xpos, &ypos);
-
-        contentRect = NSMakeRect(xpos, ypos, mode.width, mode.height);
-    }
-    else
-        contentRect = NSMakeRect(0, 0, wndconfig->width, wndconfig->height);
+    NSRect contentRect = NSMakeRect(0, 0, wndconfig->width, wndconfig->height);
 
     window->ns.object = [[GLFWWindow alloc]
         initWithContentRect:contentRect
@@ -1069,29 +1056,24 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
         return GLFW_FALSE;
     }
 
-    if (window->monitor)
-        [window->ns.object setLevel:NSMainMenuWindowLevel + 1];
-    else
+    [window->ns.object center];
+    _glfw.ns.cascadePoint =
+        NSPointToCGPoint([window->ns.object cascadeTopLeftFromPoint:
+                         NSPointFromCGPoint(_glfw.ns.cascadePoint)]);
+
+    if (wndconfig->resizable)
     {
-        [window->ns.object center];
-        _glfw.ns.cascadePoint =
-            NSPointToCGPoint([window->ns.object cascadeTopLeftFromPoint:
-                              NSPointFromCGPoint(_glfw.ns.cascadePoint)]);
-
-        if (wndconfig->resizable)
-        {
-            const NSWindowCollectionBehavior behavior =
-                NSWindowCollectionBehaviorFullScreenPrimary |
-                NSWindowCollectionBehaviorManaged;
-            [window->ns.object setCollectionBehavior:behavior];
-        }
-
-        if (wndconfig->floating)
-            [window->ns.object setLevel:NSFloatingWindowLevel];
-
-        if (wndconfig->maximized)
-            [window->ns.object zoom:nil];
+        const NSWindowCollectionBehavior behavior =
+            NSWindowCollectionBehaviorFullScreenPrimary |
+            NSWindowCollectionBehaviorManaged;
+        [window->ns.object setCollectionBehavior:behavior];
     }
+
+    if (wndconfig->floating)
+        [window->ns.object setLevel:NSFloatingWindowLevel];
+
+    if (wndconfig->maximized)
+        [window->ns.object zoom:nil];
 
     if (wndconfig->ns.frame)
         [window->ns.object setFrameAutosaveName:[NSString stringWithUTF8String:wndconfig->title]];
@@ -1159,17 +1141,6 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
             if (!_glfwCreateContextOSMesa(window, ctxconfig, fbconfig))
                 return GLFW_FALSE;
         }
-    }
-
-    if (window->monitor)
-    {
-        _glfwPlatformShowWindow(window);
-        _glfwPlatformFocusWindow(window);
-        if (!acquireMonitor(window))
-            return GLFW_FALSE;
-
-        if (wndconfig->centerCursor)
-            centerCursor(window);
     }
 
     return GLFW_TRUE;
