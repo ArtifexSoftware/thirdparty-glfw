@@ -152,6 +152,10 @@ information on what to include when reporting a bug.
   window transparency (#1089)
 - Added `glfwGetX11SelectionString` and `glfwSetX11SelectionString`
   functions for accessing X11 primary selection (#894,#1056)
+- Added `glfwSetMonitorUserPointer` and `glfwGetMonitorUserPointer` for
+  per-monitor user pointers
+- Added `glfwSetJoystickUserPointer` and `glfwGetJoystickUserPointer` for
+  per-joystick user pointers
 - Added headless [OSMesa](http://mesa3d.org/osmesa.html) backend (#850)
 - Added definition of `GLAPIENTRY` to public header
 - Added `GLFW_TRANSPARENT_FRAMEBUFFER` window hint and attribute for controlling
