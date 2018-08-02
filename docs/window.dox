@@ -479,6 +479,15 @@ ASCII encoded class and instance parts of the ICCCM `WM_CLASS` window property.
 These are set with @ref glfwWindowHintString.
 
 
+@subsubsection window_hints_win32 Win32 specific window hints
+
+@anchor GLFW_WIN32_DPI_RESIZE
+__GLFW_WIN32_DPI_RESIZE__ specifies whether to scale the window content size by
+the content scale of the monitor it is placed on.  This includes scaling it at
+creation.  Possible values are `GLFW_TRUE` and `GLFW_FALSE`.  This is ignored on
+other platforms.
+
+
 @subsubsection window_hints_values Supported and default values
 
 Window hint                   | Default value               | Supported values
@@ -523,6 +532,7 @@ GLFW_COCOA_FRAME_NAME         | `""`                        | A UTF-8 encoded fr
 GLFW_COCOA_GRAPHICS_SWITCHING | `GLFW_FALSE`                | `GLFW_TRUE` or `GLFW_FALSE`
 GLFW_X11_CLASS_NAME           | `""`                        | An ASCII encoded `WM_CLASS` class name
 GLFW_X11_INSTANCE_NAME        | `""`                        | An ASCII encoded `WM_CLASS` instance name
+GLFW_WIN32_DPI_RESIZE         | `GLFW_FALSE`                | `GLFW_TRUE` or `GLFW_FALSE`
 
 
 @section window_events Window event processing

@@ -627,6 +627,8 @@ int main( void )
    if( !glfwInit() )
       exit( EXIT_FAILURE );
 
+   glfwWindowHint(GLFW_WIN32_DPI_RESIZE, GLFW_TRUE);
+
    window = glfwCreateWindow( 400, 400, "Boing (classic Amiga demo)", NULL, NULL );
    if (!window)
    {

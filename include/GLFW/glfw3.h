@@ -980,6 +980,8 @@ extern "C" {
 
 #define GLFW_X11_CLASS_NAME         0x00024001
 #define GLFW_X11_INSTANCE_NAME      0x00024002
+
+#define GLFW_WIN32_DPI_RESIZE       0x00025001
 /*! @} */
 
 #define GLFW_NO_API                          0
