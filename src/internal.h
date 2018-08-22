@@ -275,6 +275,7 @@ struct _GLFWwndconfig
     struct {
         char      className[256];
         char      instanceName[256];
+        GLFWbool  dpiResize;
     } x11;
     struct {
         GLFWbool  dpiResize;
