@@ -441,7 +441,11 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
         markedText = [[NSMutableAttributedString alloc] init];
 
         [self updateTrackingAreas];
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 101400
         [self registerForDraggedTypes:@[NSPasteboardTypeFileURL]];
+#else
+        [self registerForDraggedTypes:@[NSURLPboardType]];
+#endif
     }
 
     return self;
