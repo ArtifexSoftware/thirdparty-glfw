@@ -252,6 +252,7 @@ information on what to include when reporting a bug.
 - [X11] Bugfix: `glfwSetWindowMonitor` did not flush output buffer in some cases
 - [X11] Bugfix: `glfwSetWindowMonitor` did not update the EWMH state of hidden
                 windows (#1358)
+- [X11] Bugfix: Posted empty events would sometimes be lost (#1281)
 - [Linux] Added workaround for missing `SYN_DROPPED` in pre-2.6.39 kernel
           headers (#1196)
 - [Linux] Moved to evdev for joystick input (#906,#1005)

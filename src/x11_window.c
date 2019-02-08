@@ -51,13 +51,13 @@
 #define _GLFW_XDND_VERSION 5
 
 
-// Wait for data to arrive using select
+// Wait a maximum of 1ms for an event to arrive on the X11 (or inotify) fd
 // This avoids blocking other threads via the per-display Xlib lock that also
 // covers GLX functions
 //
 static GLFWbool waitForEvent(double* timeout)
 {
-    fd_set fds;
+    const uint64_t start = _glfwPlatformGetTimerValue();
     const int fd = ConnectionNumber(_glfw.x11.display);
     int count = fd + 1;
 
@@ -65,36 +65,26 @@ static GLFWbool waitForEvent(double* timeout)
     if (_glfw.linjs.inotify > fd)
         count = _glfw.linjs.inotify + 1;
 #endif
-    for (;;)
-    {
-        FD_ZERO(&fds);
-        FD_SET(fd, &fds);
+
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(fd, &fds);
 #if defined(__linux__)
-        if (_glfw.linjs.inotify > 0)
-            FD_SET(_glfw.linjs.inotify, &fds);
+    if (_glfw.linjs.inotify > 0)
+        FD_SET(_glfw.linjs.inotify, &fds);
 #endif
 
-        if (timeout)
-        {
-            const long seconds = (long) *timeout;
-            const long microseconds = (long) ((*timeout - seconds) * 1e6);
-            struct timeval tv = { seconds, microseconds };
-            const uint64_t base = _glfwPlatformGetTimerValue();
+    struct timeval tv = { 0, 1000 };
+    select(count, &fds, NULL, NULL, &tv);
 
-            const int result = select(count, &fds, NULL, NULL, &tv);
-            const int error = errno;
-
-            *timeout -= (_glfwPlatformGetTimerValue() - base) /
-                (double) _glfwPlatformGetTimerFrequency();
-
-            if (result > 0)
-                return GLFW_TRUE;
-            if ((result == -1 && error == EINTR) || *timeout <= 0.0)
-                return GLFW_FALSE;
-        }
-        else if (select(count, &fds, NULL, NULL, NULL) != -1 || errno != EINTR)
-            return GLFW_TRUE;
+    if (timeout)
+    {
+        *timeout -= (_glfwPlatformGetTimerValue() - start) /
+            (double) _glfwPlatformGetTimerFrequency();
+        return *timeout > 0.0;
     }
+
+    return GLFW_TRUE;
 }
 
 // Waits until a VisibilityNotify event arrives for the specified window or the
