@@ -295,7 +295,15 @@ static void makeContextCurrentWGL(_GLFWwindow* window)
     if (window)
     {
         if (wglMakeCurrent(window->context.wgl.dc, window->context.wgl.handle))
+        {
             _glfwPlatformSetTls(&_glfw.contextSlot, window);
+
+            if (IsWindowsVistaOrGreater())
+            {
+                if (_glfw.wgl.EXT_swap_control)
+                    _glfw.wgl.SwapIntervalEXT(0);
+            }
+        }
         else
         {
             _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
@@ -317,13 +325,70 @@ static void makeContextCurrentWGL(_GLFWwindow* window)
 
 static void swapBuffersWGL(_GLFWwindow* window)
 {
+    if (IsWindowsVistaOrGreater())
+    {
+        int interval = abs(window->context.wgl.interval);
+        if (interval > 0)
+        {
+            const HMONITOR monitor =
+                MonitorFromWindow(window->win32.handle, MONITOR_DEFAULTTONEAREST);
+
+            if (window->context.wgl.monitor != monitor)
+            {
+                MONITORINFOEXW mi = {0};
+                mi.cbSize = sizeof(mi);
+
+                if (window->context.wgl.adapter)
+                {
+                    D3DKMT_CLOSEADAPTER ca = {0};
+                    ca.hAdapter = window->context.wgl.adapter;
+                    D3DKMTCloseAdapter(&ca);
+                }
+
+                if (GetMonitorInfoW(monitor, (MONITORINFO*) &mi))
+                {
+                    D3DKMT_OPENADAPTERFROMHDC oafd = {0};
+                    oafd.hDc = CreateDCW(L"DISPLAY", mi.szDevice, NULL, NULL);
+                    if (D3DKMTOpenAdapterFromHdc(&oafd) == 0)
+                    {
+                        window->context.wgl.adapter = oafd.hAdapter;
+                        window->context.wgl.vpsid = oafd.VidPnSourceId;
+                    }
+
+                    DeleteDC(oafd.hDc);
+                }
+
+                window->context.wgl.monitor = monitor;
+            }
+
+            if (window->context.wgl.adapter)
+            {
+                while (interval--)
+                {
+                    D3DKMT_WAITFORVERTICALBLANKEVENT wfvbe = {0};
+                    wfvbe.hAdapter = window->context.wgl.adapter;
+                    wfvbe.VidPnSourceId = window->context.wgl.vpsid;
+                    D3DKMTWaitForVerticalBlankEvent(&wfvbe);
+                }
+            }
+        }
+    }
+
     SwapBuffers(window->context.wgl.dc);
 }
 
 static void swapIntervalWGL(int interval)
 {
-    if (_glfw.wgl.EXT_swap_control)
-        _glfw.wgl.SwapIntervalEXT(interval);
+    if (IsWindowsVistaOrGreater())
+    {
+        _GLFWwindow* window = _glfwPlatformGetTls(&_glfw.contextSlot);
+        window->context.wgl.interval = interval;
+    }
+    else
+    {
+        if (_glfw.wgl.EXT_swap_control)
+            _glfw.wgl.SwapIntervalEXT(interval);
+    }
 }
 
 static int extensionSupportedWGL(const char* extension)
@@ -354,6 +419,13 @@ static GLFWglproc getProcAddressWGL(const char* procname)
 //
 static void destroyContextWGL(_GLFWwindow* window)
 {
+    if (window->context.wgl.adapter)
+    {
+        D3DKMT_CLOSEADAPTER ca = {0};
+        ca.hAdapter = window->context.wgl.adapter;
+        D3DKMTCloseAdapter(&ca);
+    }
+
     if (window->context.wgl.handle)
     {
         wglDeleteContext(window->context.wgl.handle);

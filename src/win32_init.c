@@ -157,6 +157,17 @@ static GLFWbool loadLibraries(void)
             GetProcAddress(_glfw.win32.ntdll.instance, "RtlVerifyVersionInfo");
     }
 
+    _glfw.win32.gdi32.instance = LoadLibraryA("gdi32.dll");
+    if (_glfw.win32.gdi32.instance)
+    {
+        _glfw.win32.gdi32.OpenAdapterFromHdc = (PFN_D3DKMTOpenAdapterFromHdc)
+            GetProcAddress(_glfw.win32.gdi32.instance, "D3DKMTOpenAdapterFromHdc");
+        _glfw.win32.gdi32.CloseAdapter = (PFN_D3DKMTCloseAdapter)
+            GetProcAddress(_glfw.win32.gdi32.instance, "D3DKMTCloseAdapter");
+        _glfw.win32.gdi32.WaitForVerticalBlankEvent = (PFN_D3DKMTWaitForVerticalBlankEvent)
+            GetProcAddress(_glfw.win32.gdi32.instance, "D3DKMTWaitForVerticalBlankEvent");
+    }
+
     return GLFW_TRUE;
 }
 
@@ -184,6 +195,9 @@ static void freeLibraries(void)
 
     if (_glfw.win32.ntdll.instance)
         FreeLibrary(_glfw.win32.ntdll.instance);
+
+    if (_glfw.win32.gdi32.instance)
+        FreeLibrary(_glfw.win32.gdi32.instance);
 }
 
 // Create key code translation tables

@@ -212,6 +212,27 @@ typedef enum
  #define DIDFT_OPTIONAL	0x80000000
 #endif
 
+typedef UINT D3DDDI_VIDEO_PRESENT_SOURCE_ID;
+typedef UINT D3DKMT_HANDLE;
+typedef LONG NTSTATUS;
+typedef struct
+{
+    HDC hDc;
+    D3DKMT_HANDLE hAdapter;
+    LUID AdapterLuid;
+    D3DDDI_VIDEO_PRESENT_SOURCE_ID VidPnSourceId;
+} D3DKMT_OPENADAPTERFROMHDC;
+typedef struct
+{
+    D3DKMT_HANDLE hAdapter;
+} D3DKMT_CLOSEADAPTER;
+typedef struct
+{
+    D3DKMT_HANDLE hAdapter;
+    D3DKMT_HANDLE hDevice;
+    D3DDDI_VIDEO_PRESENT_SOURCE_ID VidPnSourceId;
+} D3DKMT_WAITFORVERTICALBLANKEVENT;
+
 // winmm.dll function pointer typedefs
 typedef DWORD (WINAPI * PFN_timeGetTime)(void);
 #define timeGetTime _glfw.win32.winmm.GetTime
@@ -255,6 +276,14 @@ typedef HRESULT (WINAPI * PFN_GetDpiForMonitor)(HMONITOR,MONITOR_DPI_TYPE,UINT*,
 // ntdll.dll function pointer typedefs
 typedef LONG (WINAPI * PFN_RtlVerifyVersionInfo)(OSVERSIONINFOEXW*,ULONG,ULONGLONG);
 #define RtlVerifyVersionInfo _glfw.win32.ntdll.RtlVerifyVersionInfo_
+
+// gdi32.dll function pointer typedefs
+typedef NTSTATUS (WINAPI * PFN_D3DKMTOpenAdapterFromHdc)(D3DKMT_OPENADAPTERFROMHDC*);
+typedef NTSTATUS (WINAPI * PFN_D3DKMTCloseAdapter)(const D3DKMT_CLOSEADAPTER*);
+typedef NTSTATUS (WINAPI * PFN_D3DKMTWaitForVerticalBlankEvent)(const D3DKMT_WAITFORVERTICALBLANKEVENT*);
+#define D3DKMTOpenAdapterFromHdc _glfw.win32.gdi32.OpenAdapterFromHdc
+#define D3DKMTCloseAdapter _glfw.win32.gdi32.CloseAdapter
+#define D3DKMTWaitForVerticalBlankEvent _glfw.win32.gdi32.WaitForVerticalBlankEvent
 
 typedef VkFlags VkWin32SurfaceCreateFlagsKHR;
 
@@ -379,6 +408,13 @@ typedef struct _GLFWlibraryWin32
         HINSTANCE                       instance;
         PFN_RtlVerifyVersionInfo        RtlVerifyVersionInfo_;
     } ntdll;
+
+    struct {
+        HINSTANCE                       instance;
+        PFN_D3DKMTOpenAdapterFromHdc    OpenAdapterFromHdc;
+        PFN_D3DKMTCloseAdapter          CloseAdapter;
+        PFN_D3DKMTWaitForVerticalBlankEvent WaitForVerticalBlankEvent;
+    } gdi32;
 
 } _GLFWlibraryWin32;
 

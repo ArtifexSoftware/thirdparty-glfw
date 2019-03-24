@@ -111,9 +111,12 @@ typedef BOOL (WINAPI * PFN_wglShareLists)(HGLRC,HGLRC);
 //
 typedef struct _GLFWcontextWGL
 {
-    HDC       dc;
-    HGLRC     handle;
-    int       interval;
+    HDC             dc;
+    HGLRC           handle;
+    int             interval;
+    HMONITOR        monitor;
+    D3DKMT_HANDLE   adapter;
+    D3DDDI_VIDEO_PRESENT_SOURCE_ID vpsid;
 
 } _GLFWcontextWGL;
 
