@@ -317,44 +317,11 @@ static void makeContextCurrentWGL(_GLFWwindow* window)
 
 static void swapBuffersWGL(_GLFWwindow* window)
 {
-    if (!window->monitor)
-    {
-        if (IsWindowsVistaOrGreater())
-        {
-            BOOL enabled;
-
-            // HACK: Use DwmFlush when desktop composition is enabled
-            if (SUCCEEDED(DwmIsCompositionEnabled(&enabled)) && enabled)
-            {
-                int count = abs(window->context.wgl.interval);
-                while (count--)
-                    DwmFlush();
-            }
-        }
-    }
-
     SwapBuffers(window->context.wgl.dc);
 }
 
 static void swapIntervalWGL(int interval)
 {
-    _GLFWwindow* window = _glfwPlatformGetTls(&_glfw.contextSlot);
-
-    window->context.wgl.interval = interval;
-
-    if (!window->monitor)
-    {
-        if (IsWindowsVistaOrGreater())
-        {
-            BOOL enabled;
-
-            // HACK: Disable WGL swap interval when desktop composition is enabled to
-            //       avoid interfering with DWM vsync
-            if (SUCCEEDED(DwmIsCompositionEnabled(&enabled)) && enabled)
-                interval = 0;
-        }
-    }
-
     if (_glfw.wgl.EXT_swap_control)
         _glfw.wgl.SwapIntervalEXT(interval);
 }
