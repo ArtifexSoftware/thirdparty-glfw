@@ -42,11 +42,12 @@
 //
 typedef struct _GLFWjoyelementNS
 {
-    IOHIDElementRef native;
-    uint32_t        usage;
-    int             index;
-    long            minimum;
-    long            maximum;
+    IOHIDElementRef     native;
+    uint32_t            usage;
+    IOHIDElementCookie  cookie;
+    int                 index;
+    long                minimum;
+    long                maximum;
 
 } _GLFWjoyelementNS;
 
@@ -90,6 +91,95 @@ static CFComparisonResult compareElements(const void* fp,
     return kCFCompareEqualTo;
 }
 
+// Add usable elements from the specified array
+//
+static void parseElements(CFArrayRef elements,
+                          CFMutableArrayRef axes,
+                          CFMutableArrayRef buttons,
+                          CFMutableArrayRef hats)
+{
+    for (CFIndex i = 0;  i < CFArrayGetCount(elements);  i++)
+    {
+        IOHIDElementRef native = (IOHIDElementRef)
+            CFArrayGetValueAtIndex(elements, i);
+        if (CFGetTypeID(native) != IOHIDElementGetTypeID())
+            continue;
+
+        const IOHIDElementType type = IOHIDElementGetType(native);
+        if (type == kIOHIDElementTypeCollection)
+            parseElements(IOHIDElementGetChildren(native), axes, buttons, hats);
+
+        if ((type != kIOHIDElementTypeInput_Axis) &&
+            (type != kIOHIDElementTypeInput_Button) &&
+            (type != kIOHIDElementTypeInput_Misc))
+        {
+            continue;
+        }
+
+        CFMutableArrayRef target = NULL;
+
+        const uint32_t usage = IOHIDElementGetUsage(native);
+        const uint32_t page = IOHIDElementGetUsagePage(native);
+        if (page == kHIDPage_GenericDesktop)
+        {
+            switch (usage)
+            {
+                case kHIDUsage_GD_X:
+                case kHIDUsage_GD_Y:
+                case kHIDUsage_GD_Z:
+                case kHIDUsage_GD_Rx:
+                case kHIDUsage_GD_Ry:
+                case kHIDUsage_GD_Rz:
+                case kHIDUsage_GD_Slider:
+                case kHIDUsage_GD_Dial:
+                case kHIDUsage_GD_Wheel:
+                    target = axes;
+                    break;
+                case kHIDUsage_GD_Hatswitch:
+                    target = hats;
+                    break;
+                case kHIDUsage_GD_DPadUp:
+                case kHIDUsage_GD_DPadRight:
+                case kHIDUsage_GD_DPadDown:
+                case kHIDUsage_GD_DPadLeft:
+                case kHIDUsage_GD_SystemMainMenu:
+                case kHIDUsage_GD_Select:
+                case kHIDUsage_GD_Start:
+                    target = buttons;
+                    break;
+            }
+        }
+        else if (page == kHIDPage_Button || page == kHIDPage_Consumer)
+            target = buttons;
+
+        if (!target)
+            continue;
+
+        const IOHIDElementCookie cookie = IOHIDElementGetCookie(native);
+        CFIndex j, count = CFArrayGetCount(target);
+
+        for (j = 0;  j < count;  j++)
+        {
+            _GLFWjoyelementNS* element = (_GLFWjoyelementNS*)
+                CFArrayGetValueAtIndex(target, j);
+            if (element->cookie == cookie)
+                break;
+        }
+
+        if (j < count)
+            continue;
+
+        _GLFWjoyelementNS* element = calloc(1, sizeof(_GLFWjoyelementNS));
+        element->native  = native;
+        element->usage   = usage;
+        element->cookie  = cookie;
+        element->index   = (int) count;
+        element->minimum = IOHIDElementGetLogicalMin(native);
+        element->maximum = IOHIDElementGetLogicalMax(native);
+        CFArrayAppendValue(target, element);
+    }
+}
+
 // Removes the specified joystick
 //
 static void closeJoystick(_GLFWjoystick* js)
@@ -125,7 +215,6 @@ static void matchCallback(void* context,
     int jid;
     char name[256];
     char guid[33];
-    CFIndex i;
     CFTypeRef property;
     uint32_t vendor = 0, product = 0, version = 0;
     _GLFWjoystick* js;
@@ -182,70 +271,7 @@ static void matchCallback(void* context,
 
     CFArrayRef elements =
         IOHIDDeviceCopyMatchingElements(device, NULL, kIOHIDOptionsTypeNone);
-
-    for (i = 0;  i < CFArrayGetCount(elements);  i++)
-    {
-        IOHIDElementRef native = (IOHIDElementRef)
-            CFArrayGetValueAtIndex(elements, i);
-        if (CFGetTypeID(native) != IOHIDElementGetTypeID())
-            continue;
-
-        const IOHIDElementType type = IOHIDElementGetType(native);
-        if ((type != kIOHIDElementTypeInput_Axis) &&
-            (type != kIOHIDElementTypeInput_Button) &&
-            (type != kIOHIDElementTypeInput_Misc))
-        {
-            continue;
-        }
-
-        CFMutableArrayRef target = NULL;
-
-        const uint32_t usage = IOHIDElementGetUsage(native);
-        const uint32_t page = IOHIDElementGetUsagePage(native);
-        if (page == kHIDPage_GenericDesktop)
-        {
-            switch (usage)
-            {
-                case kHIDUsage_GD_X:
-                case kHIDUsage_GD_Y:
-                case kHIDUsage_GD_Z:
-                case kHIDUsage_GD_Rx:
-                case kHIDUsage_GD_Ry:
-                case kHIDUsage_GD_Rz:
-                case kHIDUsage_GD_Slider:
-                case kHIDUsage_GD_Dial:
-                case kHIDUsage_GD_Wheel:
-                    target = axes;
-                    break;
-                case kHIDUsage_GD_Hatswitch:
-                    target = hats;
-                    break;
-                case kHIDUsage_GD_DPadUp:
-                case kHIDUsage_GD_DPadRight:
-                case kHIDUsage_GD_DPadDown:
-                case kHIDUsage_GD_DPadLeft:
-                case kHIDUsage_GD_SystemMainMenu:
-                case kHIDUsage_GD_Select:
-                case kHIDUsage_GD_Start:
-                    target = buttons;
-                    break;
-            }
-        }
-        else if (page == kHIDPage_Button || page == kHIDPage_Consumer)
-            target = buttons;
-
-        if (target)
-        {
-            _GLFWjoyelementNS* element = calloc(1, sizeof(_GLFWjoyelementNS));
-            element->native  = native;
-            element->usage   = usage;
-            element->index   = (int) CFArrayGetCount(target);
-            element->minimum = IOHIDElementGetLogicalMin(native);
-            element->maximum = IOHIDElementGetLogicalMax(native);
-            CFArrayAppendValue(target, element);
-        }
-    }
-
+    parseElements(elements, axes, buttons, hats);
     CFRelease(elements);
 
     CFArraySortValues(axes, CFRangeMake(0, CFArrayGetCount(axes)),
