@@ -784,10 +784,18 @@ static char *translateCursorShape(int shape)
             return "crosshair";
         case GLFW_HAND_CURSOR:
             return "hand2";
-        case GLFW_HRESIZE_CURSOR:
+        case GLFW_RESIZE_EW_CURSOR:
             return "sb_h_double_arrow";
-        case GLFW_VRESIZE_CURSOR:
+        case GLFW_RESIZE_NS_CURSOR:
             return "sb_v_double_arrow";
+        case GLFW_RESIZE_NWSE_CURSOR:
+            return "nwse-resize";
+        case GLFW_RESIZE_NESW_CURSOR:
+            return "nesw-resize";
+        case GLFW_RESIZE_ALL_CURSOR:
+            return "all-scroll";
+        case GLFW_NOT_ALLOWED_CURSOR:
+            return "not-allowed";
     }
     return NULL;
 }

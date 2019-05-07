@@ -373,7 +373,7 @@ A cursor with a [standard shape](@ref shapes) from the current system cursor
 theme can be can be created with @ref glfwCreateStandardCursor.
 
 @code
-GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR);
 @endcode
 
 These cursor objects behave in the exact same way as those created with @ref

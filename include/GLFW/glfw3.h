@@ -1041,7 +1041,7 @@ extern "C" {
 
 /*! @brief The regular arrow cursor shape.
  *
- *  The regular arrow cursor.
+ *  The regular arrow cursor shape.
  */
 #define GLFW_ARROW_CURSOR           0x00036001
 /*! @brief The text input I-beam cursor shape.
@@ -1049,26 +1049,48 @@ extern "C" {
  *  The text input I-beam cursor shape.
  */
 #define GLFW_IBEAM_CURSOR           0x00036002
-/*! @brief The crosshair shape.
+/*! @brief The crosshair cursor shape.
  *
- *  The crosshair shape.
+ *  The crosshair cursor shape.
  */
 #define GLFW_CROSSHAIR_CURSOR       0x00036003
-/*! @brief The hand shape.
+/*! @brief The pointing hand cursor shape.
  *
- *  The hand shape.
+ *  The pointing hand cursor shape.
  */
 #define GLFW_HAND_CURSOR            0x00036004
-/*! @brief The horizontal resize arrow shape.
+/*! @brief The horizontal resize/move arrow shape.
  *
- *  The horizontal resize arrow shape.
+ *  The horizontal resize/move arrow shape.
  */
-#define GLFW_HRESIZE_CURSOR         0x00036005
-/*! @brief The vertical resize arrow shape.
+#define GLFW_RESIZE_EW_CURSOR       0x00036005
+/*! @brief The vertical resize/move arrow shape.
  *
- *  The vertical resize arrow shape.
+ *  The vertical resize arrow/move shape.
  */
-#define GLFW_VRESIZE_CURSOR         0x00036006
+#define GLFW_RESIZE_NS_CURSOR       0x00036006
+/*! @brief The top-left to bottom-right diagonal resize/move arrow shape.
+ *
+ *  The top-left to bottom-right diagonal resize/move arrow shape.
+ */
+#define GLFW_RESIZE_NWSE_CURSOR     0x00036007
+/*! @brief The top-right to bottom-left diagonal resize/move arrow shape.
+ *
+ *  The top-right to bottom-left diagonal resize arrow/move shape.
+ */
+#define GLFW_RESIZE_NESW_CURSOR     0x00036008
+/*! @brief The omni-directional resize/move cursor shape.
+ *
+ *  The omni-directional resize cursor/move shape.
+ */
+#define GLFW_RESIZE_ALL_CURSOR      0x00036009
+/*! @brief The operation-not-allowed shape.
+ *
+ *  The operation-not-allowed shape.
+ */
+#define GLFW_NOT_ALLOWED_CURSOR     0x0003600A
+#define GLFW_HRESIZE_CURSOR         GLFW_RESIZE_EW_CURSOR
+#define GLFW_VRESIZE_CURSOR         GLFW_RESIZE_NS_CURSOR
 /*! @} */
 
 #define GLFW_CONNECTED              0x00040001

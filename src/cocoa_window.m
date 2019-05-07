@@ -1603,10 +1603,34 @@ int _glfwPlatformCreateStandardCursor(_GLFWcursor* cursor, int shape)
         cursor->ns.object = [NSCursor crosshairCursor];
     else if (shape == GLFW_HAND_CURSOR)
         cursor->ns.object = [NSCursor pointingHandCursor];
-    else if (shape == GLFW_HRESIZE_CURSOR)
+    else if (shape == GLFW_RESIZE_EW_CURSOR)
         cursor->ns.object = [NSCursor resizeLeftRightCursor];
-    else if (shape == GLFW_VRESIZE_CURSOR)
+    else if (shape == GLFW_RESIZE_NS_CURSOR)
         cursor->ns.object = [NSCursor resizeUpDownCursor];
+    else if (shape == GLFW_RESIZE_NWSE_CURSOR)
+    {
+        // HACK: Use a Cocoa-internal message
+        if ([NSCursor respondsToSelector:@selector(_windowResizeNorthWestSouthEastCursor)])
+        {
+            id object = [NSCursor _windowResizeNorthWestSouthEastCursor];
+            if ([object isKindOfClass:[NSCursor class]])
+                cursor->ns.object = object;
+        }
+    }
+    else if (shape == GLFW_RESIZE_NESW_CURSOR)
+    {
+        // HACK: Use a Cocoa-internal message
+        if ([NSCursor respondsToSelector:@selector(_windowResizeNorthEastSouthWestCursor)])
+        {
+            id object = [NSCursor _windowResizeNorthEastSouthWestCursor];
+            if ([object isKindOfClass:[NSCursor class]])
+                cursor->ns.object = object;
+        }
+    }
+    else if (shape == GLFW_RESIZE_ALL_CURSOR)
+        cursor->ns.object = [NSCursor closedHandCursor];
+    else if (shape == GLFW_NOT_ALLOWED_CURSOR)
+        cursor->ns.object = [NSCursor operationNotAllowedCursor];
 
     if (!cursor->ns.object)
     {

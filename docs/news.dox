@@ -9,6 +9,18 @@
 
 @subsection features_34 New features in version 3.4
 
+@subsubsection standard_cursors_34 More standard cursors
+
+GLFW now provides the standard cursors @ref GLFW_RESIZE_NWSE_CURSOR and @ref
+GLFW_RESIZE_NESW_CURSOR for diagonal resizing, @ref GLFW_RESIZE_ALL_CURSOR for
+omni-directional resizing and @ref GLFW_NOT_ALLOWED_CURSOR for showing an action
+is not allowed.  The standard cursors for horizontal and vertical resizing are
+now referred to as @ref GLFW_RESIZE_EW_CURSOR and @ref GLFW_RESIZE_NS_CURSOR,
+but the older names are still available.
+
+For more information see @ref cursor_standard.
+
+
 @subsection caveats_34 Caveats for version 3.4
 
 @subsubsection standalone_34 Tests and examples are disabled when built as a sub-project
@@ -34,6 +46,13 @@ add_subdirectory(path/to/glfw)
 @subsubsection functions_34 New functions in version 3.4
 @subsubsection types_34 New types in version 3.4
 @subsubsection constants_34 New constants in version 3.4
+
+ - @ref GLFW_RESIZE_EW_CURSOR
+ - @ref GLFW_RESIZE_NS_CURSOR
+ - @ref GLFW_RESIZE_NWSE_CURSOR
+ - @ref GLFW_RESIZE_NESW_CURSOR
+ - @ref GLFW_RESIZE_ALL_CURSOR
+ - @ref GLFW_NOT_ALLOWED_CURSOR
 
 
 @section news_33 Release notes for version 3.3

@@ -69,7 +69,7 @@ static int swap_interval = 1;
 static int wait_events = GLFW_TRUE;
 static int animate_cursor = GLFW_FALSE;
 static int track_cursor = GLFW_FALSE;
-static GLFWcursor* standard_cursors[6];
+static GLFWcursor* standard_cursors[9];
 static GLFWcursor* tracking_cursor = NULL;
 
 static void error_callback(int error, const char* description)
@@ -294,6 +294,18 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
             glfwSetCursor(window, standard_cursors[5]);
             break;
 
+        case GLFW_KEY_7:
+            glfwSetCursor(window, standard_cursors[6]);
+            break;
+
+        case GLFW_KEY_8:
+            glfwSetCursor(window, standard_cursors[7]);
+            break;
+
+        case GLFW_KEY_9:
+            glfwSetCursor(window, standard_cursors[8]);
+            break;
+
         case GLFW_KEY_F11:
         case GLFW_KEY_ENTER:
         {
@@ -359,8 +371,11 @@ int main(void)
             GLFW_IBEAM_CURSOR,
             GLFW_CROSSHAIR_CURSOR,
             GLFW_HAND_CURSOR,
-            GLFW_HRESIZE_CURSOR,
-            GLFW_VRESIZE_CURSOR
+            GLFW_RESIZE_EW_CURSOR,
+            GLFW_RESIZE_NS_CURSOR,
+            GLFW_RESIZE_NWSE_CURSOR,
+            GLFW_RESIZE_NESW_CURSOR,
+            GLFW_NOT_ALLOWED_CURSOR
         };
 
         standard_cursors[i] = glfwCreateStandardCursor(shapes[i]);

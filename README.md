@@ -118,6 +118,10 @@ information on what to include when reporting a bug.
 
 ## Changelog
 
+ - Added `GLFW_RESIZE_NWSE_CURSOR`, `GLFW_RESIZE_NESW_CURSOR`,
+   `GLFW_RESIZE_ALL_CURSOR` and `GLFW_NOT_ALLOWED_CURSOR` standard cursors (#427)
+ - Added `GLFW_RESIZE_EW_CURSOR` alias for `GLFW_HRESIZE_CURSOR` (#427)
+ - Added `GLFW_RESIZE_NS_CURSOR` alias for `GLFW_VRESIZE_CURSOR` (#427)
  - Disabled tests and examples by default when built as a CMake subdirectory
  - Bugfix: The CMake config-file package used an absolute path and was not
    relocatable (#1470)
