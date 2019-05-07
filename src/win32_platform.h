@@ -113,6 +113,9 @@
 #ifndef OCR_HAND
  #define OCR_HAND 32649
 #endif
+#ifndef OCR_HELP
+ #define OCR_HELP 32651
+#endif
 
 #if WINVER < 0x0601
 typedef struct
