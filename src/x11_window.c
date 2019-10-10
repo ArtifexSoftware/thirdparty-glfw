@@ -50,6 +50,10 @@
 #define Button6            6
 #define Button7            7
 
+// Motif WM hints flags
+#define MWM_HINTS_DECORATIONS   2
+#define MWM_DECOR_ALL           1
+
 #define _GLFW_XDND_VERSION 5
 
 
@@ -2545,13 +2549,8 @@ void _glfwPlatformSetWindowDecorated(_GLFWwindow* window, GLFWbool enabled)
         unsigned long status;
     } hints = {0};
 
-    if (enabled)
-        hints.flags = 0;       // Hint nothing
-    else
-    {
-        hints.flags = 2;       // Hint decorations
-        hints.decorations = 0; // No decorations
-    }
+    hints.flags = MWM_HINTS_DECORATIONS;
+    hints.decorations = enabled ? MWM_DECOR_ALL : 0;
 
     XChangeProperty(_glfw.x11.display, window->x11.handle,
                     _glfw.x11.MOTIF_WM_HINTS,
