@@ -69,7 +69,7 @@ static int swap_interval = 1;
 static int wait_events = GLFW_TRUE;
 static int animate_cursor = GLFW_FALSE;
 static int track_cursor = GLFW_FALSE;
-static GLFWcursor* standard_cursors[11];
+static GLFWcursor* standard_cursors[10];
 static GLFWcursor* tracking_cursor = NULL;
 
 static void error_callback(int error, const char* description)
@@ -360,8 +360,7 @@ int main(void)
             GLFW_RESIZE_NWSE_CURSOR,
             GLFW_RESIZE_NESW_CURSOR,
             GLFW_RESIZE_ALL_CURSOR,
-            GLFW_NOT_ALLOWED_CURSOR,
-            GLFW_HELP_CURSOR
+            GLFW_NOT_ALLOWED_CURSOR
         };
 
         standard_cursors[i] = glfwCreateStandardCursor(shapes[i]);

@@ -1234,8 +1234,6 @@ int _glfwPlatformCreateStandardCursor(_GLFWcursor* cursor, int shape)
         name = "all-scroll";
     else if (shape == GLFW_NOT_ALLOWED_CURSOR)
         name = "not-allowed";
-    else if (shape == GLFW_HELP_CURSOR)
-        name = "help";
 
     cursor->wl.cursor = wl_cursor_theme_get_cursor(_glfw.wl.cursorTheme, name);
 
@@ -1262,8 +1260,6 @@ int _glfwPlatformCreateStandardCursor(_GLFWcursor* cursor, int shape)
             name = "sb_v_double_arrow";
         else if (shape == GLFW_RESIZE_ALL_CURSOR)
             name = "fleur";
-        else if (shape == GLFW_HELP_CURSOR)
-            name = "question_arrow";
         else
         {
             _glfwInputError(GLFW_CURSOR_UNAVAILABLE,

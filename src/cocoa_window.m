@@ -1614,8 +1614,6 @@ int _glfwPlatformCreateStandardCursor(_GLFWcursor* cursor, int shape)
         cursorSelector = @selector(_windowResizeNorthWestSouthEastCursor);
     else if (shape == GLFW_RESIZE_NESW_CURSOR)
         cursorSelector = @selector(_windowResizeNorthEastSouthWestCursor);
-    else if (shape == GLFW_HELP_CURSOR)
-        cursorSelector = @selector(_helpCursor);
 
     if (cursorSelector && [NSCursor respondsToSelector:cursorSelector])
     {

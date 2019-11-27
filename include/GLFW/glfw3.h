@@ -1136,15 +1136,6 @@ extern "C" {
  *  all cursor themes.
  */
 #define GLFW_NOT_ALLOWED_CURSOR     0x0003600A
-/*! @brief The help pointer shape.
- *
- *  The help pointer shape.  This is usually a regular arrow cursor combined
- *  with a question mark or a question mark with an arrow bottom.
- *
- *  @note @macos This shape is provided by a private system API and may fail
- *  with @ref GLFW_CURSOR_UNAVAILABLE in the future.
- */
-#define GLFW_HELP_CURSOR            0x0003600B
 /*! @brief Legacy name for compatibility.
  *
  *  This is an alias for compatibility with earlier versions.
@@ -4522,7 +4513,6 @@ GLFWAPI GLFWcursor* glfwCreateCursor(const GLFWimage* image, int xhot, int yhot)
  *  @ref GLFW_RESIZE_NESW_CURSOR   | Yes     | Yes<sup>1</sup> | Maybe<sup>2</sup> | Maybe<sup>2</sup>
  *  @ref GLFW_RESIZE_ALL_CURSOR    | Yes     | Yes   | Yes    | Yes
  *  @ref GLFW_NOT_ALLOWED_CURSOR   | Yes     | Yes   | Maybe<sup>2</sup> | Maybe<sup>2</sup>
- *  @ref GLFW_HELP_CURSOR          | Yes     | Yes<sup>1</sup> | Yes | Yes
  *
  *  1) This uses a private system API and may fail in the future.
  *

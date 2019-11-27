@@ -2851,8 +2851,6 @@ int _glfwPlatformCreateStandardCursor(_GLFWcursor* cursor, int shape)
                 name = "all-scroll";
             else if (shape == GLFW_NOT_ALLOWED_CURSOR)
                 name = "not-allowed";
-            else if (shape == GLFW_HELP_CURSOR)
-                name = "help";
 
             XcursorImage* image = XcursorLibraryLoadImage(name, theme, size);
             if (image)
@@ -2881,8 +2879,6 @@ int _glfwPlatformCreateStandardCursor(_GLFWcursor* cursor, int shape)
             native = XC_sb_v_double_arrow;
         else if (shape == GLFW_RESIZE_ALL_CURSOR)
             native = XC_fleur;
-        else if (shape == GLFW_HELP_CURSOR)
-            native = XC_question_arrow;
         else
         {
             _glfwInputError(GLFW_CURSOR_UNAVAILABLE,

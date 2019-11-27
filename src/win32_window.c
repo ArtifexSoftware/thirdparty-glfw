@@ -2082,8 +2082,6 @@ int _glfwPlatformCreateStandardCursor(_GLFWcursor* cursor, int shape)
         id = OCR_SIZEALL;
     else if (shape == GLFW_NOT_ALLOWED_CURSOR)
         id = OCR_NO;
-    else if (shape == GLFW_HELP_CURSOR)
-        id = OCR_HELP;
     else
     {
         _glfwInputError(GLFW_PLATFORM_ERROR, "Win32: Unknown standard cursor");

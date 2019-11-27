@@ -13,8 +13,8 @@
 
 GLFW now provides the standard cursor shapes @ref GLFW_RESIZE_NWSE_CURSOR and
 @ref GLFW_RESIZE_NESW_CURSOR for diagonal resizing, @ref GLFW_RESIZE_ALL_CURSOR
-for omni-directional resizing, @ref GLFW_NOT_ALLOWED_CURSOR for showing an
-action is not allowed and @ref GLFW_HELP_CURSOR for context sensitive help.
+for omni-directional resizing and @ref GLFW_NOT_ALLOWED_CURSOR for showing an
+action is not allowed.
 
 Unlike the original set, these shapes may not be available everywhere and
 creation will then fail with the new @ref GLFW_CURSOR_UNAVAILABLE error.
@@ -69,7 +69,6 @@ add_subdirectory(path/to/glfw)
  - @ref GLFW_RESIZE_NESW_CURSOR
  - @ref GLFW_RESIZE_ALL_CURSOR
  - @ref GLFW_NOT_ALLOWED_CURSOR
- - @ref GLFW_HELP_CURSOR
  - @ref GLFW_CURSOR_UNAVAILABLE
  - @ref GLFW_WIN32_KEYBOARD_MENU
 
