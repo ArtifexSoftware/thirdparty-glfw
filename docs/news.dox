@@ -27,6 +27,14 @@ are still available.
 For more information see @ref cursor_standard.
 
 
+@subsubsection captured_cursor_34 Captured cursor mode
+
+GLFW now supports confining the cursor to the window content area with the @ref
+GLFW_CURSOR_CAPTURED cursor mode.
+
+For more information see @ref cursor_mode.
+
+
 @subsubsection features_34_win32_keymenu Support for keyboard access to Windows window menu
 
 GLFW now provides the
@@ -71,6 +79,7 @@ add_subdirectory(path/to/glfw)
  - @ref GLFW_NOT_ALLOWED_CURSOR
  - @ref GLFW_CURSOR_UNAVAILABLE
  - @ref GLFW_WIN32_KEYBOARD_MENU
+ - @ref GLFW_CURSOR_CAPTURED
 
 
 @section news_archive Release notes for earlier versions

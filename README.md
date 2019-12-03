@@ -123,6 +123,8 @@ information on what to include when reporting a bug.
  - Added `GLFW_RESIZE_EW_CURSOR` alias for `GLFW_HRESIZE_CURSOR` (#427)
  - Added `GLFW_RESIZE_NS_CURSOR` alias for `GLFW_VRESIZE_CURSOR` (#427)
  - Added `GLFW_POINTING_HAND_CURSOR` alias for `GLFW_HAND_CURSOR` (#427)
+ - Added `GLFW_CURSOR_CAPTURED` cursor mode to confine the cursor to the window
+   content area (#58)
  - Disabled tests and examples by default when built as a CMake subdirectory
  - Bugfix: The CMake config-file package used an absolute path and was not
    relocatable (#1470)

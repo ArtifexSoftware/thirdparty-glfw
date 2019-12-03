@@ -242,7 +242,8 @@ static void applyAspectRatio(_GLFWwindow* window, int edge, RECT* area)
 //
 static void updateCursorImage(_GLFWwindow* window)
 {
-    if (window->cursorMode == GLFW_CURSOR_NORMAL)
+    if (window->cursorMode == GLFW_CURSOR_NORMAL ||
+        window->cursorMode == GLFW_CURSOR_CAPTURED)
     {
         if (window->cursor)
             SetCursor(window->cursor->win32.handle);
@@ -650,6 +651,8 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             {
                 if (window->cursorMode == GLFW_CURSOR_DISABLED)
                     disableCursor(window);
+                else if (window->cursorMode == GLFW_CURSOR_CAPTURED)
+                    captureCursor(window);
 
                 window->win32.frameAction = GLFW_FALSE;
             }
@@ -668,6 +671,8 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
 
             if (window->cursorMode == GLFW_CURSOR_DISABLED)
                 disableCursor(window);
+            else if (window->cursorMode == GLFW_CURSOR_CAPTURED)
+                captureCursor(window);
 
             return 0;
         }
@@ -676,6 +681,8 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
         {
             if (window->cursorMode == GLFW_CURSOR_DISABLED)
                 enableCursor(window);
+            else if (window->cursorMode == GLFW_CURSOR_CAPTURED)
+                releaseCursor();
 
             if (window->monitor && window->autoIconify)
                 _glfwPlatformIconifyWindow(window);
@@ -959,6 +966,8 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             //       resizing the window or using the window menu
             if (window->cursorMode == GLFW_CURSOR_DISABLED)
                 enableCursor(window);
+            else if (window->cursorMode == GLFW_CURSOR_CAPTURED)
+                releaseCursor();
 
             break;
         }
@@ -973,6 +982,8 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             //       resizing the window or using the menu
             if (window->cursorMode == GLFW_CURSOR_DISABLED)
                 disableCursor(window);
+            else if (window->cursorMode == GLFW_CURSOR_CAPTURED)
+                captureCursor(window);
 
             break;
         }
@@ -2050,7 +2061,7 @@ void _glfwPlatformSetCursorMode(_GLFWwindow* window, int mode)
                 disableRawMouseMotion(window);
         }
 
-        if (mode == GLFW_CURSOR_DISABLED)
+        if (mode == GLFW_CURSOR_DISABLED || mode == GLFW_CURSOR_CAPTURED)
             captureCursor(window);
         else
             releaseCursor();
