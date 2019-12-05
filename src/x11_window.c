@@ -508,7 +508,8 @@ static char* convertLatin1toUTF8(const char* source)
 //
 static void updateCursorImage(_GLFWwindow* window)
 {
-    if (window->cursorMode == GLFW_CURSOR_NORMAL)
+    if (window->cursorMode == GLFW_CURSOR_NORMAL ||
+        window->cursorMode == GLFW_CURSOR_CAPTURED)
     {
         if (window->cursor)
         {
@@ -2948,7 +2949,8 @@ void _glfwPlatformDestroyCursor(_GLFWcursor* cursor)
 
 void _glfwPlatformSetCursor(_GLFWwindow* window, _GLFWcursor* cursor)
 {
-    if (window->cursorMode == GLFW_CURSOR_NORMAL)
+    if (window->cursorMode == GLFW_CURSOR_NORMAL ||
+        window->cursorMode == GLFW_CURSOR_CAPTURED)
     {
         updateCursorImage(window);
         XFlush(_glfw.x11.display);
