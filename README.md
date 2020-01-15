@@ -141,6 +141,7 @@ information on what to include when reporting a bug.
  - [Win32] Bugfix: The window hint `GLFW_MAXIMIZED` did not move or resize the
    window (#1499)
  - [Win32] Bugfix: Disabled cursor mode interfered with some non-client actions
+ - [Win32] Bugfix: Super key was not released after Win+V hotkey (#1622)
  - [Cocoa] Removed dependency on the CoreVideo framework
  - [Cocoa] Bugfix: `glfwSetWindowSize` used a bottom-left anchor point (#1553)
  - [Cocoa] Bugfix: Window remained on screen after destruction until event poll
