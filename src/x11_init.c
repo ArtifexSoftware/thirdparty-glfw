@@ -1122,6 +1122,8 @@ int _glfwPlatformInit(void)
         _glfw_dlsym(_glfw.x11.xlib.handle, "XCreateFontCursor");
     _glfw.x11.xlib.CreateIC = (PFN_XCreateIC)
         _glfw_dlsym(_glfw.x11.xlib.handle, "XCreateIC");
+    _glfw.x11.xlib.CreateRegion = (PFN_XCreateRegion)
+        _glfw_dlsym(_glfw.x11.xlib.handle, "XCreateRegion");
     _glfw.x11.xlib.CreateWindow = (PFN_XCreateWindow)
         _glfw_dlsym(_glfw.x11.xlib.handle, "XCreateWindow");
     _glfw.x11.xlib.DefineCursor = (PFN_XDefineCursor)
@@ -1132,6 +1134,8 @@ int _glfwPlatformInit(void)
         _glfw_dlsym(_glfw.x11.xlib.handle, "XDeleteProperty");
     _glfw.x11.xlib.DestroyIC = (PFN_XDestroyIC)
         _glfw_dlsym(_glfw.x11.xlib.handle, "XDestroyIC");
+    _glfw.x11.xlib.DestroyRegion = (PFN_XDestroyRegion)
+        _glfw_dlsym(_glfw.x11.xlib.handle, "XDestroyRegion");
     _glfw.x11.xlib.DestroyWindow = (PFN_XDestroyWindow)
         _glfw_dlsym(_glfw.x11.xlib.handle, "XDestroyWindow");
     _glfw.x11.xlib.DisplayKeycodes = (PFN_XDisplayKeycodes)
@@ -1254,6 +1258,8 @@ int _glfwPlatformInit(void)
         _glfw_dlsym(_glfw.x11.xlib.handle, "XUndefineCursor");
     _glfw.x11.xlib.UngrabPointer = (PFN_XUngrabPointer)
         _glfw_dlsym(_glfw.x11.xlib.handle, "XUngrabPointer");
+    _glfw.x11.xlib.UnionRectWithRegion = (PFN_XUnionRectWithRegion)
+        _glfw_dlsym(_glfw.x11.xlib.handle, "XUnionRectWithRegion");
     _glfw.x11.xlib.UnmapWindow = (PFN_XUnmapWindow)
         _glfw_dlsym(_glfw.x11.xlib.handle, "XUnmapWindow");
     _glfw.x11.xlib.UnsetICFocus = (PFN_XUnsetICFocus)
