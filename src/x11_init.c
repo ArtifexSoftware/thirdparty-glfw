@@ -41,18 +41,12 @@
 //
 static int translateKeyCode(int scancode)
 {
-    int keySym;
+    int dummy;
+    KeySym* keysyms = XGetKeyboardMapping(_glfw.x11.display, scancode, 1, &dummy);
+    const int keysym = keysyms[0];
+    XFree(keysyms);
 
-    {
-        int dummy;
-        KeySym* keySyms;
-
-        keySyms = XGetKeyboardMapping(_glfw.x11.display, scancode, 1, &dummy);
-        keySym = keySyms[0];
-        XFree(keySyms);
-    }
-
-    switch (keySym)
+    switch (keysym)
     {
         case XK_Escape:         return GLFW_KEY_ESCAPE;
         case XK_Tab:            return GLFW_KEY_TAB;
