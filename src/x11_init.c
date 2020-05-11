@@ -220,7 +220,9 @@ static void createKeyTables(void)
         // current keyboard layout
 
         XkbDescPtr desc = XkbGetMap(_glfw.x11.display, 0, XkbUseCoreKbd);
-        XkbGetNames(_glfw.x11.display, XkbKeyNamesMask | XkbKeyAliasesMask, desc);
+        XkbGetNames(_glfw.x11.display,
+                    XkbKeyNamesMask | XkbKeyAliasesMask | XkbGroupNamesMask,
+                    desc);
 
         scancodeMin = desc->min_key_code;
         scancodeMax = desc->max_key_code;
@@ -353,6 +355,16 @@ static void createKeyTables(void)
             { GLFW_KEY_RIGHT_SUPER, "RWIN" },
             { GLFW_KEY_MENU, "MENU" }
         };
+
+        for (int i = 0;  i < XkbNumKbdGroups;  i++)
+        {
+            char* name = XGetAtomName(_glfw.x11.display,desc->names->groups[i]);
+            if (name)
+            {
+                _glfw.x11.xkb.groupNames[i] = _glfw_strdup(name);
+                XFree(name);
+            }
+        }
 
         // Find the X11 key code -> GLFW key code mapping
         for (scancode = scancodeMin;  scancode <= scancodeMax;  scancode++)
@@ -1153,6 +1165,8 @@ int _glfwPlatformInit(void)
         _glfw_dlsym(_glfw.x11.xlib.handle, "XFreeCursor");
     _glfw.x11.xlib.FreeEventData = (PFN_XFreeEventData)
         _glfw_dlsym(_glfw.x11.xlib.handle, "XFreeEventData");
+    _glfw.x11.xlib.GetAtomName = (PFN_XGetAtomName)
+        _glfw_dlsym(_glfw.x11.xlib.handle, "XGetAtomName");
     _glfw.x11.xlib.GetErrorText = (PFN_XGetErrorText)
         _glfw_dlsym(_glfw.x11.xlib.handle, "XGetErrorText");
     _glfw.x11.xlib.GetEventData = (PFN_XGetEventData)
@@ -1375,6 +1389,9 @@ void _glfwPlatformTerminate(void)
 
     free(_glfw.x11.primarySelectionString);
     free(_glfw.x11.clipboardString);
+
+    for (int i = 0;  i < XkbNumKbdGroups;  i++)
+        free(_glfw.x11.xkb.groupNames[i]);
 
     XUnregisterIMInstantiateCallback(_glfw.x11.display,
                                      NULL, NULL, NULL,

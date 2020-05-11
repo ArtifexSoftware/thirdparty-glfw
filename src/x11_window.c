@@ -1184,6 +1184,7 @@ static void processEvent(XEvent *event)
                 (((XkbEvent*) event)->state.changed & XkbGroupStateMask))
             {
                 _glfw.x11.xkb.group = ((XkbEvent*) event)->state.group;
+                _glfwInputKeyboardLayout();
             }
         }
     }
@@ -2918,6 +2919,18 @@ const char* _glfwPlatformGetScancodeName(int scancode)
 int _glfwPlatformGetKeyScancode(int key)
 {
     return _glfw.x11.scancodes[key];
+}
+
+const char* _glfwPlatformGetKeyboardLayoutName(void)
+{
+    if (!_glfw.x11.xkb.available)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR,
+                        "X11: XKB extension required for keyboard layout names");
+        return NULL;
+    }
+
+    return _glfw.x11.xkb.groupNames[_glfw.x11.xkb.group];
 }
 
 int _glfwPlatformCreateCursor(_GLFWcursor* cursor,

@@ -231,6 +231,11 @@ ignored.  This matches the behavior of the key callback, meaning the callback
 arguments can always be passed unmodified to this function.
 
 
+@subsection keyboard_layout Keyboard layout
+
+There should be words here.
+
+
 @section input_mouse Mouse input
 
 Mouse input comes in many forms, including mouse motion, button presses and

@@ -144,6 +144,7 @@ typedef struct _GLFWlibraryNS
     id                  delegate;
     GLFWbool            cursorHidden;
     TISInputSourceRef   inputSource;
+    NSString*           inputSourceID;
     IOHIDManagerRef     hidManager;
     id                  unicodeData;
     id                  helper;
@@ -154,6 +155,7 @@ typedef struct _GLFWlibraryNS
     short int           keycodes[256];
     short int           scancodes[GLFW_KEY_LAST + 1];
     char*               clipboardString;
+    char*               keyboardLayoutName;
     CGPoint             cascadePoint;
     // Where to place the cursor when re-enabled
     double              restoreCursorPosX, restoreCursorPosY;

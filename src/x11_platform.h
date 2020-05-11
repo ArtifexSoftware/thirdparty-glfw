@@ -76,6 +76,7 @@ typedef int (* PFN_XFree)(void*);
 typedef int (* PFN_XFreeColormap)(Display*,Colormap);
 typedef int (* PFN_XFreeCursor)(Display*,Cursor);
 typedef void (* PFN_XFreeEventData)(Display*,XGenericEventCookie*);
+typedef char* (* PFN_XGetAtomName)(Display*,Atom);
 typedef int (* PFN_XGetErrorText)(Display*,int,char*,int);
 typedef Bool (* PFN_XGetEventData)(Display*,XGenericEventCookie*);
 typedef char* (* PFN_XGetICValues)(XIC,...);
@@ -176,6 +177,7 @@ typedef void (* PFN_Xutf8SetWMProperties)(Display*,Window,const char*,const char
 #define XFreeColormap _glfw.x11.xlib.FreeColormap
 #define XFreeCursor _glfw.x11.xlib.FreeCursor
 #define XFreeEventData _glfw.x11.xlib.FreeEventData
+#define XGetAtomName _glfw.x11.xlib.GetAtomName
 #define XGetErrorText _glfw.x11.xlib.GetErrorText
 #define XGetEventData _glfw.x11.xlib.GetEventData
 #define XGetICValues _glfw.x11.xlib.GetICValues
@@ -533,6 +535,7 @@ typedef struct _GLFWlibraryX11
         PFN_XFreeColormap FreeColormap;
         PFN_XFreeCursor FreeCursor;
         PFN_XFreeEventData FreeEventData;
+        PFN_XGetAtomName GetAtomName;
         PFN_XGetErrorText GetErrorText;
         PFN_XGetEventData GetEventData;
         PFN_XGetICValues GetICValues;
@@ -638,6 +641,7 @@ typedef struct _GLFWlibraryX11
         int          major;
         int          minor;
         unsigned int group;
+        char*        groupNames[XkbNumKbdGroups];
         PFN_XkbFreeKeyboard FreeKeyboard;
         PFN_XkbFreeNames FreeNames;
         PFN_XkbGetMap GetMap;

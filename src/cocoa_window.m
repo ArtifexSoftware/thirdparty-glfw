@@ -1559,6 +1559,17 @@ int _glfwPlatformGetKeyScancode(int key)
     return _glfw.ns.scancodes[key];
 }
 
+const char* _glfwPlatformGetKeyboardLayoutName(void)
+{
+    NSTextInputContext* context = [NSTextInputContext currentInputContext];
+    NSTextInputSourceIdentifier* source = [context selectedKeyboardInputSource];
+    NSString* name = [NSTextInputContext localizedNameForInputSource:source];
+
+    free(_glfw.ns.keyboardLayoutName);
+    _glfw.ns.keyboardLayoutName = _glfw_strdup([name UTF8String]);
+    return _glfw.ns.keyboardLayoutName;
+}
+
 int _glfwPlatformCreateCursor(_GLFWcursor* cursor,
                               const GLFWimage* image,
                               int xhot, int yhot)

@@ -387,7 +387,26 @@ static GLFWbool initializeTIS(void)
 
 - (void)selectedKeyboardInputSourceChanged:(NSObject* )object
 {
+    NSTextInputContext* context = [NSTextInputContext currentInputContext];
+
+    // Ignore this event; we will get another when one of our windows becomes key
+    if (!context)
+        return;
+
+    NSTextInputSourceIdentifier source = [context selectedKeyboardInputSource];
+    if (_glfw.ns.inputSourceID)
+    {
+        // Filter out duplicate events for the same input source
+        if ([source isEqualToString:_glfw.ns.inputSourceID])
+            return;
+
+        [_glfw.ns.inputSourceID release];
+    }
+
+    _glfw.ns.inputSourceID = [source copy];
+
     updateUnicodeDataNS();
+    _glfwInputKeyboardLayout();
 }
 
 - (void)doNothing:(id)object
@@ -574,6 +593,12 @@ void _glfwPlatformTerminate(void)
         _glfw.ns.unicodeData = nil;
     }
 
+    if (_glfw.ns.inputSourceID)
+    {
+        [_glfw.ns.inputSourceID release];
+        _glfw.ns.inputSourceID = nil;
+    }
+
     if (_glfw.ns.eventSource)
     {
         CFRelease(_glfw.ns.eventSource);
@@ -603,6 +628,7 @@ void _glfwPlatformTerminate(void)
         [NSEvent removeMonitor:_glfw.ns.keyUpMonitor];
 
     free(_glfw.ns.clipboardString);
+    free(_glfw.ns.keyboardLayoutName);
 
     _glfwTerminateNSGL();
     _glfwTerminateJoysticksNS();
