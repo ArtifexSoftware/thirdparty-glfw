@@ -1561,12 +1561,28 @@ int _glfwPlatformGetKeyScancode(int key)
 
 const char* _glfwPlatformGetKeyboardLayoutName(void)
 {
-    NSTextInputContext* context = [NSTextInputContext currentInputContext];
-    NSTextInputSourceIdentifier* source = [context selectedKeyboardInputSource];
-    NSString* name = [NSTextInputContext localizedNameForInputSource:source];
+    TISInputSourceRef source = TISCopyCurrentKeyboardLayoutInputSource();
+    if (!source)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR,
+                        "Cocoa: Failed to retrieve keyboard layout input source");
+        return NULL;
+    }
+
+    NSString* name = (__bridge NSString*)
+        TISGetInputSourceProperty(source, kTISPropertyLocalizedName);
+    if (!name)
+    {
+        CFRelease(source);
+        _glfwInputError(GLFW_PLATFORM_ERROR,
+                        "Cocoa: Failed to retrieve keyboard layout name");
+        return NULL;
+    }
 
     free(_glfw.ns.keyboardLayoutName);
     _glfw.ns.keyboardLayoutName = _glfw_strdup([name UTF8String]);
+
+    CFRelease(source);
     return _glfw.ns.keyboardLayoutName;
 }
 

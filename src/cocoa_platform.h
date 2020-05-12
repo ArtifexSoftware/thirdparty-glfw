@@ -103,6 +103,8 @@ typedef VkResult (APIENTRY *PFN_vkCreateMetalSurfaceEXT)(VkInstance,const VkMeta
 
 // HIToolbox.framework pointer typedefs
 #define kTISPropertyUnicodeKeyLayoutData _glfw.ns.tis.kPropertyUnicodeKeyLayoutData
+#define kTISPropertyInputSourceID _glfw.ns.tis.kPropertyInputSourceID
+#define kTISPropertyLocalizedName _glfw.ns.tis.kPropertyLocalizedName
 typedef TISInputSourceRef (*PFN_TISCopyCurrentKeyboardLayoutInputSource)(void);
 #define TISCopyCurrentKeyboardLayoutInputSource _glfw.ns.tis.CopyCurrentKeyboardLayoutInputSource
 typedef void* (*PFN_TISGetInputSourceProperty)(TISInputSourceRef,CFStringRef);
@@ -144,7 +146,6 @@ typedef struct _GLFWlibraryNS
     id                  delegate;
     GLFWbool            cursorHidden;
     TISInputSourceRef   inputSource;
-    NSString*           inputSourceID;
     IOHIDManagerRef     hidManager;
     id                  unicodeData;
     id                  helper;
@@ -168,6 +169,8 @@ typedef struct _GLFWlibraryNS
         PFN_TISGetInputSourceProperty GetInputSourceProperty;
         PFN_LMGetKbdType GetKbdType;
         CFStringRef     kPropertyUnicodeKeyLayoutData;
+        CFStringRef     kPropertyInputSourceID;
+        CFStringRef     kPropertyLocalizedName;
     } tis;
 
 } _GLFWlibraryNS;
