@@ -305,12 +305,6 @@ static void createKeyTables(void)
     }
 }
 
-// Retrieve Unicode data for the current keyboard layout
-//
-static GLFWbool updateKeyboardLayoutNS(void)
-{
-}
-
 // Load HIToolbox.framework and the TIS symbols we need from it
 //
 static GLFWbool initializeTIS(void)
