@@ -358,12 +358,11 @@ static void createKeyTables(void)
 
         for (int i = 0;  i < XkbNumKbdGroups;  i++)
         {
-            char* name = XGetAtomName(_glfw.x11.display,desc->names->groups[i]);
-            if (name)
-            {
-                _glfw.x11.xkb.groupNames[i] = _glfw_strdup(name);
-                XFree(name);
-            }
+            if (desc->names->groups[i] == None)
+                continue;
+
+            _glfw.x11.xkb.groupNames[i] =
+                XGetAtomName(_glfw.x11.display, desc->names->groups[i]);
         }
 
         // Find the X11 key code -> GLFW key code mapping
@@ -1391,7 +1390,7 @@ void _glfwPlatformTerminate(void)
     free(_glfw.x11.clipboardString);
 
     for (int i = 0;  i < XkbNumKbdGroups;  i++)
-        free(_glfw.x11.xkb.groupNames[i]);
+        XFree(_glfw.x11.xkb.groupNames[i]);
 
     XUnregisterIMInstantiateCallback(_glfw.x11.display,
                                      NULL, NULL, NULL,
