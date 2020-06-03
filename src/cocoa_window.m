@@ -1721,6 +1721,11 @@ const char* _glfwPlatformGetClipboardString(void)
     } // autoreleasepool
 }
 
+EGLenum _glfwPlatformGetEGLPlatform(EGLint** attribs)
+{
+    return 0;
+}
+
 EGLNativeDisplayType _glfwPlatformGetEGLNativeDisplay(void)
 {
     return EGL_DEFAULT_DISPLAY;

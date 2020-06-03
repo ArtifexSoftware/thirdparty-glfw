@@ -3048,6 +3048,16 @@ const char* _glfwPlatformGetClipboardString(void)
     return getSelectionString(_glfw.x11.CLIPBOARD);
 }
 
+EGLenum _glfwPlatformGetEGLPlatform(EGLint** attribs)
+{
+    if (_glfw.egl.KHR_platform_x11)
+        return EGL_PLATFORM_X11_KHR;
+    else if (_glfw.egl.EXT_platform_base && _glfw.egl.EXT_platform_x11)
+        return EGL_PLATFORM_X11_EXT;
+    else
+        return 0;
+}
+
 EGLNativeDisplayType _glfwPlatformGetEGLNativeDisplay(void)
 {
     return _glfw.x11.display;
@@ -3055,7 +3065,10 @@ EGLNativeDisplayType _glfwPlatformGetEGLNativeDisplay(void)
 
 EGLNativeWindowType _glfwPlatformGetEGLNativeWindow(_GLFWwindow* window)
 {
-    return (EGLNativeWindowType) window->x11.handle;
+    if (_glfw.egl.platform)
+        return &window->x11.handle;
+    else
+        return (EGLNativeWindowType) window->x11.handle;
 }
 
 void _glfwPlatformGetRequiredInstanceExtensions(char** extensions)

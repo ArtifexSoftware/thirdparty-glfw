@@ -681,6 +681,7 @@ void _glfwPlatformWaitEvents(void);
 void _glfwPlatformWaitEventsTimeout(double timeout);
 void _glfwPlatformPostEmptyEvent(void);
 
+EGLenum _glfwPlatformGetEGLPlatform(EGLint** attribs);
 EGLNativeDisplayType _glfwPlatformGetEGLNativeDisplay(void);
 EGLNativeWindowType _glfwPlatformGetEGLNativeWindow(_GLFWwindow* window);
 
