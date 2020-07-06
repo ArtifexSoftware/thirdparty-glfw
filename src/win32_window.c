@@ -1201,13 +1201,6 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg,
             DragFinish(drop);
             return 0;
         }
-
-        case WM_NCHITTEST:
-        {
-            if (window->mousePassthru)
-                return HTTRANSPARENT;
-            break;
-        }
     }
 
     return DefWindowProcW(hWnd, uMsg, wParam, lParam);
@@ -1863,6 +1856,33 @@ void _glfwPlatformSetWindowFloating(_GLFWwindow* window, GLFWbool enabled)
 
 void _glfwPlatformSetWindowMousePassthru(_GLFWwindow* window, GLFWbool enabled)
 {
+    COLORREF key = 0;
+    BYTE alpha = 0;
+    DWORD flags = 0;
+    DWORD exStyle = GetWindowLongW(window->win32.handle, GWL_EXSTYLE);
+
+    if (exStyle & WS_EX_LAYERED)
+        GetLayeredWindowAttributes(window->win32.handle, &key, &alpha, &flags);
+
+    if (enabled)
+        exStyle |= (WS_EX_TRANSPARENT | WS_EX_LAYERED);
+    else
+    {
+        exStyle &= ~WS_EX_TRANSPARENT;
+        // NOTE: Window opacity and framebuffer transparency also need to
+        //       control the layered style so avoid stepping on their feet
+        if (exStyle & WS_EX_LAYERED)
+        {
+            if (!(flags & (LWA_ALPHA | LWA_COLORKEY)))
+                exStyle &= ~WS_EX_LAYERED;
+        }
+    }
+
+    SetWindowLongW(window->win32.handle, GWL_EXSTYLE, exStyle);
+
+    if (enabled)
+        SetLayeredWindowAttributes(window->win32.handle, key, alpha, flags);
+
     window->mousePassthru = enabled;
 }
 
