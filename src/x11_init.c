@@ -864,6 +864,8 @@ static GLFWbool initExtensions(void)
             _glfw_dlsym(_glfw.x11.xshape.handle, "XShapeCombineRegion");
         _glfw.x11.xshape.QueryVersion = (PFN_XShapeQueryVersion)
             _glfw_dlsym(_glfw.x11.xshape.handle, "XShapeQueryVersion");
+        _glfw.x11.xshape.ShapeCombineMask = (PFN_XShapeCombineMask)
+            _glfw_dlsym(_glfw.x11.xshape.handle, "XShapeCombineMask");
 
         if (XShapeQueryExtension(_glfw.x11.display,
             &_glfw.x11.xshape.errorBase,
