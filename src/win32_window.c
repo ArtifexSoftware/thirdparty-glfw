@@ -1882,8 +1882,6 @@ void _glfwPlatformSetWindowMousePassthru(_GLFWwindow* window, GLFWbool enabled)
 
     if (enabled)
         SetLayeredWindowAttributes(window->win32.handle, key, alpha, flags);
-
-    window->mousePassthru = enabled;
 }
 
 float _glfwPlatformGetWindowOpacity(_GLFWwindow* window)

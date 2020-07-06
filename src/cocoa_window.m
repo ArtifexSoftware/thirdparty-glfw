@@ -1373,7 +1373,6 @@ void _glfwPlatformSetWindowFloating(_GLFWwindow* window, GLFWbool enabled)
 
 void _glfwPlatformSetWindowMousePassthru(_GLFWwindow* window, GLFWbool enabled)
 {
-    window->mousePassthru = enabled;
     @autoreleasepool {
     [window->ns.object setIgnoresMouseEvents:enabled];
     }

@@ -2709,9 +2709,6 @@ void _glfwPlatformSetWindowMousePassthru(_GLFWwindow* window, GLFWbool enabled)
     if (!_glfw.x11.xshape.available)
         return;
 
-    if (enabled == window->mousePassthru)
-        return;
-
     if (enabled)
     {
         Region region = XCreateRegion();
@@ -2724,8 +2721,6 @@ void _glfwPlatformSetWindowMousePassthru(_GLFWwindow* window, GLFWbool enabled)
         XShapeCombineMask(_glfw.x11.display, window->x11.handle,
                           ShapeInput, 0, 0, None, ShapeSet);
     }
-
-    window->mousePassthru = enabled;
 }
 
 float _glfwPlatformGetWindowOpacity(_GLFWwindow* window)
