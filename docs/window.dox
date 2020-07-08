@@ -1229,7 +1229,7 @@ If the system does not support whole window transparency, this function always
 returns one.
 
 GLFW comes with a test program that lets you control whole window transparency
-at run-time called `opacity`.
+at run-time called `window`.
 
 
 @subsection window_attribs Window attributes
