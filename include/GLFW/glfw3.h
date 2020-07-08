@@ -895,9 +895,9 @@ extern "C" {
  */
 #define GLFW_FOCUS_ON_SHOW          0x0002000C
 
-/*! @brief Forward mouse input to window behind.
+/*! @brief Pass mouse input to the window behind.
  *
- *  Mouse input forwarding[window hint](@ref GLFW_MOUSE_PASSTHRU_hint) or
+ *  Mouse input transparency [window hint](@ref GLFW_MOUSE_PASSTHRU_hint) or
  *  [window attribute](@ref GLFW_MOUSE_PASSTHRU_attrib).
  */
 #define GLFW_MOUSE_PASSTHRU         0x0002000D
