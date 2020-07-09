@@ -2704,7 +2704,7 @@ void _glfwPlatformSetWindowFloating(_GLFWwindow* window, GLFWbool enabled)
     XFlush(_glfw.x11.display);
 }
 
-void _glfwPlatformSetWindowMousePassthru(_GLFWwindow* window, GLFWbool enabled)
+void _glfwPlatformSetWindowMousePassthrough(_GLFWwindow* window, GLFWbool enabled)
 {
     if (!_glfw.x11.xshape.available)
         return;

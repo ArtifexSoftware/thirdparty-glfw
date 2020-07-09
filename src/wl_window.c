@@ -1127,7 +1127,7 @@ void _glfwPlatformSetWindowFloating(_GLFWwindow* window, GLFWbool enabled)
                     "Wayland: Window attribute setting not implemented yet");
 }
 
-void _glfwPlatformSetWindowMousePassthru(_GLFWwindow* window, GLFWbool enabled)
+void _glfwPlatformSetWindowMousePassthrough(_GLFWwindow* window, GLFWbool enabled)
 {
     if (enabled)
     {

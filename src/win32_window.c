@@ -1854,7 +1854,7 @@ void _glfwPlatformSetWindowFloating(_GLFWwindow* window, GLFWbool enabled)
                  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
 }
 
-void _glfwPlatformSetWindowMousePassthru(_GLFWwindow* window, GLFWbool enabled)
+void _glfwPlatformSetWindowMousePassthrough(_GLFWwindow* window, GLFWbool enabled)
 {
     COLORREF key = 0;
     BYTE alpha = 0;

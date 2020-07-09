@@ -229,8 +229,8 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
         }
     }
 
-    if (wndconfig.mousePassthru)
-        _glfwPlatformSetWindowMousePassthru(window, GLFW_TRUE);
+    if (wndconfig.mousePassthrough)
+        _glfwPlatformSetWindowMousePassthrough(window, GLFW_TRUE);
 
     if (window->monitor)
     {
@@ -382,8 +382,8 @@ GLFWAPI void glfwWindowHint(int hint, int value)
         case GLFW_FOCUS_ON_SHOW:
             _glfw.hints.window.focusOnShow = value ? GLFW_TRUE : GLFW_FALSE;
             return;
-        case GLFW_MOUSE_PASSTHRU:
-            _glfw.hints.window.mousePassthru = value ? GLFW_TRUE : GLFW_FALSE;
+        case GLFW_MOUSE_PASSTHROUGH:
+            _glfw.hints.window.mousePassthrough = value ? GLFW_TRUE : GLFW_FALSE;
             return;
         case GLFW_CLIENT_API:
             _glfw.hints.context.client = value;
@@ -829,8 +829,8 @@ GLFWAPI int glfwGetWindowAttrib(GLFWwindow* handle, int attrib)
             return _glfwPlatformWindowHovered(window);
         case GLFW_FOCUS_ON_SHOW:
             return window->focusOnShow;
-        case GLFW_MOUSE_PASSTHRU:
-            return window->mousePassthru;
+        case GLFW_MOUSE_PASSTHROUGH:
+            return window->mousePassthrough;
         case GLFW_TRANSPARENT_FRAMEBUFFER:
             return _glfwPlatformFramebufferTransparent(window);
         case GLFW_RESIZABLE:
@@ -909,13 +909,13 @@ GLFWAPI void glfwSetWindowAttrib(GLFWwindow* handle, int attrib, int value)
     }
     else if (attrib == GLFW_FOCUS_ON_SHOW)
         window->focusOnShow = value;
-    else if (attrib == GLFW_MOUSE_PASSTHRU)
+    else if (attrib == GLFW_MOUSE_PASSTHROUGH)
     {
-        if (window->mousePassthru == value)
+        if (window->mousePassthrough == value)
             return;
 
-        window->mousePassthru = value;
-        _glfwPlatformSetWindowMousePassthru(window, value);
+        window->mousePassthrough = value;
+        _glfwPlatformSetWindowMousePassthrough(window, value);
     }
     else
         _glfwInputError(GLFW_INVALID_ENUM, "Invalid window attribute 0x%08X", attrib);
