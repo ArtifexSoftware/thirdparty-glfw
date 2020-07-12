@@ -1344,11 +1344,6 @@ int _glfwPlatformInit(void)
                                        NULL);
     }
 
-#if defined(__linux__)
-    if (!_glfwInitJoysticksLinux())
-        return GLFW_FALSE;
-#endif
-
     _glfwInitTimerPOSIX();
 
     _glfwPollMonitorsX11();
@@ -1441,10 +1436,6 @@ void _glfwPlatformTerminate(void)
     //       cleanup callbacks that get called by that function
     _glfwTerminateEGL();
     _glfwTerminateGLX();
-
-#if defined(__linux__)
-    _glfwTerminateJoysticksLinux();
-#endif
 
     if (_glfw.x11.xlib.handle)
     {
