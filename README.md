@@ -232,6 +232,7 @@ information on what to include when reporting a bug.
    (#1798)
  - [Wayland] Bugfix: Monitors physical size could report zero (#1784,#1792)
  - [POSIX] Bugfix: `CLOCK_MONOTONIC` was not correctly tested for or enabled
+ - [POSIX] Removed use of deprecated function `gettimeofday`
  - [NSGL] Removed enforcement of forward-compatible flag for core contexts
  - [NSGL] Bugfix: `GLFW_COCOA_RETINA_FRAMEBUFFER` had no effect on newer
    macOS versions (#1442)

@@ -44,20 +44,14 @@
 //
 void _glfwInitTimerPOSIX(void)
 {
-#if defined(_POSIX_TIMERS) && defined(_POSIX_MONOTONIC_CLOCK)
-    struct timespec ts;
+    _glfw.timer.posix.clock = CLOCK_REALTIME;
+    _glfw.timer.posix.frequency = 1000000000;
 
+#if defined(_POSIX_MONOTONIC_CLOCK)
+    struct timespec ts;
     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
-    {
-        _glfw.timer.posix.monotonic = GLFW_TRUE;
-        _glfw.timer.posix.frequency = 1000000000;
-    }
-    else
+        _glfw.timer.posix.clock = CLOCK_MONOTONIC;
 #endif
-    {
-        _glfw.timer.posix.monotonic = GLFW_FALSE;
-        _glfw.timer.posix.frequency = 1000000;
-    }
 }
 
 
@@ -67,20 +61,9 @@ void _glfwInitTimerPOSIX(void)
 
 uint64_t _glfwPlatformGetTimerValue(void)
 {
-#if defined(_POSIX_TIMERS) && defined(_POSIX_MONOTONIC_CLOCK)
-    if (_glfw.timer.posix.monotonic)
-    {
-        struct timespec ts;
-        clock_gettime(CLOCK_MONOTONIC, &ts);
-        return (uint64_t) ts.tv_sec * (uint64_t) 1000000000 + (uint64_t) ts.tv_nsec;
-    }
-    else
-#endif
-    {
-        struct timeval tv;
-        gettimeofday(&tv, NULL);
-        return (uint64_t) tv.tv_sec * (uint64_t) 1000000 + (uint64_t) tv.tv_usec;
-    }
+    struct timespec ts;
+    clock_gettime(_glfw.timer.posix.clock, &ts);
+    return (uint64_t) ts.tv_sec * (uint64_t) 1000000000 + (uint64_t) ts.tv_nsec;
 }
 
 uint64_t _glfwPlatformGetTimerFrequency(void)
