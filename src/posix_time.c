@@ -51,7 +51,12 @@ void _glfwInitTimerPOSIX(void)
     struct timespec ts;
     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
         _glfw.timer.posix.clock = CLOCK_MONOTONIC;
-#endif
+
+#if defined(CLOCK_MONOTONIC_RAW)
+    if (clock_gettime(CLOCK_MONOTONIC_RAW, &ts) == 0)
+        _glfw.timer.posix.clock = CLOCK_MONOTONIC_RAW;
+#endif // CLOCK_MONOTONIC_RAW
+#endif // _POSIX_MONOTONIC_CLOCK
 }
 
 
