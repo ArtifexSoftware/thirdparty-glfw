@@ -100,8 +100,16 @@ set_target_properties(glfw PROPERTIES
                       POSITION_INDEPENDENT_CODE ON
                       C_STANDARD 99
                       C_EXTENSIONS OFF
-                      DEFINE_SYMBOL _GLFW_BUILD_DLL
                       FOLDER "GLFW3")
+
+if (GLFW_BUILD_SHARED_LIBRARY OR GLFW_EXPORT_PUBLIC_API)
+    target_compile_definitions(glfw PRIVATE _GLFW_BUILD_DLL)
+endif()
+
+if (UNIX)
+    # Hide symbols not explicitly tagged for export from the shared library
+    target_compile_options(glfw PRIVATE "-fvisibility=hidden")
+endif()
 
 target_include_directories(glfw PUBLIC
                            "$<BUILD_INTERFACE:${GLFW_SOURCE_DIR}/include>"
@@ -229,11 +237,6 @@ if (GLFW_BUILD_SHARED_LIBRARY)
 
         # Clear flags again to avoid breaking later tests
         set(CMAKE_REQUIRED_FLAGS)
-    endif()
-
-    if (UNIX)
-        # Hide symbols not explicitly tagged for export from the shared library
-        target_compile_options(glfw PRIVATE "-fvisibility=hidden")
     endif()
 endif()
 

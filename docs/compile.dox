@@ -271,6 +271,12 @@ with the library.  This is enabled by default if
 __GLFW_VULKAN_STATIC__ determines whether to use the Vulkan loader linked
 directly with the application.  This is disabled by default.
 
+@anchor GLFW_EXPORT_PUBLIC_API
+__GLFW_EXPORT_PUBLIC_API__ is only available when building GLFW as a CMake object library.
+It determines whether the object files export the public GLFW API.  This is useful for
+example when linking GLFW into in a larger shared library.  See @ref GLFW_LIBRARY_TYPE for
+how to build an object library.
+
 
 @subsection compile_options_win32 Windows specific CMake options
 

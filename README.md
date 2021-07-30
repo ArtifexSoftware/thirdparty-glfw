@@ -131,6 +131,8 @@ information on what to include when reporting a bug.
    surface extension (#1793)
  - Added `GLFW_LIBRARY_TYPE` CMake variable for overriding the library type
    (#279,#1307,#1497,#1574,#1928)
+ - Added `GLFW_EXPORT_PUBLIC_API` CMake option for building an object library that exports
+   the public API
  - Made joystick subsystem initialize at first use (#1284,#1646)
  - Made `GLFW_DOUBLEBUFFER` a read-only window attribute
  - Updated the minimum required CMake version to 3.1
